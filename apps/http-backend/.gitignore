@@ -1,0 +1,65 @@
+# Logs
+*.log
+*.txt
+
+# Compiled source #
+###################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Packages #
+############
+# it's better to unpack these files and commit the raw source
+# git has its own compression methods
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# virtual machine disks
+*.vmdk
+
+# node_modules
+node_modules/
+/node_modules
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Env files
+.env
+.env.development
+
+# Temporary files
+tmp/
+temp/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Build output
+dist/
+
+# Turbo cache
+.turbo/
+
+# Typescript
+*.tsbuildinfo
+
+# Package manager files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock

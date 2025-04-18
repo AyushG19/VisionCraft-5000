@@ -3,5 +3,6 @@
     {
       "mode": "auto"
     }
-  ]
+  ],
+  "prismaERDPreviewer.preferredTheme": "dark"
 }

@@ -1,0 +1,25 @@
+{
+  "name": "@repo/backend-common",
+  "version": "1.0.0",
+  "exports": {
+    "./config": "./dist/config.js",
+    "./jwt": "./dist/jwt.js"
+  },
+  "main": "config.js",
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^22.14.1"
+  },
+  "dependencies": {
+    "@types/jsonwebtoken": "^9.0.9",
+    "dotenv": "^16.5.0",
+    "jsonwebtoken": "^9.0.2"
+  }
+}
