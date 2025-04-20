@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "exports": {
-    "./db": "./dist/index.js"
+    "./db": "./dist/index.js",
+    "./redis": "./dist/redis.js"
   },
   "scripts": {
     "build": "tsc -b"
@@ -17,6 +18,8 @@
   "description": "",
   "dependencies": {
     "@prisma/client": "6.6.0",
-    "prisma": "^6.6.0"
+    "dotenv": "^16.5.0",
+    "prisma": "^6.6.0",
+    "redis": "^4.7.0"
   }
 }

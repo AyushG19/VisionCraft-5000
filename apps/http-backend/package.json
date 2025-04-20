@@ -1,7 +1,7 @@
 {
   "name": "http-backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "index.mts",
   "type": "module",
   "scripts": {
     "build": "tsc -b",

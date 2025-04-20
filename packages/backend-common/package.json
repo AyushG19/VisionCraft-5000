@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "exports": {
     "./config": "./dist/config.js",
-    "./jwt": "./dist/jwt.js"
+    "./jwt.service": "./dist/jwt.service.js"
   },
   "main": "config.js",
   "scripts": {

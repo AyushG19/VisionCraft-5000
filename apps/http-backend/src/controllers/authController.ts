@@ -3,7 +3,7 @@ import { prismaClient, Prisma } from "@repo/db/db";
 import { CreateUserSchema, LoginSchema } from "@repo/common/types";
 import bcrypt from "bcrypt";
 import { BCRYPT_SALT } from "@repo/backend-common/config";
-import { generateAToken } from "@repo/backend-common/jwt";
+import jwtService from "@repo/backend-common/jwt.service";
 
 export const signup = async (req: Request, res: Response) => {
   try {
@@ -26,6 +26,7 @@ export const signup = async (req: Request, res: Response) => {
 
     console.log("hasing");
     const hashedPass = await bcrypt.hash(parsed.data.password, 10);
+
     try {
       const user = await prismaClient.user.create({
         data: {
@@ -34,11 +35,13 @@ export const signup = async (req: Request, res: Response) => {
           password: hashedPass,
         },
       });
+
       console.log("user generated");
       res.status(201).json({
         id: user.id,
         email: user.email,
         name: user.name,
+        token: jwtService.createAccessToken({ userId: user.id }),
       });
     } catch (error: any) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -77,7 +80,7 @@ export const login = async (req: Request, res: Response) => {
       return;
     }
     res.status(200).json({
-      token: generateAToken(user.id),
+      token: jwtService.createAccessToken({ userId: user.id }),
     });
   } catch (error) {
     console.log("login error: ", error);
