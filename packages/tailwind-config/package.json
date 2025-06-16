@@ -1,0 +1,30 @@
+{
+  "name": "@repo/tailwind-config",
+  "version": "1.0.0",
+  "main": "tailwind.config.ts",
+  "exports": {
+    "./tailwind.config": "./tailwind.config.ts",
+    "./theme.css": "./theme.css"
+  },
+  "files": [
+    "tailwind.config.ts",
+    "theme.css"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.4",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.1.4",
+    "@repo/typescript-config": "workspace:*"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

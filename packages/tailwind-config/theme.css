@@ -1,0 +1,7 @@
+/* packages/tailwind-config/theme.css */
+@layer base {
+  :root {
+    --color-primary: #2563eb;
+    --color-secondary: #9333ea;
+  }
+}

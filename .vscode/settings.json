@@ -4,5 +4,6 @@
       "mode": "auto"
     }
   ],
-  "prismaERDPreviewer.preferredTheme": "dark"
+  "prismaERDPreviewer.preferredTheme": "dark",
+  "postman.settings.dotenv-detection-notification-visibility": false
 }
