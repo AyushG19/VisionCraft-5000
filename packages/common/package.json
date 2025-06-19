@@ -2,7 +2,8 @@
   "name": "@repo/common",
   "version": "1.0.0",
   "exports": {
-    "./types": "./dist/types.js"
+    "./types": "./dist/types.js",
+    "./toolState": "./dist/toolState.js"
   },
   "main": "index.js",
   "scripts": {

@@ -113,9 +113,10 @@
   --color-sidebar-ring: var(--sidebar-ring);
 
   --drop-shadow: 5px 5px 0px black;
+  --drop-shadow-pressed: 2px 2px 0px black;
   --drop-shadow-none: 0px 0px 0px black;
-  /* Thistle palette */
-  --color-thistle: #cdb4db;
+  --outline-primary: 1px black 0.5 /* Thistle palette */
+    --color-thistle: #cdb4db;
   --color-thistle-100: #2b1a36;
   --color-thistle-200: #57346b;
   --color-thistle-300: #824ea1;
@@ -181,5 +182,11 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+/* Add custom utility in components layer */
+@layer components {
+  .outline-personal {
+    @apply outline outline-[1px] outline-black/50;
   }
 }
