@@ -37,6 +37,7 @@
   --sidebar-ring: oklch(0.708 0 0);
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
+  --canvas: oklch(24.642% 0.10139 311.23);
 }
 
 .dark {
@@ -75,6 +76,7 @@
 }
 
 @theme inline {
+  --color-canvas: var(--canvas);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -112,12 +114,11 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --drop-shadow: 5px 5px 0px black;
+  --drop-shadow: 4px 4px 0px black;
   --drop-shadow-pressed: 2px 2px 0px black;
   --drop-shadow-none: 0px 0px 0px black;
   --outline-primary: 1px black 0.5 /* Thistle palette */
-    --color-thistle: #cdb4db;
-  --color-thistle-100: #2b1a36;
+    --color-thistle-100: #2b1a36;
   --color-thistle-200: #57346b;
   --color-thistle-300: #824ea1;
   --color-thistle-400: #a87ec1;
@@ -188,5 +189,11 @@
 @layer components {
   .outline-personal {
     @apply outline outline-[1px] outline-black/50;
+  }
+  .shadow-primary {
+    box-shadow: 5px 5px 0px black;
+  }
+  .shadow-pressed {
+    box-shadow: 2px 2px 0px black;
   }
 }

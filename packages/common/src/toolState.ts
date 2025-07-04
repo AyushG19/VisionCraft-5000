@@ -10,6 +10,6 @@ export type ToolState = {
     | "undo"
     | "redo"
     | "none";
-  currentColor: string;
+  currentColor: { l: number; c: number; h: number };
   brushSize: number;
 };

@@ -1,7 +1,11 @@
 "use client";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ToolIcon } from "./ui/ToolIcon";
-import { IconGripVertical } from "@tabler/icons-react";
+import {
+  IconGripVertical,
+  IconLocation,
+  IconPointer,
+} from "@tabler/icons-react";
 import {
   IconArrowBackUp,
   IconArrowForwardUp,
@@ -13,9 +17,10 @@ import {
   IconTriangle,
 } from "@tabler/icons-react";
 import type { ToolState } from "@repo/common/toolState";
+import ColorBoxes from "./ui/ColorBoxes";
 
 const tools = [
-  { id: "select" as const, icon: IconArrowForwardUp, label: "select" },
+  { id: "select" as const, icon: IconPointer, label: "select" },
   { id: "circle" as const, icon: IconCircle, label: "circle" },
   { id: "square" as const, icon: IconSquare, label: "square" },
   { id: "triangle" as const, icon: IconTriangle, label: "triangle" },
@@ -25,14 +30,22 @@ const tools = [
   { id: "undo" as const, icon: IconArrowBackUp, label: "undo" },
   { id: "redo" as const, icon: IconArrowForwardUp, label: "redo" },
 ];
-
+export interface toolkitProps {
+  toolState: ToolState;
+  handleToolSelect: (toolname: ToolState["currentTool"]) => void;
+  handleColorSelect: (color: { l: number; c: number; h: number }) => void;
+  handleStrokeSelect: (size: number) => void;
+  handleUndo: () => void;
+  handleRedo: () => void;
+}
 const Toolkit = ({
   toolState,
   handleToolSelect,
-}: {
-  toolState: ToolState;
-  handleToolSelect: (toolname: ToolState["currentTool"]) => void;
-}) => {
+  handleColorSelect,
+  handleStrokeSelect,
+  handleUndo,
+  handleRedo,
+}: toolkitProps) => {
   const toolkitRef = useRef<HTMLDivElement | null>(null);
   const [currPos, setCurrPos] = useState({ x: 0, y: 0 });
   const dragState = useRef<{
@@ -54,8 +67,10 @@ const Toolkit = ({
     initialWidth: 362,
     lastWidth: 362,
   });
-
   const toolIconRef = useRef<HTMLDivElement | null>(null);
+
+  const [colorVisibility, setColorVisibility] = useState(false);
+
   const onMouseDown = useCallback((e: MouseEvent) => {
     if (e.target != toolkitRef.current) return;
     dragState.current.isDraging = true;
@@ -181,30 +196,37 @@ const Toolkit = ({
   return (
     <div
       ref={toolkitRef}
-      className="absolute translate-x-1/2 rounded-lg flex items-center cursor-move bg-light_sky_blue outline-personal drop-shadow"
+      className="p-3 pb-3.5 pr-0 absolute rounded-lg flex items-center cursor-move bg-light_sky_blue outline-personal shadow-primary "
       style={{
         top: currPos.y,
         left: currPos.x,
         width: `${!currWidth ? 33.5 * tools.length + (tools.length - 1) * 10 + 30 : currWidth}px`,
       }}
     >
-      <div
-        ref={toolIconRef}
-        className="flex flex-wrap w-auto gap-2.5 m-1.5 mb-3 pr-1"
-      >
-        {tools.map((tool) => (
-          <ToolIcon
-            isSelected={toolState.currentTool === tool.id}
-            key={tool.id}
-            toolInfo={tool}
-            onSelectTool={handleToolSelect}
-          />
-        ))}
+      <div ref={toolIconRef} className="flex flex-wrap w-auto gap-2.5 z-50">
+        {tools.map((tool) => {
+          return (
+            <ToolIcon
+              isSelected={toolState.currentTool === tool.id}
+              key={tool.id}
+              toolInfo={tool}
+              onSelectColor={handleColorSelect}
+              onSelectStroke={handleStrokeSelect}
+              onSelectTool={
+                tool.id !== "undo" && tool.id !== "redo"
+                  ? handleToolSelect
+                  : tool.id === "redo"
+                    ? handleRedo
+                    : handleUndo
+              }
+            />
+          );
+        })}
       </div>
 
       <IconGripVertical
         ref={resizeRef}
-        className="cursor-e-resize w-4 h-4 shrink-0 "
+        className="cursor-e-resize w-4 h-4 shrink-0 ml-1.5"
       />
     </div>
   );
