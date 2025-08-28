@@ -1,13 +1,14 @@
-import React from "react";
-// import cn from "./lib/utils";
+import React, { ClassType, forwardRef } from "react";
+import { cn } from "./lib/utils";
 
-const Button = () => {
-  return (
-    <button className=" ">
-      <span>Button</span>
-    </button>
-  );
-};
+const MyButton = forwardRef<
+  HTMLButtonElement,
+  React.ButtonHTMLAttributes<HTMLButtonElement>
+>(({ className, ...props }, ref) => {
+  return <button className={cn(className)} {...props} />;
+});
+MyButton.displayName = "Button";
+export default { MyButton };
 
 // const StyledWrapper = styled.div`
 //   button {
@@ -62,5 +63,3 @@ const Button = () => {
 //     transform: translate3d(100%, 0, 0);
 //   }
 // `;
-
-// export default Button;

@@ -1,9 +1,12 @@
 "use client";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Toolkit from "@repo/ui/Toolkit";
+import ChatModal from "@repo/ui/ChatModal";
+import JoinRoomModal from "@repo/ui/JoinRoomModal";
 
 import { ToolState } from "@repo/common/toolState";
 import { toolkitProps } from "@repo/ui/Toolkit";
+import { Button } from "@workspace/ui/components/ui/button";
 interface Shape {
   type: ToolState["currentTool"];
   lineWidth: number;
@@ -33,6 +36,7 @@ const page = () => {
   const [drawnShapes, setDrawnShapes] = useState<Shape[]>([]);
   const [history, setHistory] = useState<Shape[][]>([[]]);
   const [historyIndex, setHistoryIndex] = useState<number>(0);
+  const [isChatOn, setIsChatOn] = useState(false);
 
   const [toolState, setToolState] = useState<ToolState>({
     currentTool: "none",
@@ -293,10 +297,12 @@ const page = () => {
     handleRedo,
     handleUndo,
   };
+
   return (
-    <div className="w-screen h-screen ">
+    <div className="relative w-screen h-screen ">
       <Toolkit {...toolkitProps} />
       <canvas ref={myRef} className="w-full h-full border bg-canvas "></canvas>
+      {isChatOn ? <ChatModal /> : <JoinRoomModal />}
     </div>
   );
 };

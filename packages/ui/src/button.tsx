@@ -1,22 +1,24 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "./lib/utils";
 
 const buttonVariants = cva(
-  " inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2  disabled:opacity-50 cursor-pointer",
+  " inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2  disabled:opacity-50 cursor-pointer hover:scale-[103%] transform ease-in",
   {
     variants: {
       variant: {
         default:
-          " bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[color-mix(in srgb, var(--primary) 90%, black)]",
+          "shadow-primary bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[color-mix(in srgb, var(--primary) 90%, black)]  transform transition-transform ease-in-out",
         destructive:
           "bg-[var(--destructive)] text-[var(--destructive-foreground)] hover:bg-[color-mix(in srgb, var(--destructive) 90%, black)]",
         outline:
-          "border border-[var(--border)] bg-[var(--background)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]",
+          "shadow-primary outline-personal bg-[var(--background)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]",
         secondary:
           "bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:bg-[color-mix(in srgb, var(--secondary) 80%, black)]",
         ghost: "hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]",
         link: "text-[var(--primary)] underline-offset-4 hover:underline",
+        icon: "",
       },
       size: {
         default: "h-10 px-4 py-2",
@@ -43,7 +45,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const Comp = asChild ? Slot : "button";
     return (
       <Comp
-        className={buttonVariants({ variant, size, className })}
+        className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         {...props}
       />

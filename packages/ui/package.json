@@ -6,6 +6,8 @@
     "./button2": "./src/button2.tsx",
     "./button": "./src/components/ui/button.tsx",
     "./Toolkit": "./src/components/Toolkit.tsx",
+    "./ChatModal": "./src/components/ChatModal.tsx",
+    "./JoinRoomModal": "./src/components/JoinRoomModal.tsx",
     "./*": "./src/*.tsx",
     "./utils": "./src/lib/utils.ts",
     "./ui-css": "./dist/index.css"

@@ -1,6 +1,9 @@
+@import url("https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&display=swap");
 @import "tailwindcss";
+
 @import "tw-animate-css";
 @source "../../../packages/ui/src/**/*.{tsx}";
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
@@ -187,6 +190,26 @@
 }
 /* Add custom utility in components layer */
 @layer components {
+  /* .google-sans-code-light {
+    font-family: "Google Sans Code";
+    font-optical-sizing: auto;
+    font-weight: 300;
+    font-style: normal;
+  }
+
+  .google-sans-code-regular {
+    font-family: "Google Sans Code";
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
+  }
+
+  .google-sans-code-bold {
+    font-family: "Google Sans Code";
+    font-optical-sizing: auto;
+    font-weight: 800;
+    font-style: normal;
+  } */
   .outline-personal {
     @apply outline outline-[1px] outline-black/50;
   }
