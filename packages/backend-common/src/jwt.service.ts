@@ -23,3 +23,9 @@ export const verifyToken = (
     return { valid: false, error: err };
   }
 };
+export const createTokens = (payload: jwt.JwtPayload): object => {
+  return {
+    accessToken: jwt.sign(payload, JWT_SECRET, { expiresIn: aTokenExpiry }),
+    refreshToken: jwt.sign(payload, JWT_SECRET, { expiresIn: rTokenExpiry }),
+  };
+};

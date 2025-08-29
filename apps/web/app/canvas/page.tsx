@@ -289,6 +289,7 @@ const page = () => {
       setHistoryIndex(newIndex);
     }
   };
+
   const toolkitProps: toolkitProps = {
     handleColorSelect,
     handleStrokeSelect,
