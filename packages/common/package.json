@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "exports": {
     "./types": "./dist/types.js",
-    "./toolState": "./dist/toolState.js"
+    "./toolState": "./dist/toolState.js",
+    "./expressReq": "./src/express.d.ts"
   },
   "main": "index.js",
   "scripts": {

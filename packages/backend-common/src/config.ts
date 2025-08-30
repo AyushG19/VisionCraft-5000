@@ -4,4 +4,4 @@ export const BCRYPT_SALT = process.env.BCRYPT_SALT || "12345";
 
 export const aTokenExpiry = "5m";
 
-export const rTokenExpiry = "30s";
+export const rTokenExpiry = "30m";

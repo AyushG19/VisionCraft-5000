@@ -75,7 +75,7 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-const fetchChat = () => {
+export const fetchChat = () => {
   const token = localStorage.getItem("token");
   const res = fetch(HTTP_BE_URL, {
     method: "GET",
@@ -86,9 +86,18 @@ const fetchChat = () => {
   });
 };
 
-const checkCode = async (config: InternalAxiosRequestConfig) => {
+export const checkCode = async (config: InternalAxiosRequestConfig) => {
   try {
-    const res = await axiosInstance.get("/api/rooms/check-code", config);
+    const res = await axiosInstance.post("/api/rooms/check-code", config);
+    return res.data;
+  } catch (error) {
+    return error;
+  }
+};
+
+export const createRoom = async () => {
+  try {
+    const res = await axiosInstance.post("/api/rooms/create");
     return res.data;
   } catch (error) {
     return error;

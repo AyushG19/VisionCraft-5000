@@ -23,6 +23,7 @@ export const CreateUserSchema = z
     message: "Passwords don't match",
     path: ["confirmPassword"],
   });
+
 export const LoginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
   password: z
@@ -30,10 +31,40 @@ export const LoginSchema = z.object({
     .min(8, { message: "Password must be at least 8 characters" }),
   remember: z.boolean().optional(),
 });
-export const RoomSchema = z.object({
+
+const ColorSchema = z.object({
+  l: z.number(),
+  c: z.number(),
+  h: z.number(),
+});
+
+const PointSchema = z.object({
+  x: z.number(),
+  y: z.number(),
+});
+
+const ShapeSchema = z.object({
+  type: z.enum(["pencil", "line", "rectangle", "circle"]),
+  x: z.number().optional(),
+  y: z.number().optional(),
+  width: z.number().optional(),
+  height: z.number().optional(),
+  radius: z.number().optional(),
+  color: ColorSchema,
+  size: z.number(),
+  points: z.array(PointSchema).optional(),
+});
+
+export const CreateRoomSchema = z.object({
+  canvas: ShapeSchema,
+});
+
+export const JoinRoomSchema = z.object({
   slug: z.string(),
   roomId: z.any(),
 });
 
 export type LoginFormValues = z.infer<typeof LoginSchema>;
 export type SignupFormValues = z.infer<typeof CreateUserSchema>;
+export type JoinRoomValues = z.infer<typeof JoinRoomSchema>;
+export type CreateRoomValues = z.infer<typeof CreateRoomSchema>;
