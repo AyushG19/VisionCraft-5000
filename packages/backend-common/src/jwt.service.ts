@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { aTokenExpiry, rTokenExpiry, JWT_SECRET } from "./config";
+import { UserPayload } from "./jwt-payload";
 
 export const createAccessToken = (payload: jwt.JwtPayload): string => {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: aTokenExpiry });
@@ -13,7 +14,7 @@ export const verifyToken = (
   token: string
 ): {
   valid: boolean;
-  decoded?: string | jwt.JwtPayload;
+  decoded?: string | UserPayload;
   error?: unknown;
 } => {
   try {

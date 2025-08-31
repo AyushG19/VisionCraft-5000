@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "exports": {
     "./config": "./dist/config.js",
-    "./jwt.service": "./dist/jwt.service.js"
+    "./jwt.service": "./dist/jwt.service.js",
+    "./AuthPayload": "./dist/jwt-payload.js"
   },
   "main": "config.js",
   "scripts": {
@@ -15,10 +16,11 @@
   "description": "",
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
-    "@types/node": "^22.14.1"
+    "@repo/common": "workspace:*",
+    "@types/node": "^22.14.1",
+    "@types/jsonwebtoken": "^9.0.9"
   },
   "dependencies": {
-    "@types/jsonwebtoken": "^9.0.9",
     "dotenv": "^16.5.0",
     "jsonwebtoken": "^9.0.2"
   }

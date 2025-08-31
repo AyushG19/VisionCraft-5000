@@ -4,7 +4,7 @@
   "exports": {
     "./types": "./dist/types.js",
     "./toolState": "./dist/toolState.js",
-    "./expressReq": "./src/express.d.ts"
+    "./jwt-payload": "./dist/jwt.js"
   },
   "main": "index.js",
   "scripts": {
