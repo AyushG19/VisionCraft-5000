@@ -2,26 +2,44 @@ import { Request, Response } from "express";
 import { prismaClient } from "@repo/db/db";
 import { CreateRoomSchema } from "@repo/common/types";
 
-const checkCode = (req: Request, res: Response) => {};
-const createRoom = async (req: Request & { user?: any }, res: Response) => {
+const checkCode = async (req: Request, res: Response) => {
+  try {
+    const slug = req.body.slug;
+    if (!slug) {
+      res.status(400).json("Invalid room Id");
+      return;
+    }
+    const actualRoomId = await prismaClient.room.findFirst({
+      where: {
+        slug: slug,
+      },
+    });
+    if (actualRoomId && slug === actualRoomId.slug) {
+      res.status(200).send("Authorised");
+      return;
+    }
+    res.status(400).json("Bad Request");
+  } catch (error) {
+    res.status(505).json("Internam Server Error");
+  }
+};
+const createRoom = async (req: Request, res: Response) => {
   try {
     const userId = req.user.userId;
-    const canvas = req.user.canvas;
-    const canvasState = CreateRoomSchema.safeParse(req.body);
-    if (!canvasState.success) {
-      res.status(400).json({
-        message: "invalid data",
-        error: canvasState.error.flatten(),
-      });
-    }
-    const room = await prismaClient.room.create({
+    const canvas = req.body.canvas;
+
+    const newRoom = await prismaClient.room.create({
       data: {
-        slug: "1234",
-        adminId: userId,
+        slug: "slug",
+        admin: {
+          connect: {
+            id: userId,
+          },
+        },
         canvas: canvas,
       },
     });
-    res.json(room);
+    res.status(200).json(newRoom);
   } catch (error) {
     res.status(505).json(error);
   }

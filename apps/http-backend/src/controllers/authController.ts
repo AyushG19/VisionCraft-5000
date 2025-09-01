@@ -73,7 +73,9 @@ export const login = async (req: Request, res: Response) => {
     const user = await prismaClient.user.findUnique({
       where: { email: parsed.data.email },
     });
+    console.log("in login");
     if (!user || !(await bcrypt.compare(parsed.data.password, user.password))) {
+      console.log(user);
       res.status(401).json({
         error: "invalid credentials",
       });

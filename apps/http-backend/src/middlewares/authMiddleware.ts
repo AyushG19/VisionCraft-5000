@@ -18,7 +18,7 @@ export const checkAuth = (req: Request, res: Response, next: NextFunction) => {
       return;
     }
     const JwtPayload = jwtService.verifyToken(token);
-    if (!JwtPayload.valid) {
+    if (!JwtPayload.valid || !JwtPayload.decoded) {
       res.status(401).json({
         error: "invalid token",
       });
