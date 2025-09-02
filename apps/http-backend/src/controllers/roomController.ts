@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { prismaClient } from "@repo/db/db";
 import { CreateRoomSchema } from "@repo/common/types";
+import { generateRandomCode } from "../utils/codeGenerator.js";
 
 const checkCode = async (req: Request, res: Response) => {
   try {
@@ -27,10 +28,15 @@ const createRoom = async (req: Request, res: Response) => {
   try {
     const userId = req.user.userId;
     const canvas = req.body.canvas;
+    if (!userId) {
+      res.status(401).json("UserId undefined");
+      return;
+    }
 
+    const slug = generateRandomCode(4);
     const newRoom = await prismaClient.room.create({
       data: {
-        slug: "slug",
+        slug: slug,
         admin: {
           connect: {
             id: userId,

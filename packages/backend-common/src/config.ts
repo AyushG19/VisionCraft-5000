@@ -1,6 +1,14 @@
-export const JWT_SECRET: string = process.env.JWT_SECRET || "12345";
+const jwtSecret = process.env.JWT_SECRET;
+const bcryptSalt = process.env.BCRYPT_SALT;
 
-export const BCRYPT_SALT = process.env.BCRYPT_SALT || "12345";
+if (!jwtSecret) {
+  throw new Error("JWT_SECRET environment variable not set");
+}
+if (!bcryptSalt) {
+  throw new Error("JWT_SECRET environment variable not set");
+}
+export const BCRYPT_SALT = bcryptSalt;
+export const JWT_SECRET = jwtSecret;
 
 export const aTokenExpiry = "5m";
 
