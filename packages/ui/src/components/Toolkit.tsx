@@ -19,6 +19,23 @@ import {
 import type { ToolState } from "@repo/common/toolState";
 import ColorBoxes from "./ui/ColorBoxes";
 
+interface Shape {
+  type: ToolState["currentTool"];
+  lineWidth: number;
+  lineColor: { l: number; c: number; h: number };
+  fillColor: { l: number; c: number; h: number };
+  startX: number;
+  startY: number;
+  endX: number;
+  endY: number;
+  points?: { x: number; y: number }[];
+}
+type State = {
+  drawnShapes: Shape[];
+  history: Shape[][];
+  historyIndex: number;
+  toolState: ToolState;
+};
 const tools = [
   { id: "select" as const, icon: IconPointer, label: "select" },
   { id: "circle" as const, icon: IconCircle, label: "circle" },
@@ -31,7 +48,7 @@ const tools = [
   { id: "redo" as const, icon: IconArrowForwardUp, label: "redo" },
 ];
 export interface toolkitProps {
-  toolState: ToolState;
+  toolState: State["toolState"];
   handleToolSelect: (toolname: ToolState["currentTool"]) => void;
   handleColorSelect: (color: { l: number; c: number; h: number }) => void;
   handleStrokeSelect: (size: number) => void;

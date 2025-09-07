@@ -9,7 +9,6 @@ import React, {
 import oklchToCSS from "../utils/oklchToCss";
 import { Action, State, Shape } from "../types/index";
 import { drawShape } from "../utils/drawing";
-import { Newspaper } from "lucide-react";
 
 // const oklchToCSS = ({
 //   l,
@@ -80,6 +79,21 @@ function reducer(state: State, action: Action): State {
         };
       }
       return state;
+    case "CHANGE_TOOL":
+      return {
+        ...state,
+        toolState: { ...state.toolState, currentTool: action.payload },
+      };
+    case "CHANGE_COLOR":
+      return {
+        ...state,
+        toolState: { ...state.toolState, currentColor: action.payload },
+      };
+    case "CHANGE_BRUSHSIZE":
+      return {
+        ...state,
+        toolState: { ...state.toolState, brushSize: action.payload },
+      };
     default:
       return state;
   }
@@ -89,16 +103,21 @@ export const useWhiteBoard = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const startPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const isDrawing = useRef<boolean>(false);
-  const [toolState, setToolState] = useState<ToolState>({
-    currentTool: "none",
-    currentColor: { l: 0.7, c: 0.1, h: 0 },
-    brushSize: 10,
-  });
+  // const [toolState, setToolState] = useState<ToolState>({
+  //   currentTool: "none",
+  //   currentColor: { l: 0.7, c: 0.1, h: 0 },
+  //   brushSize: 10,
+  // });
 
   const initState: State = {
     drawnShapes: [],
     history: [[]],
     historyIndex: 0,
+    toolState: {
+      currentTool: "none",
+      currentColor: { l: 0.7, c: 0.1, h: 0 },
+      brushSize: 10,
+    },
   };
 
   const [state, dispatch] = useReducer(reducer, initState);
@@ -184,7 +203,7 @@ export const useWhiteBoard = () => {
     ctx.scale(dpr, dpr);
 
     ctx.lineWidth = 2;
-    ctx.strokeStyle = oklchToCSS(toolState.currentColor);
+    ctx.strokeStyle = oklchToCSS(state.toolState.currentColor);
 
     const getMousePos = (e: MouseEvent) => {
       return {
@@ -198,12 +217,12 @@ export const useWhiteBoard = () => {
 
       isDrawing.current = true;
       startPos.current = getMousePos(e);
-      if (toolState.currentTool === "pencil") {
+      if (state.toolState.currentTool === "pencil") {
         let newShape = {
-          type: toolState.currentTool,
-          lineWidth: toolState.brushSize,
-          lineColor: toolState.currentColor,
-          fillColor: toolState.currentColor,
+          type: state.toolState.currentTool,
+          lineWidth: state.toolState.brushSize,
+          lineColor: state.toolState.currentColor,
+          fillColor: state.toolState.currentColor,
           startX: startPos.current.x,
           startY: startPos.current.y,
           endX: startPos.current.x,
@@ -232,14 +251,14 @@ export const useWhiteBoard = () => {
       if (!isDrawing.current || !startPos.current) return;
 
       const currentPos = getMousePos(e);
-      console.log(toolState.currentTool);
+      console.log(state.toolState.currentTool);
 
-      if (toolState.currentTool !== "pencil") {
+      if (state.toolState.currentTool !== "pencil") {
         redrawPreviousShapes({
-          type: toolState.currentTool,
-          lineWidth: toolState.brushSize,
-          lineColor: toolState.currentColor,
-          fillColor: toolState.currentColor,
+          type: state.toolState.currentTool,
+          lineWidth: state.toolState.brushSize,
+          lineColor: state.toolState.currentColor,
+          fillColor: state.toolState.currentColor,
           startX: startPos.current.x,
           startY: startPos.current.y,
           endX: currentPos.x,
@@ -270,15 +289,15 @@ export const useWhiteBoard = () => {
     const onMouseUp = (e: MouseEvent) => {
       if (!startPos.current) return;
       if (
-        toolState.currentTool === "none" ||
-        toolState.currentTool === "select"
+        state.toolState.currentTool === "none" ||
+        state.toolState.currentTool === "select"
       )
         return;
       const newShape = {
-        type: toolState.currentTool,
-        lineWidth: toolState.brushSize,
-        lineColor: toolState.currentColor,
-        fillColor: toolState.currentColor,
+        type: state.toolState.currentTool,
+        lineWidth: state.toolState.brushSize,
+        lineColor: state.toolState.currentColor,
+        fillColor: state.toolState.currentColor,
         startX: startPos.current.x,
         startY: startPos.current.y,
         endX: e.clientX,
@@ -339,22 +358,24 @@ export const useWhiteBoard = () => {
       window.removeEventListener("mousemove", onMouseMove);
       canvas.removeEventListener("mouseup", onMouseUp);
     };
-  }, [toolState, state]);
+  }, [state.toolState, state]);
 
   const handleToolSelect = (toolName: ToolState["currentTool"]) => {
     console.log(toolName);
-    setToolState((prev) => ({ ...prev, currentTool: toolName }));
-    console.log(toolState);
+    dispatch({ type: "CHANGE_TOOL", payload: toolName });
+    // setToolState((prev) => ({ ...prev, currentTool: toolName }));
+    // console.log(state.toolState);
   };
 
   const handleColorSelect = (color: { l: number; c: number; h: number }) => {
-    toolState.currentColor = color;
+    dispatch({ type: "CHANGE_COLOR", payload: color });
   };
   const handleStrokeSelect = (size: number) => {
-    toolState.brushSize = size;
+    dispatch({ type: "CHANGE_BRUSHSIZE", payload: size });
   };
 
   const handleRedo = () => {
+    dispatch({ type: "REDO" });
     // if (state.historyIndex < state.history.length - 1) {
     //   const newIndex = state.historyIndex + 1;
     //   const newState = state.history[newIndex];
@@ -363,6 +384,7 @@ export const useWhiteBoard = () => {
     // }
   };
   const handleUndo = () => {
+    dispatch({ type: "UNDO" });
     // if (historyIndex > 0) {
     //   const newIndex = historyIndex - 1;
     //   const newState = history[newIndex];
@@ -371,5 +393,14 @@ export const useWhiteBoard = () => {
     // }
   };
 
-  return { canvasRef, dispatch };
+  return {
+    canvasRef,
+    dispatch,
+    handleToolSelect,
+    handleColorSelect,
+    handleStrokeSelect,
+    handleRedo,
+    handleUndo,
+    state,
+  };
 };

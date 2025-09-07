@@ -15,6 +15,7 @@ export type State = {
   drawnShapes: Shape[];
   history: Shape[][];
   historyIndex: number;
+  toolState: ToolState;
 };
 export type currentPos = {
   x: number;
@@ -26,4 +27,7 @@ export type Action =
   | { type: "UPDATE_HISTORY" }
   | { type: "FINISH_SHAPE"; payload: Shape }
   | { type: "REDO" }
-  | { type: "UNDO" };
+  | { type: "UNDO" }
+  | { type: "CHANGE_TOOL"; payload: ToolState["currentTool"] }
+  | { type: "CHANGE_COLOR"; payload: ToolState["currentColor"] }
+  | { type: "CHANGE_BRUSHSIZE"; payload: ToolState["brushSize"] };

@@ -13,7 +13,7 @@ import JoinRoomModal from "@repo/ui/JoinRoomModal";
 import { ToolState } from "@repo/common/toolState";
 import { toolkitProps } from "@repo/ui/Toolkit";
 import { Button } from "@workspace/ui/components/ui/button";
-import useWhiteBoard from "./hooks/useWhiteBoard";
+import { useWhiteBoard } from "./hooks/useWhiteBoard";
 // export interface Shape {
 //   type: ToolState["currentTool"];
 //   lineWidth: number;
@@ -276,7 +276,15 @@ const page = () => {
   //     canvas.removeEventListener("mouseup", onMouseUp);
   //   };
   // }, [toolState, drawnShapes, history, historyIndex]);
-  const canvasRef = useWhiteBoard();
+  const {
+    handleColorSelect,
+    handleStrokeSelect,
+    handleToolSelect,
+    handleRedo,
+    handleUndo,
+    canvasRef,
+    state,
+  } = useWhiteBoard();
 
   // const handleToolSelect = (toolName: ToolState["currentTool"]) => {
   //   console.log(toolName);
@@ -312,7 +320,7 @@ const page = () => {
     handleColorSelect,
     handleStrokeSelect,
     handleToolSelect,
-    toolState,
+    toolState: state.toolState,
     handleRedo,
     handleUndo,
   };
