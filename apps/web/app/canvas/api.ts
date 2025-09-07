@@ -86,7 +86,7 @@ export const fetchChat = () => {
   });
 };
 
-export const checkCode = async (config: InternalAxiosRequestConfig) => {
+export const joinRoom = async (config: InternalAxiosRequestConfig) => {
   try {
     const res = await axiosInstance.post("/api/rooms/check-code", config);
     return res.data;
