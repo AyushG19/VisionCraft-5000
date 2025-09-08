@@ -3,7 +3,7 @@ import axios, {
   AxiosResponse,
   InternalAxiosRequestConfig,
 } from "axios";
-import { HTTP_BE_URL } from "../../config";
+import { HTTP_BE_URL } from "../../config/index";
 
 let isRefreshing = false;
 let refreshSubscribers: ((newToken: string) => void)[] = [];
@@ -86,8 +86,11 @@ export const fetchChat = () => {
   });
 };
 
-export const joinRoom = async (config: InternalAxiosRequestConfig) => {
+export const joinRoom = async (roomCode: string) => {
   try {
+    let config = {
+      slug: roomCode,
+    };
     const res = await axiosInstance.post("/api/rooms/check-code", config);
     return res.data;
   } catch (error) {

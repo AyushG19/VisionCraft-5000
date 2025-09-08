@@ -14,6 +14,7 @@ import { ToolState } from "@repo/common/toolState";
 import { toolkitProps } from "@repo/ui/Toolkit";
 import { Button } from "@workspace/ui/components/ui/button";
 import { useWhiteBoard } from "./hooks/useWhiteBoard";
+import { joinRoom } from "./api";
 // export interface Shape {
 //   type: ToolState["currentTool"];
 //   lineWidth: number;
@@ -316,6 +317,10 @@ const page = () => {
   //   }
   // };
 
+  const verifyJoin = async (code: string) => {
+    const res = await joinRoom(code);
+    console.log(res);
+  };
   const toolkitProps: toolkitProps = {
     handleColorSelect,
     handleStrokeSelect,
@@ -332,7 +337,7 @@ const page = () => {
         ref={canvasRef}
         className="w-full h-full border bg-canvas "
       ></canvas>
-      {isChatOn ? <ChatModal /> : <JoinRoomModal />}
+      {isChatOn ? <ChatModal /> : <JoinRoomModal verifyJoin={verifyJoin} />}
     </div>
   );
 };

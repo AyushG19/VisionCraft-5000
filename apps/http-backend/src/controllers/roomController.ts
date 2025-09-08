@@ -5,6 +5,7 @@ import { generateRandomCode } from "../utils/codeGenerator.js";
 
 const checkCode = async (req: Request, res: Response) => {
   try {
+    console.log("in check code");
     const slug = req.body.slug;
     if (!slug) {
       res.status(400).json("Invalid room Id");

@@ -9,7 +9,11 @@ import {
 import { Tooltip, TooltipTrigger, TooltipContent } from "./ui/ToolTip";
 import { CodeInputBox } from "./ui/CodeInputBox";
 
-const JoinRoomModal = () => {
+const JoinRoomModal = ({
+  verifyJoin,
+}: {
+  verifyJoin: (code: string) => void;
+}) => {
   const [showInputBox, setShowInputBox] = useState(false);
 
   const toggleShowInputBox = () => {
@@ -18,7 +22,10 @@ const JoinRoomModal = () => {
   return (
     <>
       {showInputBox ? (
-        <CodeInputBox toggleFunction={toggleShowInputBox} />
+        <CodeInputBox
+          verifyJoin={verifyJoin}
+          toggleFunction={toggleShowInputBox}
+        />
       ) : (
         <Tooltip>
           <TooltipTrigger asChild>

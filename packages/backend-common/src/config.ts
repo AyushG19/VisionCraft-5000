@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+
+dotenv.config();
 const jwtSecret = process.env.JWT_SECRET;
 const bcryptSalt = process.env.BCRYPT_SALT;
 
@@ -10,6 +13,6 @@ if (!bcryptSalt) {
 export const BCRYPT_SALT = bcryptSalt;
 export const JWT_SECRET = jwtSecret;
 
-export const aTokenExpiry = "5m";
+export const aTokenExpiry = "10m";
 
 export const rTokenExpiry = "30m";
