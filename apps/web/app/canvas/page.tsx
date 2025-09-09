@@ -1,17 +1,14 @@
 "use client";
-import React, {
-  useCallback,
-  useEffect,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
-import Toolkit from "@repo/ui/Toolkit";
-import ChatModal from "@repo/ui/ChatModal";
-import JoinRoomModal from "@repo/ui/JoinRoomModal";
-
+import React, { useState } from "react";
+import {
+  RoomOptions,
+  JoinRoomModal,
+  Toolkit,
+  toolkitProps,
+  ChatModal,
+  ResizableDiv,
+} from "@repo/ui";
 import { ToolState } from "@repo/common/toolState";
-import { toolkitProps } from "@repo/ui/Toolkit";
 import { Button } from "@workspace/ui/components/ui/button";
 import { useWhiteBoard } from "./hooks/useWhiteBoard";
 import { joinRoom } from "./api";
@@ -55,7 +52,7 @@ const page = () => {
   // const [history, setHistory] = useState<Shape[][]>([[]]);
   // const [historyIndex, setHistoryIndex] = useState<number>(0);
 
-  const [isChatOn, setIsChatOn] = useState(false);
+  const [inRoom, setInRoom] = useState(false);
   // const [toolState, setToolState] = useState<ToolState>({
   //   currentTool: "none",
   //   currentColor: { l: 0.7, c: 0.1, h: 0 },
@@ -319,6 +316,9 @@ const page = () => {
 
   const verifyJoin = async (code: string) => {
     const res = await joinRoom(code);
+    if (res == "Authorised") {
+      setInRoom(true);
+    }
     console.log(res);
   };
   const toolkitProps: toolkitProps = {
@@ -337,7 +337,9 @@ const page = () => {
         ref={canvasRef}
         className="w-full h-full border bg-canvas "
       ></canvas>
-      {isChatOn ? <ChatModal /> : <JoinRoomModal verifyJoin={verifyJoin} />}
+      <ChatModal />
+      <ResizableDiv />
+      {true ? <RoomOptions /> : <JoinRoomModal verifyJoin={verifyJoin} />}
     </div>
   );
 };

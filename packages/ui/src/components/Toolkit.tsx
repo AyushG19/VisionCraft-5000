@@ -47,14 +47,14 @@ const tools = [
   { id: "undo" as const, icon: IconArrowBackUp, label: "undo" },
   { id: "redo" as const, icon: IconArrowForwardUp, label: "redo" },
 ];
-export interface toolkitProps {
+type toolkitProps = {
   toolState: State["toolState"];
   handleToolSelect: (toolname: ToolState["currentTool"]) => void;
   handleColorSelect: (color: { l: number; c: number; h: number }) => void;
   handleStrokeSelect: (size: number) => void;
   handleUndo: () => void;
   handleRedo: () => void;
-}
+};
 const Toolkit = ({
   toolState,
   handleToolSelect,
@@ -249,4 +249,4 @@ const Toolkit = ({
   );
 };
 
-export default Toolkit;
+export { Toolkit, type toolkitProps };
