@@ -9,13 +9,13 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "shadow-primary bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[color-mix(in srgb, var(--primary) 90%, black)]  transform transition-transform ease-in-out",
+          "shadow-primary bg-light_sky_blue text-[var(--primary-foreground)] hover:bg-[color-mix(in srgb, var(--primary) 90%, black)]  transform transition-transform ease-in-out outline-personal",
         destructive:
           "bg-[var(--destructive)] text-[var(--destructive-foreground)] hover:bg-[color-mix(in srgb, var(--destructive) 90%, black)]",
         outline:
           "shadow-primary outline-personal bg-[var(--background)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]",
         secondary:
-          "bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:bg-[color-mix(in srgb, var(--secondary) 80%, black)]",
+          "bg-light_sky_blue-700 text-[var(--secondary-foreground)] hover:bg-[color-mix(in srgb, var(--secondary) 80%, black)]",
         ghost: "hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]",
         link: "text-[var(--primary)] underline-offset-4 hover:underline",
         icon: "",

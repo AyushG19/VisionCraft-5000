@@ -7,6 +7,7 @@ import {
   toolkitProps,
   ChatModal,
   ResizableDiv,
+  TestComponent,
 } from "@repo/ui";
 import { ToolState } from "@repo/common/toolState";
 import { Button } from "@workspace/ui/components/ui/button";
@@ -338,7 +339,9 @@ const page = () => {
         className="w-full h-full border bg-canvas "
       ></canvas>
       <ChatModal />
-      <ResizableDiv />
+      {/* <ResizableDiv minHeight={30} minWidth={200}> */}
+      <TestComponent />
+      {/* </ResizableDiv> */}
       {true ? <RoomOptions /> : <JoinRoomModal verifyJoin={verifyJoin} />}
     </div>
   );
