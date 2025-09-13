@@ -7,12 +7,12 @@ import {
   toolkitProps,
   ChatModal,
   ResizableDiv,
-  TestComponent,
+  ChatBoxContainer,
 } from "@repo/ui";
 import { ToolState } from "@repo/common/toolState";
 import { Button } from "@workspace/ui/components/ui/button";
 import { useWhiteBoard } from "./hooks/useWhiteBoard";
-import { joinRoom } from "./api";
+import { joinRoom } from "@repo/common/api";
 // export interface Shape {
 //   type: ToolState["currentTool"];
 //   lineWidth: number;
@@ -54,6 +54,7 @@ const page = () => {
   // const [historyIndex, setHistoryIndex] = useState<number>(0);
 
   const [inRoom, setInRoom] = useState(false);
+  const [inChat, setInChat] = useState(false);
   // const [toolState, setToolState] = useState<ToolState>({
   //   currentTool: "none",
   //   currentColor: { l: 0.7, c: 0.1, h: 0 },
@@ -338,11 +339,16 @@ const page = () => {
         ref={canvasRef}
         className="w-full h-full border bg-canvas "
       ></canvas>
-      <ChatModal />
       {/* <ResizableDiv minHeight={30} minWidth={200}> */}
-      <TestComponent />
       {/* </ResizableDiv> */}
-      {true ? <RoomOptions /> : <JoinRoomModal verifyJoin={verifyJoin} />}
+      {true ? (
+        <>
+          <RoomOptions />
+          <ChatBoxContainer />
+        </>
+      ) : (
+        <JoinRoomModal verifyJoin={verifyJoin} />
+      )}
     </div>
   );
 };

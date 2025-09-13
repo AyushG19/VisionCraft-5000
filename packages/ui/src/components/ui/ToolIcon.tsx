@@ -60,7 +60,7 @@ const ToolIcon = React.forwardRef<HTMLDivElement, ToolIconProps>(
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             ref={ref}
-            className={`w-9 h-9 p-2.5 flex items-center justify-center cursor-pointer z-10 shadow-primary rounded-lg bg-uranian_blue outline-personal hover:scale-[103%] ${toolInfo.id !== "color" && isSelected && "shadow-pressed ml-0.5 mt-0.5"}`}
+            className={`w-9 h-9 p-2.5 flex items-center justify-center cursor-pointer z-10 shadow-primary rounded-lg bg-uranian_blue outline-personal hover:scale-[103%] ${toolInfo.id !== "color" && isSelected && "shadow-pressed ml-0.5 mt-0.5 "}`}
           >
             {toolInfo.id === "color" && isHovered && (
               <ColorSelector

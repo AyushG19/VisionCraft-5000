@@ -6,7 +6,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "./ui/ToolTip";
 
 const RoomOptions = () => {
   return (
-    <div className="flex items-center justify-center gap-2 absolute bottom-0 right-0 m-6">
+    <div className="flex items-center justify-center gap-2 absolute top-0 right-0 m-6 z-10">
       <Tooltip>
         <TooltipTrigger asChild>
           <Button

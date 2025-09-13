@@ -207,6 +207,15 @@ importers:
 
   packages/common:
     dependencies:
+      '@types/axios':
+        specifier: ^0.14.4
+        version: 0.14.4
+      '@types/node':
+        specifier: ^24.3.3
+        version: 24.3.3
+      axios:
+        specifier: ^1.10.0
+        version: 1.10.0
       zod:
         specifier: ^3.24.2
         version: 3.24.3
@@ -1280,6 +1289,10 @@ packages:
     resolution: {integrity: sha512-NxPRAT/mywJ6agqLuVsOag1btEUbPYacVqCndQjvkm5EN0DfjvBIYCsXA/i2Q+Z0hqX84UeIIfIXAQiXpAXZmA==}
     hasBin: true
 
+  '@types/axios@0.14.4':
+    resolution: {integrity: sha512-9JgOaunvQdsQ/qW2OPmE5+hCeUB52lQSolecrFrthct55QekhmXEwT203s20RL+UHtCQc15y3VXpby9E7Kkh/g==}
+    deprecated: This is a stub types definition. axios provides its own type definitions, so you do not need this installed.
+
   '@types/bcrypt@5.0.2':
     resolution: {integrity: sha512-6atioO8Y75fNcbmj0G7UjI9lXN2pQ/IGJ2FWT4a/btd0Lk9lQalHLKhkgKVZ3r+spnmWUKfbMi1GEe9wyHQfNQ==}
 
@@ -1330,6 +1343,9 @@ packages:
 
   '@types/node@24.3.0':
     resolution: {integrity: sha512-aPTXCrfwnDLj4VvXrm+UUCQjNEvJgNA8s5F1cvwQU+3KNltTOkBm1j30uNLyqqPNe7gE3KFzImYoZEfLhp4Yow==}
+
+  '@types/node@24.3.3':
+    resolution: {integrity: sha512-GKBNHjoNw3Kra1Qg5UXttsY5kiWMEfoHq2TmXb+b1rcm6N7B3wTrFYIf/oSZ1xNQ+hVVijgLkiDZh7jRRsh+Gw==}
 
   '@types/qs@6.9.18':
     resolution: {integrity: sha512-kK7dgTYDyGqS+e2Q4aK9X3D7q234CIZ1Bv0q/7Z5IwRDoADNU81xXJK/YVyLbLTZCoIwUoDoffFeF+p/eIklAA==}
@@ -4357,6 +4373,12 @@ snapshots:
       semver: 7.6.2
       update-check: 1.5.4
 
+  '@types/axios@0.14.4':
+    dependencies:
+      axios: 1.10.0
+    transitivePeerDependencies:
+      - debug
+
   '@types/bcrypt@5.0.2':
     dependencies:
       '@types/node': 22.15.3
@@ -4419,6 +4441,10 @@ snapshots:
       undici-types: 6.21.0
 
   '@types/node@24.3.0':
+    dependencies:
+      undici-types: 7.10.0
+
+  '@types/node@24.3.3':
     dependencies:
       undici-types: 7.10.0
 
