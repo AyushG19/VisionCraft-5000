@@ -11,13 +11,13 @@ const checkCode = async (req: Request, res: Response) => {
       res.status(400).json("Invalid room Id");
       return;
     }
-    const actualRoomId = await prismaClient.room.findFirst({
+    const room = await prismaClient.room.findFirst({
       where: {
         slug: slug,
       },
     });
-    if (actualRoomId && slug === actualRoomId.slug) {
-      res.status(200).send("Authorised");
+    if (room && slug === room.slug) {
+      res.status(200).json({ roomId: room.id, canvasState: room.canvas });
       return;
     }
     res.status(400).json("Bad Request");
@@ -35,6 +35,7 @@ const createRoom = async (req: Request, res: Response) => {
     }
 
     const slug = generateRandomCode(4);
+    console.log("slug genrrate");
     const newRoom = await prismaClient.room.create({
       data: {
         slug: slug,
@@ -48,6 +49,7 @@ const createRoom = async (req: Request, res: Response) => {
     });
     res.status(200).json(newRoom);
   } catch (error) {
+    console.log("error in create room");
     res.status(505).json(error);
   }
 };

@@ -4,6 +4,12 @@ if (!httpUrl) {
   throw new Error("Backend url not specified");
 }
 export const HTTP_BE_URL = httpUrl;
+const wsURL = process.env.NEXT_PUBLIC_WS_BACKEND;
+
+if (!wsURL) {
+  throw new Error("WebSocket url not specified");
+}
+export const WS_BE_URL = wsURL;
 
 export const GITHUB_ID = process.env.GITHUB_ID || "";
 export const GITHUB_SECRET = process.env.GITHUB_SECRET || "";

@@ -26,8 +26,14 @@ const parseData = (data: any) => {
 };
 
 wss.on("connection", function connection(ws, req) {
-  const url = req.url;
-  const token = req.headers["authorization"]?.split(" ")[1];
+  console.log("connection requested");
+  if (!req.url || !req.headers.host) {
+    ws.close();
+    return;
+  }
+  const url = new URL(req.url, `http://${req.headers.host}`);
+  const token = url.searchParams.get("token");
+  const slug = url.searchParams.get("slug");
   if (!token || !url) {
     ws.close();
     return null;
@@ -55,8 +61,14 @@ wss.on("connection", function connection(ws, req) {
 
     if (parsedData.type === "join_room") {
       try {
+        if (!decoded.userId) {
+          ws.send(
+            JSON.stringify({ status: "error", message: "User ID is missing" })
+          );
+          return;
+        }
         const result = await redisPub.sAdd(
-          `room:${parsedData.roomId}:users`,
+          `room:${slug}:users`,
           decoded.userId
         );
         ws.send(JSON.stringify({ status: "joined", result }));
@@ -67,8 +79,14 @@ wss.on("connection", function connection(ws, req) {
 
     if (parsedData.type === "leave_room") {
       try {
+        if (!decoded.userId) {
+          ws.send(
+            JSON.stringify({ status: "error", message: "User ID is missing" })
+          );
+          return;
+        }
         const result = await redisPub.sRem(
-          `room:${parsedData.roomId}:users`,
+          `room:${slug}:users`,
           decoded.userId
         );
         ws.send(JSON.stringify({ status: "left successfully", result }));
@@ -80,7 +98,7 @@ wss.on("connection", function connection(ws, req) {
     if (parsedData.type === "subscribe") {
       try {
         const result = await redisSub.subscribe(
-          `room:${parsedData.roomId}:users`,
+          `room:${slug}:users`,
           (message) => {
             const parsedMessage = JSON.parse(message);
             if (parsedMessage.userId === decoded.userId) return;
@@ -100,7 +118,7 @@ wss.on("connection", function connection(ws, req) {
       };
       try {
         const result = await redisPub.publish(
-          `room:${parsedData.roomId}:users`,
+          `room:${slug}:users`,
           JSON.stringify(messagePayload)
         );
         ws.send(JSON.stringify({ status: "published", result }));

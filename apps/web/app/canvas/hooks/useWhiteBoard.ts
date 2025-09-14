@@ -402,5 +402,6 @@ export const useWhiteBoard = () => {
     handleRedo,
     handleUndo,
     state,
+    isDrawing,
   };
 };
