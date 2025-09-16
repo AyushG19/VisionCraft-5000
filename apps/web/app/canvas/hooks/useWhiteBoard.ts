@@ -9,6 +9,9 @@ import React, {
 import oklchToCSS from "../utils/oklchToCss";
 import { Action, State, Shape } from "../types/index";
 import { drawShape } from "../utils/drawing";
+import debounce from "../utils/debounce";
+import { saveCanvasState } from "../api";
+import { DatabaseBackup } from "lucide-react";
 
 // const oklchToCSS = ({
 //   l,
@@ -230,20 +233,6 @@ export const useWhiteBoard = () => {
           points: [startPos.current],
         };
         dispatch({ type: "ADD_SHAPE", payload: newShape });
-        // setDrawnShapes((prevShapes) => [
-        //   ...prevShapes,
-        //   {
-        //     type: toolState.currentTool,
-        //     lineWidth: toolState.brushSize,
-        //     lineColor: toolState.currentColor,
-        //     fillColor: toolState.currentColor,
-        //     startX: startPos.current.x,
-        //     startY: startPos.current.y,
-        //     endX: startPos.current.x,
-        //     endY: startPos.current.y,
-        //     points: [startPos.current],
-        //   },
-        // ]);
       }
     };
 
@@ -266,23 +255,6 @@ export const useWhiteBoard = () => {
         });
       } else {
         dispatch({ type: "UPDATE_PENCIL", payload: currentPos });
-        // setDrawnShapes((prevShapes) => {
-        //   const lastShapeIndex = drawnShapes.length - 1;
-        //   const lastShape = drawnShapes[lastShapeIndex];
-        //   if (lastShape && lastShape.type === "pencil") {
-        //     const updatedPoints = [...(lastShape.points || []), currentPos];
-        //     return [
-        //       ...prevShapes.slice(0, lastShapeIndex),
-        //       {
-        //         ...lastShape,
-        //         points: updatedPoints,
-        //         endX: currentPos.x,
-        //         endY: currentPos.y,
-        //       },
-        //     ];
-        //   }
-        //   return prevShapes;
-        // });
       }
     };
 
@@ -293,6 +265,12 @@ export const useWhiteBoard = () => {
         state.toolState.currentTool === "select"
       )
         return;
+      try {
+        const debounceCanvasSave = useRef(debounce(saveCanvasState, 10000));
+        debounceCanvasSave.current(state.drawnShapes);
+      } catch (error) {
+        alert("Error in saving canvas");
+      }
       const newShape = {
         type: state.toolState.currentTool,
         lineWidth: state.toolState.brushSize,
@@ -305,39 +283,6 @@ export const useWhiteBoard = () => {
       };
       dispatch({ type: "FINISH_SHAPE", payload: newShape });
       isDrawing.current = false;
-      // setDrawnShapes((prevShapes) => {
-      //   const previousHistory = history.slice(0, historyIndex + 1);
-      //   setHistory([
-      //     ...previousHistory,
-      //     [
-      //       ...prevShapes,
-      //       {
-      //         type: toolState.currentTool,
-      //         lineWidth: toolState.brushSize,
-      //         lineColor: toolState.currentColor,
-      //         fillColor: toolState.currentColor,
-      //         startX: startPos.current.x,
-      //         startY: startPos.current.y,
-      //         endX: e.clientX,
-      //         endY: e.clientY,
-      //       },
-      //     ],
-      //   ]);
-      //   setHistoryIndex(previousHistory.length);
-      //   return [
-      //     ...prevShapes,
-      //     {
-      //       type: toolState.currentTool,
-      //       lineWidth: toolState.brushSize,
-      //       lineColor: toolState.currentColor,
-      //       fillColor: toolState.currentColor,
-      //       startX: startPos.current.x,
-      //       startY: startPos.current.y,
-      //       endX: e.clientX,
-      //       endY: e.clientY,
-      //     },
-      //   ];
-      // });
     };
     const redrawPreviousShapes = (currentShape?: Shape) => {
       ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);

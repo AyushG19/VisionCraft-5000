@@ -5,6 +5,7 @@ import axios, {
 } from "axios";
 import { HTTP_BE_URL } from "../../config/index";
 import { Shape } from "./types";
+import { UUID } from "crypto";
 
 let isRefreshing = false;
 let refreshSubscribers: ((newToken: string) => void)[] = [];
@@ -107,6 +108,18 @@ export const createRoom = async (canvas: Shape[]): Promise<any> => {
     };
     const res = await axiosInstance.post("/api/rooms/create", config);
     localStorage.setItem("roomId", res.data.id);
+    return res;
+  } catch (error) {
+    return error;
+  }
+};
+
+export const saveCanvasState = async (boardState: Shape[]) => {
+  try {
+    let config = {
+      boardState: boardState,
+    };
+    const res = await axiosInstance.post("/api/rooms/save-canvas", config);
     return res;
   } catch (error) {
     return error;
