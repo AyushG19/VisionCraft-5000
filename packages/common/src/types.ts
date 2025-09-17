@@ -64,7 +64,16 @@ export const JoinRoomSchema = z.object({
   roomId: z.any(),
 });
 
+export const UuidSchema = z.string().uuid({ message: "Invalid RoomID" });
+export const WebSocketDataType = z.object({
+  type: z.enum(["JOIN_ROOM", "LEAVE_ROOM", "SUBSCRIBE", "CHAT"]),
+  payload: z.object({
+    message: z.string().optional(),
+    shape: ShapeSchema.optional(),
+  }),
+});
 export type LoginFormValues = z.infer<typeof LoginSchema>;
 export type SignupFormValues = z.infer<typeof CreateUserSchema>;
 export type JoinRoomValues = z.infer<typeof JoinRoomSchema>;
 export type CreateRoomValues = z.infer<typeof CreateRoomSchema>;
+export type UuidType = z.infer<typeof UuidSchema>;

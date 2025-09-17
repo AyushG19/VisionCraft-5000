@@ -1,18 +1,15 @@
+"use client";
 import { ToolState } from "@repo/common/toolState";
-import React, {
-  useRef,
-  useEffect,
-  useState,
-  useReducer,
-  Dispatch,
-} from "react";
+import React, { useRef, useEffect, useReducer } from "react";
 import oklchToCSS from "../utils/oklchToCss";
 import { Action, State, Shape } from "../types/index";
 import { drawShape } from "../utils/drawing";
 import debounce from "../utils/debounce";
 import { saveCanvasState } from "../api";
-import { DatabaseBackup } from "lucide-react";
-
+import { useSearchParams } from "next/navigation";
+import { UuidSchema, UuidType } from "@repo/common/types";
+import { error } from "console";
+import { useRoomID } from "./useRoomID";
 // const oklchToCSS = ({
 //   l,
 //   c,
@@ -102,7 +99,7 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-export const useWhiteBoard = () => {
+export const useWhiteBoard = (enabled: boolean) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const startPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const isDrawing = useRef<boolean>(false);
@@ -124,6 +121,7 @@ export const useWhiteBoard = () => {
   };
 
   const [state, dispatch] = useReducer(reducer, initState);
+  const debounceCanvasSave = useRef(debounce(saveCanvasState, 10000));
 
   //   const drawShape = useCallback(
   //     (ctx: CanvasRenderingContext2D, shape: Shape) => {
@@ -190,6 +188,13 @@ export const useWhiteBoard = () => {
   //     },
   //     [toolState]
   //   );
+
+  useEffect(() => {
+    if (enabled) {
+      const roomID = useRoomID();
+      debounceCanvasSave.current(state.drawnShapes, roomID);
+    }
+  }, [state.drawnShapes, enabled]);
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -265,12 +270,6 @@ export const useWhiteBoard = () => {
         state.toolState.currentTool === "select"
       )
         return;
-      try {
-        const debounceCanvasSave = useRef(debounce(saveCanvasState, 10000));
-        debounceCanvasSave.current(state.drawnShapes);
-      } catch (error) {
-        alert("Error in saving canvas");
-      }
       const newShape = {
         type: state.toolState.currentTool,
         lineWidth: state.toolState.brushSize,

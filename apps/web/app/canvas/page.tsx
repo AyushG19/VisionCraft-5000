@@ -13,11 +13,13 @@ import { useCanvasSocket } from "./hooks/useCanvasSocket";
 import { Button } from "@workspace/ui/button";
 import { AxiosResponse } from "axios";
 import { drawShape } from "./utils/drawing";
+import { useRouter } from "next/navigation";
+import { useRoomID } from "./hooks/useRoomID";
 
 const page = () => {
   const [inRoom, setInRoom] = useState(false);
   const [inChat, setInChat] = useState(false);
-  const { send, messages } = useCanvasSocket(inRoom);
+  // const { send, messages } = useCanvasSocket(inRoom);
 
   const {
     handleColorSelect,
@@ -28,7 +30,7 @@ const page = () => {
     canvasRef,
     state,
     isDrawing,
-  } = useWhiteBoard();
+  } = useWhiteBoard(inRoom);
 
   const verifyJoin = async (code: string) => {
     if (canvasRef.current) {
@@ -65,9 +67,9 @@ const page = () => {
         ref={canvasRef}
         className="w-full h-full border bg-canvas "
       ></canvas>
-      <Button className="absolute top-0 left-0" onClick={() => send("hii")}>
+      {/* <Button className="absolute top-0 left-0" onClick={() => send("hii")}>
         send
-      </Button>
+      </Button> */}
       {inRoom ? (
         <>
           <RoomOptions />

@@ -93,8 +93,9 @@ export const joinRoom = async (roomCode: string): Promise<any> => {
     let config = {
       slug: roomCode,
     };
-    const res = await axiosInstance.post("/api/rooms/check-code", config);
+    const res = await axiosInstance.post(`/api/rooms/check-code`, config);
     localStorage.setItem("roomId", res.data.id);
+    localStorage.setItem("slug", res.data.slug);
     return res;
   } catch (error) {
     return error;
@@ -114,12 +115,17 @@ export const createRoom = async (canvas: Shape[]): Promise<any> => {
   }
 };
 
-export const saveCanvasState = async (boardState: Shape[]) => {
+export const saveCanvasState = async (boardState: Shape[], roomId: string) => {
   try {
     let config = {
       boardState: boardState,
     };
-    const res = await axiosInstance.post("/api/rooms/save-canvas", config);
+    console.log("saving");
+    const res = await axiosInstance.post(
+      `/api/rooms/save-canvas?roomId=${encodeURIComponent(roomId)}`,
+      config
+    );
+    console.log("saved", res);
     return res;
   } catch (error) {
     return error;
