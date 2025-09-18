@@ -1,19 +1,9 @@
 import { ToolState } from "@repo/common/toolState";
+import { ShapeType } from "@repo/common/types";
 
-export interface Shape {
-  type: ToolState["currentTool"];
-  lineWidth: number;
-  lineColor: { l: number; c: number; h: number };
-  fillColor: { l: number; c: number; h: number };
-  startX: number;
-  startY: number;
-  endX: number;
-  endY: number;
-  points?: { x: number; y: number }[];
-}
 export type State = {
-  drawnShapes: Shape[];
-  history: Shape[][];
+  drawnShapes: ShapeType[];
+  history: ShapeType[][];
   historyIndex: number;
   toolState: ToolState;
 };
@@ -22,10 +12,11 @@ export type currentPos = {
   y: number;
 };
 export type Action =
-  | { type: "ADD_SHAPE"; payload: Shape }
+  | { type: "INITIALIZE_BOARD"; payload: ShapeType[] }
+  | { type: "ADD_SHAPE"; payload: ShapeType }
   | { type: "UPDATE_PENCIL"; payload: currentPos }
   | { type: "UPDATE_HISTORY" }
-  | { type: "FINISH_SHAPE"; payload: Shape }
+  | { type: "FINISH_SHAPE"; payload: ShapeType }
   | { type: "REDO" }
   | { type: "UNDO" }
   | { type: "CHANGE_TOOL"; payload: ToolState["currentTool"] }

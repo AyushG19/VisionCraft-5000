@@ -8,7 +8,7 @@ import {
   ChatBoxContainer,
 } from "@repo/ui";
 import { useWhiteBoard } from "./hooks/useWhiteBoard";
-import { createRoom, joinRoom } from "./api";
+import { createRoom, joinRoom, login } from "./api";
 import { useCanvasSocket } from "./hooks/useCanvasSocket";
 import { Button } from "@workspace/ui/button";
 import { AxiosResponse } from "axios";
@@ -30,6 +30,7 @@ const page = () => {
     canvasRef,
     state,
     isDrawing,
+    dispatch,
   } = useWhiteBoard(inRoom);
 
   const verifyJoin = async (code: string) => {
@@ -43,8 +44,9 @@ const page = () => {
       if (res.status == 200) {
         setInRoom(true);
         drawShape(ctx, res.data.canvasState);
+        dispatch({ type: "INITIALIZE_BOARD", payload: res.data.canvasState });
       }
-      console.log(res);
+      console.log("From page verifyJoin: ", res);
     }
   };
   const makeNewRoom = async () => {
@@ -79,6 +81,12 @@ const page = () => {
         <JoinRoomModal verifyJoin={verifyJoin} />
       )}
       <Button className="absolute top-100 left-200" onClick={makeNewRoom}>
+        send
+      </Button>
+      <Button
+        className="absolute top-100 left-0 bg-amber-500"
+        onClick={() => login()}
+      >
         send
       </Button>
     </div>

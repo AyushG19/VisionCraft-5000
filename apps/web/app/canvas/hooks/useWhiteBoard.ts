@@ -2,7 +2,8 @@
 import { ToolState } from "@repo/common/toolState";
 import React, { useRef, useEffect, useReducer } from "react";
 import oklchToCSS from "../utils/oklchToCss";
-import { Action, State, Shape } from "../types/index";
+import { Action, State } from "../types/index";
+import { type ShapeType } from "@repo/common/types";
 import { drawShape } from "../utils/drawing";
 import debounce from "../utils/debounce";
 import { saveCanvasState } from "../api";
@@ -24,6 +25,11 @@ import { useRoomID } from "./useRoomID";
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
+    case "INITIALIZE_BOARD":
+      return {
+        ...state,
+        drawnShapes: action.payload,
+      };
     case "ADD_SHAPE":
       return {
         ...state,
@@ -190,7 +196,7 @@ export const useWhiteBoard = (enabled: boolean) => {
   //   );
 
   useEffect(() => {
-    if (enabled) {
+    if (enabled && state.drawnShapes.length > 0) {
       const roomID = useRoomID();
       debounceCanvasSave.current(state.drawnShapes, roomID);
     }
@@ -227,6 +233,7 @@ export const useWhiteBoard = (enabled: boolean) => {
       startPos.current = getMousePos(e);
       if (state.toolState.currentTool === "pencil") {
         let newShape = {
+          id: crypto.randomUUID(),
           type: state.toolState.currentTool,
           lineWidth: state.toolState.brushSize,
           lineColor: state.toolState.currentColor,
@@ -249,6 +256,7 @@ export const useWhiteBoard = (enabled: boolean) => {
 
       if (state.toolState.currentTool !== "pencil") {
         redrawPreviousShapes({
+          id: crypto.randomUUID(),
           type: state.toolState.currentTool,
           lineWidth: state.toolState.brushSize,
           lineColor: state.toolState.currentColor,
@@ -271,6 +279,7 @@ export const useWhiteBoard = (enabled: boolean) => {
       )
         return;
       const newShape = {
+        id: crypto.randomUUID(),
         type: state.toolState.currentTool,
         lineWidth: state.toolState.brushSize,
         lineColor: state.toolState.currentColor,
@@ -283,7 +292,7 @@ export const useWhiteBoard = (enabled: boolean) => {
       dispatch({ type: "FINISH_SHAPE", payload: newShape });
       isDrawing.current = false;
     };
-    const redrawPreviousShapes = (currentShape?: Shape) => {
+    const redrawPreviousShapes = (currentShape?: ShapeType) => {
       ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
       state.drawnShapes.forEach((shape) => drawShape(ctx, shape));
       if (currentShape) {

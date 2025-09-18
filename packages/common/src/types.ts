@@ -44,14 +44,26 @@ const PointSchema = z.object({
 });
 
 const ShapeSchema = z.object({
-  type: z.enum(["pencil", "line", "rectangle", "circle"]),
-  x: z.number().optional(),
-  y: z.number().optional(),
-  width: z.number().optional(),
-  height: z.number().optional(),
-  radius: z.number().optional(),
-  color: ColorSchema,
-  size: z.number(),
+  id: z.string(),
+  type: z.enum([
+    "select",
+    "circle",
+    "square",
+    "triangle",
+    "arrow",
+    "color",
+    "pencil",
+    "undo",
+    "redo",
+    "none",
+  ]),
+  lineWidth: z.number(),
+  lineColor: ColorSchema,
+  fillColor: z.object({ l: z.number(), c: z.number(), h: z.number() }),
+  startX: z.number(),
+  startY: z.number(),
+  endX: z.number(),
+  endY: z.number(),
   points: z.array(PointSchema).optional(),
 });
 
@@ -65,11 +77,20 @@ export const JoinRoomSchema = z.object({
 });
 
 export const UuidSchema = z.string().uuid({ message: "Invalid RoomID" });
-export const WebSocketDataType = z.object({
-  type: z.enum(["JOIN_ROOM", "LEAVE_ROOM", "SUBSCRIBE", "CHAT"]),
+export const WebSocketData = z.object({
+  type: z.enum([
+    "JOIN_ROOM",
+    "LEAVE_ROOM",
+    "SUBSCRIBE",
+    "CHAT",
+    "ADD_SHAPE",
+    "DEL_SHAPE",
+    "UPD_SHAPE",
+  ]),
   payload: z.object({
     message: z.string().optional(),
     shape: ShapeSchema.optional(),
+    userId: z.string().optional(),
   }),
 });
 export type LoginFormValues = z.infer<typeof LoginSchema>;
@@ -77,3 +98,5 @@ export type SignupFormValues = z.infer<typeof CreateUserSchema>;
 export type JoinRoomValues = z.infer<typeof JoinRoomSchema>;
 export type CreateRoomValues = z.infer<typeof CreateRoomSchema>;
 export type UuidType = z.infer<typeof UuidSchema>;
+export type WebSocketDataType = z.infer<typeof WebSocketData>;
+export type ShapeType = z.infer<typeof ShapeSchema>;

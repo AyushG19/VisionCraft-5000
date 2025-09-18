@@ -4,8 +4,7 @@ import axios, {
   InternalAxiosRequestConfig,
 } from "axios";
 import { HTTP_BE_URL } from "../../config/index";
-import { Shape } from "./types";
-import { UUID } from "crypto";
+import { ShapeType } from "@repo/common/types";
 
 let isRefreshing = false;
 let refreshSubscribers: ((newToken: string) => void)[] = [];
@@ -27,6 +26,7 @@ axiosInstance.interceptors.request.use(
     if (token && config.headers) {
       config.headers["Authorization"] = `Bearer ${token}`;
     }
+    config.withCredentials = true;
     return config;
   },
   (error) => {
@@ -59,8 +59,9 @@ axiosInstance.interceptors.response.use(
     }
     isRefreshing = true;
     try {
-      const res = await axiosInstance.post("/auth/create-newTokens");
-      const newToken = res.data; //make sure res has only string token not in aobject form
+      console.log("Refreshing");
+      const res = await axiosInstance.post("api/auth/refresh-token");
+      const newToken = res.data.token; //make sure res has only string token not in aobject form
       localStorage.setItem("token", newToken);
       originalReq.headers["Authorization"] = newToken;
 
@@ -90,10 +91,10 @@ export const fetchChat = () => {
 
 export const joinRoom = async (roomCode: string): Promise<any> => {
   try {
-    let config = {
+    let data = {
       slug: roomCode,
     };
-    const res = await axiosInstance.post(`/api/rooms/check-code`, config);
+    const res = await axiosInstance.post(`/api/rooms/check-code`, data);
     localStorage.setItem("roomId", res.data.id);
     localStorage.setItem("slug", res.data.slug);
     return res;
@@ -102,12 +103,12 @@ export const joinRoom = async (roomCode: string): Promise<any> => {
   }
 };
 
-export const createRoom = async (canvas: Shape[]): Promise<any> => {
+export const createRoom = async (canvas: ShapeType[]): Promise<any> => {
   try {
-    const config = {
+    const data = {
       canvas: canvas,
     };
-    const res = await axiosInstance.post("/api/rooms/create", config);
+    const res = await axiosInstance.post("/api/rooms/create", data);
     localStorage.setItem("roomId", res.data.id);
     return res;
   } catch (error) {
@@ -115,17 +116,36 @@ export const createRoom = async (canvas: Shape[]): Promise<any> => {
   }
 };
 
-export const saveCanvasState = async (boardState: Shape[], roomId: string) => {
+export const saveCanvasState = async (
+  boardState: ShapeType[],
+  roomId: string
+) => {
   try {
-    let config = {
+    let data = {
       boardState: boardState,
     };
     console.log("saving");
     const res = await axiosInstance.post(
       `/api/rooms/save-canvas?roomId=${encodeURIComponent(roomId)}`,
-      config
+      data
     );
     console.log("saved", res);
+    return res;
+  } catch (error) {
+    return error;
+  }
+};
+
+export const login = async () => {
+  try {
+    let data = {
+      email: "ayush@gamil.com",
+      password: "@Ayush1900",
+    };
+    console.log("loggin in");
+    const res = await axiosInstance.post(`/api/auth/login`, data);
+    localStorage.setItem("token", res.data.token);
+    console.log("login res :", res);
     return res;
   } catch (error) {
     return error;
