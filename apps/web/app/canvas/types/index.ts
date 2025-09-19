@@ -13,6 +13,7 @@ export type currentPos = {
 };
 export type Action =
   | { type: "INITIALIZE_BOARD"; payload: ShapeType[] }
+  | { type: "DEL_SHAPE"; payload: ShapeType }
   | { type: "ADD_SHAPE"; payload: ShapeType }
   | { type: "UPDATE_PENCIL"; payload: currentPos }
   | { type: "UPDATE_HISTORY" }

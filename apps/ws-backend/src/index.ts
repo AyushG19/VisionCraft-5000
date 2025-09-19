@@ -44,7 +44,7 @@ wss.on("connection", function connection(ws, req) {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const token = url.searchParams.get("token");
   const roomId = url.searchParams.get("roomId");
-  if (!token || !url) {
+  if (!token || !url || !roomId) {
     ws.close();
     return null;
   }
@@ -84,7 +84,15 @@ wss.on("connection", function connection(ws, req) {
             `room:${roomId}:users`,
             payload.userId
           );
-          if (exists) return;
+          if (exists) {
+            ws.send(
+              JSON.stringify({
+                type: "INFO",
+                message: "Already subscribed",
+              })
+            );
+            return;
+          }
           await redisPub.sAdd(`room:${roomId}:users`, payload.userId);
           await redisSub.subscribe(`room:${roomId}:events`, (message) => {
             const parsedMessage: EventType = JSON.parse(message);
@@ -110,7 +118,8 @@ wss.on("connection", function connection(ws, req) {
 
       case "LEAVE_ROOM":
         try {
-          ws.close();
+          await redisPub.sRem(`room:${roomId}:users`, payload.userId);
+          ws.close(1000);
         } catch (error) {
           ws.send(
             JSON.stringify({ type: "ERROR", message: "Failed to Leave Room" })

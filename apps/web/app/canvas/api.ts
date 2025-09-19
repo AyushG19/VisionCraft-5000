@@ -145,6 +145,7 @@ export const login = async () => {
     console.log("loggin in");
     const res = await axiosInstance.post(`/api/auth/login`, data);
     localStorage.setItem("token", res.data.token);
+    localStorage.setItem("userId", res.data.userId);
     console.log("login res :", res);
     return res;
   } catch (error) {

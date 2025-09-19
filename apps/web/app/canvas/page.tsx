@@ -7,7 +7,7 @@ import {
   toolkitProps,
   ChatBoxContainer,
 } from "@repo/ui";
-import { useWhiteBoard } from "./hooks/useWhiteBoard";
+import { useWhiteboardWithSocket } from "./hooks/useWhiteboardWithSocket";
 import { createRoom, joinRoom, login } from "./api";
 import { useCanvasSocket } from "./hooks/useCanvasSocket";
 import { Button } from "@workspace/ui/button";
@@ -31,8 +31,10 @@ const page = () => {
     state,
     isDrawing,
     dispatch,
-  } = useWhiteBoard(inRoom);
+    wsRef,
+  } = useWhiteboardWithSocket(inRoom);
 
+  useEffect(() => {}, [state.drawnShapes]);
   const verifyJoin = async (code: string) => {
     if (canvasRef.current) {
       const ctx = canvasRef.current.getContext("2d");
@@ -67,7 +69,7 @@ const page = () => {
       <Toolkit {...toolkitProps} />
       <canvas
         ref={canvasRef}
-        className="w-full h-full border bg-canvas "
+        className="w-screen h-screen border bg-canvas "
       ></canvas>
       {/* <Button className="absolute top-0 left-0" onClick={() => send("hii")}>
         send
@@ -81,13 +83,47 @@ const page = () => {
         <JoinRoomModal verifyJoin={verifyJoin} />
       )}
       <Button className="absolute top-100 left-200" onClick={makeNewRoom}>
-        send
+        new room
       </Button>
       <Button
         className="absolute top-100 left-0 bg-amber-500"
         onClick={() => login()}
       >
-        send
+        ayush login
+      </Button>
+      <Button
+        className="absolute top-100 left-100 bg-amber-500"
+        onClick={() =>
+          wsRef.current?.send(
+            JSON.stringify({
+              type: "LEAVE_ROOM",
+              payload: {
+                userId: "b357fe14-cf67-4c71-9a00-f6636e7a7018",
+                shape: {
+                  id: "cdc51e8d-20dc-4a4c-8103-7547a1d09c5f",
+                  type: "square",
+                  lineWidth: 10,
+                  lineColor: {
+                    h: 0,
+                    c: 0.15,
+                    l: 0.7,
+                  },
+                  fillColor: {
+                    h: 0,
+                    c: 0.15,
+                    l: 0.7,
+                  },
+                  startX: 286,
+                  startY: 209,
+                  endX: 495,
+                  endY: 334,
+                },
+              },
+            })
+          )
+        }
+      >
+        leave room
       </Button>
     </div>
   );

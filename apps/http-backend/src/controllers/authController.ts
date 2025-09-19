@@ -109,6 +109,7 @@ export const login = async (req: Request, res: Response) => {
         } // 1 hour
       )
       .json({
+        userId: user.id,
         token: jwtService.createAccessToken({ userId: user.id }),
       });
   } catch (error) {

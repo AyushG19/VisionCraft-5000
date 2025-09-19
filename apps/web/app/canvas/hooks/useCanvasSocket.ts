@@ -1,12 +1,24 @@
 import { useEffect, useRef, useState } from "react";
 import { WS_BE_URL } from "config";
+import { useWhiteBoard } from "./useWhiteBoard";
 
 export function useCanvasSocket(enabled: boolean) {
   const wsRef = useRef<WebSocket | null>(null);
   const [messages, setMessages] = useState<string[]>([]);
+  const { state, dispatch } = useWhiteBoard(enabled);
   const send = (message: string) => {
     if (!wsRef.current) return;
     wsRef.current.send(message);
+  };
+  const handleMessage = (event: any) => {
+    switch (event.type) {
+      case "ADD":
+        dispatch({ type: "ADD_SHAPE", payload: event.shape });
+        break;
+      case "DEL":
+        dispatch({ type: "DEL_SHAPE", payload: event.shape });
+        break;
+    }
   };
   useEffect(() => {
     if (!enabled) return;
@@ -23,8 +35,8 @@ export function useCanvasSocket(enabled: boolean) {
     wsRef.current = ws;
     ws.onopen = () => console.log("event");
     ws.onmessage = (event) => {
+      handleMessage(event);
       console.log(event);
-      setMessages((prev) => [...prev, event.data]);
     };
     ws.onerror = (err) => console.error("WS error:", err);
     ws.onclose = (ev) => console.log("WS closed:", ev);

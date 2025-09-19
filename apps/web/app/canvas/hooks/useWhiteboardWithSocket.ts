@@ -8,18 +8,12 @@ import { drawShape } from "../utils/drawing";
 import debounce from "../utils/debounce";
 import { saveCanvasState } from "../api";
 import { useRoomID } from "./useRoomID";
-// const oklchToCSS = ({
-//   l,
-//   c,
-//   h,
-// }: {
-//   l: number;
-//   c: number;
-//   h: number;
-// }): string => {
-//   return `oklch(${l} ${c} ${h})`;
-// };
-
+import { WS_BE_URL } from "config";
+type EventType = {
+  userId: string;
+  type: "ADD" | "DEL" | "UPD";
+  shape: ShapeType;
+};
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "INITIALIZE_BOARD":
@@ -62,16 +56,7 @@ function reducer(state: State, action: Action): State {
           },
         ],
       };
-    // case "FINISH_SHAPE":
-    //   const previousHistory = state.history.slice(0, state.historyIndex + 1);
-    //   const newCanvasState = [...state.drawnShapes, action.payload];
 
-    //   return {
-    //     ...state,
-    //     drawnShapes: newCanvasState,
-    //     history: [...previousHistory, newCanvasState],
-    //     historyIndex: previousHistory.length,
-    //   };
     case "REDO":
       if (state.historyIndex < state.history.length - 1) {
         const newIndex = state.historyIndex + 1;
@@ -114,15 +99,11 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-export const useWhiteBoard = (enabled: boolean) => {
+export const useWhiteboardWithSocket = (enabled: boolean) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const startPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const isDrawing = useRef<boolean>(false);
-  // const [toolState, setToolState] = useState<ToolState>({
-  //   currentTool: "none",
-  //   currentColor: { l: 0.7, c: 0.1, h: 0 },
-  //   brushSize: 10,
-  // });
+  const wsRef = useRef<WebSocket | null>(null);
 
   const initState: State = {
     drawnShapes: [],
@@ -138,78 +119,128 @@ export const useWhiteBoard = (enabled: boolean) => {
   const [state, dispatch] = useReducer(reducer, initState);
   const debounceCanvasSave = useRef(debounce(saveCanvasState, 10000));
 
-  //   const drawShape = useCallback(
-  //     (ctx: CanvasRenderingContext2D, shape: Shape) => {
-  //       const width = shape.endX - shape.startX;
-  //       const height = shape.endY - shape.startY;
-  //       ctx.beginPath();
-  //       ctx.strokeStyle = oklchToCSS(shape.lineColor);
-  //       switch (shape.type) {
-  //         case "pencil":
-  //           if (shape.points && shape.points.length > 1) {
-  //             ctx.beginPath();
-  //             ctx.moveTo(shape.points[0]!.x, shape.points[0]!.y);
-  //             for (let i = 1; i < shape.points.length; i++) {
-  //               ctx.lineTo(shape.points[i]!.x, shape.points[i]!.y);
-  //             }
-  //             ctx.stroke();
-  //           }
-  //           break;
-  //         case "arrow":
-  //           const angle = Math.atan2(height, width);
-  //           ctx.beginPath();
-  //           ctx.moveTo(shape.startX, shape.startY);
-  //           ctx.lineTo(shape.endX, shape.endY);
-  //           ctx.stroke();
+  const dispatchWithSocket = (action: Action) => {
+    if (!wsRef.current) return;
+    dispatch(action);
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      console.log("no user Id");
+      return;
+    }
+    if (action.type === "ADD_SHAPE") {
+      let messagePayload: EventType = {
+        userId: userId,
+        type: "ADD",
+        shape: action.payload,
+      };
+      wsRef.current.send(
+        JSON.stringify({ type: "ADD_SHAPE", payload: messagePayload })
+      );
+    }
+    if (action.type === "DEL_SHAPE") {
+      let messagePayload = {
+        userId: userId,
+        type: "DEL",
+        shape: action.payload,
+      };
+      wsRef.current.send(
+        JSON.stringify({ type: "DEL_SHAPE", payload: messagePayload })
+      );
+    }
+  };
 
-  //           //Draw the arrowhead
-  //           ctx.beginPath();
-  //           ctx.moveTo(shape.endX, shape.endY);
-  //           ctx.lineTo(
-  //             shape.endX - 15 * Math.cos(angle - Math.PI / 7),
-  //             shape.endY - 15 * Math.sin(angle - Math.PI / 7)
-  //           );
-  //           ctx.stroke();
-  //           ctx.beginPath();
-  //           ctx.moveTo(shape.endX, shape.endY);
-  //           ctx.lineTo(
-  //             shape.endX - 15 * Math.cos(angle + Math.PI / 7),
-  //             shape.endY - 15 * Math.sin(angle + Math.PI / 7)
-  //           );
-  //           ctx.stroke();
-  //           break;
-  //         case "circle":
-  //           const centerX = shape.startX + width / 2;
-  //           const centerY = shape.startY + height / 2;
-  //           const radiusX = Math.abs(width / 2);
-  //           const radiusY = Math.abs(height / 2);
-  //           ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, Math.PI * 2);
-  //           ctx.stroke();
-  //           break;
-  //         case "square":
-  //           ctx.strokeRect(shape.startX, shape.startY, width, height);
-  //           break;
-  //         case "triangle":
-  //           ctx.beginPath();
-  //           ctx.moveTo(shape.endX - width / 2, shape.startY);
-  //           ctx.lineTo(shape.endX - width, shape.startY + height);
-  //           ctx.lineTo(shape.endX, shape.endY);
-  //           ctx.closePath();
-  //           ctx.stroke();
-  //           break;
-  //         case "redo":
-  //         case "undo":
-  //       }
-  //     },
-  //     [toolState]
-  //   );
+  const handleMessage = (event: any) => {
+    switch (event.type) {
+      case "ADD":
+        dispatch({ type: "ADD_SHAPE", payload: event.shape });
+        break;
+      case "DEL":
+        dispatch({ type: "DEL_SHAPE", payload: event.shape });
+        break;
+    }
+  };
+  useEffect(() => {
+    if (!enabled) return;
+    console.log("in canvas socket");
+    const token = localStorage.getItem("token");
+    const roomId = localStorage.getItem("roomId");
+    if (!token || !roomId) {
+      alert("login with email to chat");
+      return;
+    }
+    const ws = new WebSocket(
+      `${WS_BE_URL}?token=${encodeURIComponent(token)}&roomId=${roomId}`
+    );
+    wsRef.current = ws;
+    ws.onopen = () => {
+      console.log("opened connection");
+      wsRef.current?.send(
+        JSON.stringify({
+          type: "JOIN_ROOM",
+          payload: {
+            userId: "b357fe14-cf67-4c71-9a00-f6636e7a7018",
+            shape: {
+              id: "cdc51e8d-20dc-4a4c-8103-7547a1d09c5f",
+              type: "square",
+              lineWidth: 10,
+              lineColor: {
+                h: 0,
+                c: 0.15,
+                l: 0.7,
+              },
+              fillColor: {
+                h: 0,
+                c: 0.15,
+                l: 0.7,
+              },
+              startX: 286,
+              startY: 209,
+              endX: 495,
+              endY: 334,
+            },
+          },
+        })
+      );
+    };
+    ws.onmessage = (event) => {
+      handleMessage(event);
+      console.log("Event: ", event);
+    };
+    ws.onerror = (err) => console.error("WS error:", err);
+    ws.onclose = (ev) => {
+      console.log("WS closed:", ev);
+      wsRef.current?.send(
+        JSON.stringify({
+          type: "LEAVE_ROOM",
+          payload: {
+            userId: "b357fe14-cf67-4c71-9a00-f6636e7a7018",
+            shape: {
+              id: "cdc51e8d-20dc-4a4c-8103-7547a1d09c5f",
+              type: "square",
+              lineWidth: 10,
+              lineColor: {
+                h: 0,
+                c: 0.15,
+                l: 0.7,
+              },
+              fillColor: {
+                h: 0,
+                c: 0.15,
+                l: 0.7,
+              },
+              startX: 286,
+              startY: 209,
+              endX: 495,
+              endY: 334,
+            },
+          },
+        })
+      );
+    };
 
-  // useEffect(() => {
-  //   if (enabled && state.drawnShapes.length > 0) {
-  //     const roomID = useRoomID();
-  //     debounceCanvasSave.current(state.drawnShapes, roomID);
-  //   }
-  // }, [state.drawnShapes, enabled]);
+    return () => ws.close();
+  }, [enabled]);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -298,7 +329,7 @@ export const useWhiteBoard = (enabled: boolean) => {
         endX: e.clientX,
         endY: e.clientY,
       };
-      dispatch({ type: "ADD_SHAPE", payload: newShape });
+      dispatchWithSocket({ type: "ADD_SHAPE", payload: newShape });
       isDrawing.current = false;
     };
     const redrawPreviousShapes = (currentShape?: ShapeType) => {
@@ -325,8 +356,6 @@ export const useWhiteBoard = (enabled: boolean) => {
   const handleToolSelect = (toolName: ToolState["currentTool"]) => {
     console.log(toolName);
     dispatch({ type: "CHANGE_TOOL", payload: toolName });
-    // setToolState((prev) => ({ ...prev, currentTool: toolName }));
-    // console.log(state.toolState);
   };
 
   const handleColorSelect = (color: { l: number; c: number; h: number }) => {
@@ -338,32 +367,22 @@ export const useWhiteBoard = (enabled: boolean) => {
 
   const handleRedo = () => {
     dispatch({ type: "REDO" });
-    // if (state.historyIndex < state.history.length - 1) {
-    //   const newIndex = state.historyIndex + 1;
-    //   const newState = state.history[newIndex];
-    //   setDrawnShapes(newState || []);
-    //   setHistoryIndex(newIndex);
-    // }
   };
   const handleUndo = () => {
     dispatch({ type: "UNDO" });
-    // if (historyIndex > 0) {
-    //   const newIndex = historyIndex - 1;
-    //   const newState = history[newIndex];
-    //   setDrawnShapes(newState || []);
-    //   setHistoryIndex(newIndex);
-    // }
   };
 
   return {
     canvasRef,
     dispatch,
+    dispatchWithSocket,
     handleToolSelect,
     handleColorSelect,
     handleStrokeSelect,
     handleRedo,
     handleUndo,
     state,
+    wsRef,
     isDrawing,
   };
 };
