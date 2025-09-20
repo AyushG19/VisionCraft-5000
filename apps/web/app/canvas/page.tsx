@@ -6,6 +6,7 @@ import {
   Toolkit,
   toolkitProps,
   ChatBoxContainer,
+  ChatModal,
 } from "@repo/ui";
 import { useWhiteboardWithSocket } from "./hooks/useWhiteboardWithSocket";
 import { createRoom, joinRoom, login } from "./api";
@@ -74,10 +75,12 @@ const page = () => {
       {/* <Button className="absolute top-0 left-0" onClick={() => send("hii")}>
         send
       </Button> */}
+      <ChatModal wsRef={wsRef} />
+
       {inRoom ? (
         <>
           <RoomOptions />
-          <ChatBoxContainer />
+          <ChatBoxContainer wsRef={wsRef} />
         </>
       ) : (
         <JoinRoomModal verifyJoin={verifyJoin} />
@@ -93,7 +96,8 @@ const page = () => {
       </Button>
       <Button
         className="absolute top-100 left-100 bg-amber-500"
-        onClick={() =>
+        onClick={() => {
+          setInRoom(false);
           wsRef.current?.send(
             JSON.stringify({
               type: "LEAVE_ROOM",
@@ -120,8 +124,8 @@ const page = () => {
                 },
               },
             })
-          )
-        }
+          );
+        }}
       >
         leave room
       </Button>

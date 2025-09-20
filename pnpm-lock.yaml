@@ -108,9 +108,6 @@ importers:
       import:
         specifier: ^0.0.6
         version: 0.0.6
-      lucide-react:
-        specifier: ^0.503.0
-        version: 0.503.0(react@19.1.0)
       next:
         specifier: ^15.2.4
         version: 15.3.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -216,9 +213,6 @@ importers:
 
   packages/common:
     dependencies:
-      '@types/axios':
-        specifier: ^0.14.4
-        version: 0.14.4
       '@types/node':
         specifier: ^24.3.3
         version: 24.3.3
@@ -352,6 +346,9 @@ importers:
       react-hook-form:
         specifier: ^7.56.1
         version: 7.56.1(react@19.1.0)
+      react-virtuoso:
+        specifier: ^4.14.0
+        version: 4.14.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       tailwind-merge:
         specifier: ^3.2.0
         version: 3.2.0
@@ -1297,10 +1294,6 @@ packages:
   '@turbo/workspaces@2.5.2':
     resolution: {integrity: sha512-NxPRAT/mywJ6agqLuVsOag1btEUbPYacVqCndQjvkm5EN0DfjvBIYCsXA/i2Q+Z0hqX84UeIIfIXAQiXpAXZmA==}
     hasBin: true
-
-  '@types/axios@0.14.4':
-    resolution: {integrity: sha512-9JgOaunvQdsQ/qW2OPmE5+hCeUB52lQSolecrFrthct55QekhmXEwT203s20RL+UHtCQc15y3VXpby9E7Kkh/g==}
-    deprecated: This is a stub types definition. axios provides its own type definitions, so you do not need this installed.
 
   '@types/bcrypt@5.0.2':
     resolution: {integrity: sha512-6atioO8Y75fNcbmj0G7UjI9lXN2pQ/IGJ2FWT4a/btd0Lk9lQalHLKhkgKVZ3r+spnmWUKfbMi1GEe9wyHQfNQ==}
@@ -3099,6 +3092,12 @@ packages:
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
 
+  react-virtuoso@4.14.0:
+    resolution: {integrity: sha512-fR+eiCvirSNIRvvCD7ueJPRsacGQvUbjkwgWzBZXVq+yWypoH7mRUvWJzGHIdoRaCZCT+6mMMMwIG2S1BW3uwA==}
+    peerDependencies:
+      react: '>=16 || >=17 || >= 18 || >= 19'
+      react-dom: '>=16 || >=17 || >= 18 || >=19'
+
   react@19.1.0:
     resolution: {integrity: sha512-FS+XFBNvn3GTAWq26joslQgWNoFu08F4kl0J4CgdNKADkdSGXQyTCnKteIAJy96Br6YbpEU1LSzV5dYtjMkMDg==}
     engines: {node: '>=0.10.0'}
@@ -4393,12 +4392,6 @@ snapshots:
       picocolors: 1.0.1
       semver: 7.6.2
       update-check: 1.5.4
-
-  '@types/axios@0.14.4':
-    dependencies:
-      axios: 1.10.0
-    transitivePeerDependencies:
-      - debug
 
   '@types/bcrypt@5.0.2':
     dependencies:
@@ -6492,6 +6485,11 @@ snapshots:
       react: 19.1.0
 
   react-is@16.13.1: {}
+
+  react-virtuoso@4.14.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+    dependencies:
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
 
   react@19.1.0: {}
 

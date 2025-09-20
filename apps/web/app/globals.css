@@ -211,7 +211,10 @@
     font-style: normal;
   } */
   .outline-personal {
-    @apply outline outline-[1px] outline-black/50;
+    @apply outline outline-black/50;
+  }
+  .border-personal {
+    @apply border border-black/50;
   }
   .shadow-primary {
     box-shadow: 5px 5px 0px black;

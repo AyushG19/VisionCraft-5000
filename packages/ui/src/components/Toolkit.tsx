@@ -217,7 +217,7 @@ const Toolkit = ({
       style={{
         top: currPos.y,
         left: currPos.x,
-        width: `${!currWidth ? 33.5 * tools.length + (tools.length - 1) * 10 + 30 : currWidth}px`,
+        width: `${!currWidth ? 33.8 * tools.length + (tools.length - 1) * 10 + 30 : currWidth}px`,
       }}
     >
       <div ref={toolIconRef} className="flex flex-wrap w-auto gap-2.5 z-50">

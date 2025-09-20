@@ -120,8 +120,8 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
   const debounceCanvasSave = useRef(debounce(saveCanvasState, 10000));
 
   const dispatchWithSocket = (action: Action) => {
-    if (!wsRef.current) return;
     dispatch(action);
+    if (!wsRef.current) return;
     const userId = localStorage.getItem("userId");
     if (!userId) {
       console.log("no user Id");
@@ -203,7 +203,7 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
       );
     };
     ws.onmessage = (event) => {
-      handleMessage(event);
+      handleMessage(JSON.parse(event.data));
       console.log("Event: ", event);
     };
     ws.onerror = (err) => console.error("WS error:", err);

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { number, string, z } from "zod";
 
 export const CreateUserSchema = z
   .object({
@@ -93,6 +93,19 @@ export const WebSocketData = z.object({
     userId: z.string().optional(),
   }),
 });
+const ParticipantsSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+});
+const MessageSchema = z.object({
+  sender_id: z.string(),
+  timestamp_ms: z.number(),
+  content: z.string(),
+});
+export const MessageSocketSchema = z.object({
+  participants: z.array(ParticipantsSchema),
+  messages: z.array(MessageSchema),
+});
 export type LoginFormValues = z.infer<typeof LoginSchema>;
 export type SignupFormValues = z.infer<typeof CreateUserSchema>;
 export type JoinRoomValues = z.infer<typeof JoinRoomSchema>;
@@ -100,3 +113,4 @@ export type CreateRoomValues = z.infer<typeof CreateRoomSchema>;
 export type UuidType = z.infer<typeof UuidSchema>;
 export type WebSocketDataType = z.infer<typeof WebSocketData>;
 export type ShapeType = z.infer<typeof ShapeSchema>;
+export type MessageSocketType = z.infer<typeof MessageSocketSchema>;
