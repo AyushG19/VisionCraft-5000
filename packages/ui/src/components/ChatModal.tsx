@@ -1,263 +1,309 @@
-import { IconSend2, IconSlash } from "@tabler/icons-react";
+import {
+  IconChevronCompactDown,
+  IconChevronCompactRight,
+  IconChevronCompactUp,
+  IconChevronDown,
+  IconChevronsDown,
+  IconSend2,
+  IconSlash,
+} from "@tabler/icons-react";
 import React, { RefObject, useEffect, useState } from "react";
 import { Button } from "../button";
 import { Virtuoso } from "react-virtuoso";
 import MessageBubble from "./ui/MessageBubble";
+import { attachColorsToParticipants } from "../lib/colorMapper";
 interface ChatModalProps {
   wsRef: RefObject<WebSocket | null>;
 }
+interface ParticipantColor {
+  name: string;
+  color: string;
+}
 const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
   ({ wsRef }, ref) => {
+    const [isChatUp, setIsChatUp] = useState(false);
     const [placeholder, setPlaceholder] =
       useState<string>("Say hello to chat!");
+    const [participants, setParticipants] = useState([
+      { user_id: "u001", name: "Alex" },
+      { user_id: "u002", name: "Maya" },
+      { user_id: "u003", name: "Alex" },
+      { user_id: "u004", name: "Sam" },
+    ]);
     const [messages, setMessages] = useState([
       {
-        id: 1,
-        user: "Alice",
-        content: "Hey! How are you?",
+        sender_id: "u001",
+        timestamp_ms: 1744558000000,
+        content: "Hey team, are we good to start?",
       },
       {
-        id: 2,
-        user: "Bob",
-        content:
-          "I'm good, thanks! Just working on a new project that involves React Virtuoso. It's really cool!",
+        sender_id: "u002",
+        timestamp_ms: 1744558010000,
+        content: "Yes, just opening my notes.",
       },
       {
-        id: 3,
-        user: "Alice",
-        content:
-          "Oh nice! I heard Virtuoso is great for handling large lists efficiently. Are you building a chat app?",
+        sender_id: "u003",
+        timestamp_ms: 1744558020000,
+        content: "All set here.",
       },
       {
-        id: 4,
-        user: "Bob",
-        content:
-          "Yes! It's a dynamic chat interface. Users can scroll up to load older messages. Each message may have variable heights, images, or even long text paragraphs. Here's an example of a longer message to test scrolling behavior in Virtuoso:\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.",
+        sender_id: "u004",
+        timestamp_ms: 1744558030000,
+        content: "Ready to roll 👍",
       },
       {
-        id: 5,
-        user: "Alice",
-        content:
-          "Wow, that’s quite long! This should test the variable height rendering nicely.",
+        sender_id: "u001",
+        timestamp_ms: 1744558040000,
+        content: "Great. First topic: project timeline.",
       },
       {
-        id: 6,
-        user: "Bob",
-        content: "Exactly. Also, some messages might be very short.",
+        sender_id: "u002",
+        timestamp_ms: 1744558050000,
+        content: "I think we can finish phase 1 by Friday.",
       },
       {
-        id: 7,
-        user: "Alice",
-        content: "👍",
+        sender_id: "u003",
+        timestamp_ms: 1744558060000,
+        content: "Agree. I’ve already done most of the backend work.",
       },
       {
-        id: 8,
-        user: "Bob",
-        content:
-          "Here’s a medium-length message to fill the chat and test smooth scrolling and virtualization behavior in the app.",
+        sender_id: "u004",
+        timestamp_ms: 1744558070000,
+        content: "Design is 80% done; just polishing.",
       },
       {
-        id: 9,
-        user: "Alice",
-        content:
-          "Great! This should cover short, medium, and long messages for testing.",
+        sender_id: "u001",
+        timestamp_ms: 1744558080000,
+        content: "Awesome progress everyone.",
       },
       {
-        id: 10,
-        user: "Bob",
-        content:
-          "Finally, a very long message to really stress test the scroll behavior. Imagine this goes on and on, with multiple paragraphs, emojis, code snippets, or anything else a user might send in a real chat scenario.\n\n1. Bullet point one\n2. Bullet point two\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        sender_id: "u002",
+        timestamp_ms: 1744558090000,
+        content: "Should we plan a demo for Monday?",
       },
       {
-        id: 1,
-        user: "Alice",
-        content: "Hey! How are you?",
+        sender_id: "u003",
+        timestamp_ms: 1744558100000,
+        content: "Monday works for me.",
+      },
+      { sender_id: "u004", timestamp_ms: 1744558110000, content: "Same here." },
+      {
+        sender_id: "u001",
+        timestamp_ms: 1744558120000,
+        content: "Cool, I’ll schedule it.",
       },
       {
-        id: 2,
-        user: "Bob",
-        content:
-          "I'm good, thanks! Just working on a new project that involves React Virtuoso. It's really cool!",
+        sender_id: "u002",
+        timestamp_ms: 1744558130000,
+        content: "By the way, any blocker for testing?",
       },
       {
-        id: 3,
-        user: "Alice",
-        content:
-          "Oh nice! I heard Virtuoso is great for handling large lists efficiently. Are you building a chat app?",
+        sender_id: "u003",
+        timestamp_ms: 1744558140000,
+        content: "Need sample data for edge cases.",
       },
       {
-        id: 4,
-        user: "Bob",
-        content:
-          "Yes! It's a dynamic chat interface. Users can scroll up to load older messages. Each message may have variable heights, images, or even long text paragraphs. Here's an example of a longer message to test scrolling behavior in Virtuoso:\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.",
+        sender_id: "u004",
+        timestamp_ms: 1744558150000,
+        content: "I can prepare that later today.",
       },
       {
-        id: 5,
-        user: "Alice",
-        content:
-          "Wow, that’s quite long! This should test the variable height rendering nicely.",
+        sender_id: "u001",
+        timestamp_ms: 1744558160000,
+        content: "Thanks, Sam.",
       },
       {
-        id: 6,
-        user: "Bob",
-        content: "Exactly. Also, some messages might be very short.",
+        sender_id: "u002",
+        timestamp_ms: 1744558170000,
+        content: "I’ll handle docs update tonight.",
       },
       {
-        id: 7,
-        user: "Alice",
-        content: "👍",
+        sender_id: "u003",
+        timestamp_ms: 1744558180000,
+        content: "Perfect. What about deployment pipeline?",
       },
       {
-        id: 8,
-        user: "Bob",
-        content:
-          "Here’s a medium-length message to fill the chat and test smooth scrolling and virtualization behavior in the app.",
+        sender_id: "u004",
+        timestamp_ms: 1744558190000,
+        content: "Already integrated with staging.",
       },
       {
-        id: 9,
-        user: "Alice",
-        content:
-          "Great! This should cover short, medium, and long messages for testing.",
+        sender_id: "u001",
+        timestamp_ms: 1744558200000,
+        content: "👏 Great job.",
       },
       {
-        id: 10,
-        user: "Bob",
-        content:
-          "Finally, a very long message to really stress test the scroll behavior. Imagine this goes on and on, with multiple paragraphs, emojis, code snippets, or anything else a user might send in a real chat scenario.\n\n1. Bullet point one\n2. Bullet point two\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        sender_id: "u002",
+        timestamp_ms: 1744558210000,
+        content: "Do we need to optimize queries?",
       },
       {
-        id: 1,
-        user: "Alice",
-        content: "Hey! How are you?",
+        sender_id: "u003",
+        timestamp_ms: 1744558220000,
+        content: "Yes, I’ll run a profiler tomorrow.",
       },
       {
-        id: 2,
-        user: "Bob",
-        content:
-          "I'm good, thanks! Just working on a new project that involves React Virtuoso. It's really cool!",
+        sender_id: "u004",
+        timestamp_ms: 1744558230000,
+        content: "I'll assist if needed.",
       },
       {
-        id: 3,
-        user: "Alice",
-        content:
-          "Oh nice! I heard Virtuoso is great for handling large lists efficiently. Are you building a chat app?",
+        sender_id: "u001",
+        timestamp_ms: 1744558240000,
+        content: "Thanks both.",
       },
       {
-        id: 4,
-        user: "Bob",
-        content:
-          "Yes! It's a dynamic chat interface. Users can scroll up to load older messages. Each message may have variable heights, images, or even long text paragraphs. Here's an example of a longer message to test scrolling behavior in Virtuoso:\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.",
+        sender_id: "u002",
+        timestamp_ms: 1744558250000,
+        content: "Shall we also refresh our test suite?",
       },
       {
-        id: 5,
-        user: "Alice",
-        content:
-          "Wow, that’s quite long! This should test the variable height rendering nicely.",
+        sender_id: "u003",
+        timestamp_ms: 1744558260000,
+        content: "Good idea, some scripts are outdated.",
       },
       {
-        id: 6,
-        user: "Bob",
-        content: "Exactly. Also, some messages might be very short.",
+        sender_id: "u004",
+        timestamp_ms: 1744558270000,
+        content: "I’ll refactor them this week.",
       },
       {
-        id: 7,
-        user: "Alice",
-        content: "👍",
+        sender_id: "u001",
+        timestamp_ms: 1744558280000,
+        content: "Let’s prioritize that.",
       },
       {
-        id: 8,
-        user: "Bob",
-        content:
-          "Here’s a medium-length message to fill the chat and test smooth scrolling and virtualization behavior in the app.",
+        sender_id: "u002",
+        timestamp_ms: 1744558290000,
+        content: "✅ Added to tasks.",
       },
       {
-        id: 9,
-        user: "Alice",
-        content:
-          "Great! This should cover short, medium, and long messages for testing.",
+        sender_id: "u003",
+        timestamp_ms: 1744558300000,
+        content: "Thanks Maya.",
       },
       {
-        id: 10,
-        user: "Bob",
-        content:
-          "Finally, a very long message to really stress test the scroll behavior. Imagine this goes on and on, with multiple paragraphs, emojis, code snippets, or anything else a user might send in a real chat scenario.\n\n1. Bullet point one\n2. Bullet point two\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        sender_id: "u004",
+        timestamp_ms: 1744558310000,
+        content: "Should we meet mid-week to review?",
       },
       {
-        id: 1,
-        user: "Alice",
-        content: "Hey! How are you?",
+        sender_id: "u001",
+        timestamp_ms: 1744558320000,
+        content: "Yes, Wednesday afternoon?",
       },
       {
-        id: 2,
-        user: "Bob",
-        content:
-          "I'm good, thanks! Just working on a new project that involves React Virtuoso. It's really cool!",
+        sender_id: "u002",
+        timestamp_ms: 1744558330000,
+        content: "Works for me.",
+      },
+      { sender_id: "u003", timestamp_ms: 1744558340000, content: "Same." },
+      { sender_id: "u004", timestamp_ms: 1744558350000, content: "👍" },
+      {
+        sender_id: "u001",
+        timestamp_ms: 1744558360000,
+        content: "Alright, meeting locked.",
       },
       {
-        id: 3,
-        user: "Alice",
-        content:
-          "Oh nice! I heard Virtuoso is great for handling large lists efficiently. Are you building a chat app?",
+        sender_id: "u002",
+        timestamp_ms: 1744558370000,
+        content: "Anything else for today?",
       },
       {
-        id: 4,
-        user: "Bob",
-        content:
-          "Yes! It's a dynamic chat interface. Users can scroll up to load older messages. Each message may have variable heights, images, or even long text paragraphs. Here's an example of a longer message to test scrolling behavior in Virtuoso:\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.",
+        sender_id: "u003",
+        timestamp_ms: 1744558380000,
+        content: "Not from me.",
+      },
+      { sender_id: "u004", timestamp_ms: 1744558390000, content: "All good." },
+      {
+        sender_id: "u001",
+        timestamp_ms: 1744558400000,
+        content: "Okay, let's wrap.",
       },
       {
-        id: 5,
-        user: "Alice",
-        content:
-          "Wow, that’s quite long! This should test the variable height rendering nicely.",
+        sender_id: "u002",
+        timestamp_ms: 1744558410000,
+        content: "Great work folks 🎉",
       },
       {
-        id: 6,
-        user: "Bob",
-        content: "Exactly. Also, some messages might be very short.",
+        sender_id: "u003",
+        timestamp_ms: 1744558420000,
+        content: "Catch you later.",
+      },
+      { sender_id: "u004", timestamp_ms: 1744558430000, content: "Bye!" },
+      {
+        sender_id: "u001",
+        timestamp_ms: 1744558440000,
+        content: "Bye everyone.",
       },
       {
-        id: 7,
-        user: "Alice",
-        content: "👍",
+        sender_id: "u002",
+        timestamp_ms: 1744558450000,
+        content: "Logging off now.",
       },
       {
-        id: 8,
-        user: "Bob",
-        content:
-          "Here’s a medium-length message to fill the chat and test smooth scrolling and virtualization behavior in the app.",
+        sender_id: "u003",
+        timestamp_ms: 1744558460000,
+        content: "See you tomorrow.",
       },
       {
-        id: 9,
-        user: "Alice",
-        content:
-          "Great! This should cover short, medium, and long messages for testing.",
+        sender_id: "u004",
+        timestamp_ms: 1744558470000,
+        content: "Have a nice evening.",
+      },
+      { sender_id: "u001", timestamp_ms: 1744558480000, content: "You too!" },
+      {
+        sender_id: "u003",
+        timestamp_ms: 1744558490000,
+        content: "Remember to update docs before Friday.",
+      },
+      { sender_id: "u002", timestamp_ms: 1744558500000, content: "Will do!" },
+      {
+        sender_id: "u004",
+        timestamp_ms: 1744558510000,
+        content: "I’ll check staging for bugs tonight.",
       },
       {
-        id: 10,
-        user: "Bob",
-        content:
-          "Finally, a very long message to really stress test the scroll behavior. Imagine this goes on and on, with multiple paragraphs, emojis, code snippets, or anything else a user might send in a real chat scenario.\n\n1. Bullet point one\n2. Bullet point two\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        sender_id: "u001",
+        timestamp_ms: 1744558520000,
+        content: "Perfect, thanks team.",
       },
     ]);
+
+    const colotAttachedParticipants: Record<string, ParticipantColor> =
+      attachColorsToParticipants(participants);
 
     const handleMessageSend = () => {};
     return (
       <div
         ref={ref}
-        className="absolute bottom-0 right-0 m-8 py-2 flex flex-col gap-1.5 min-h-7 w-80 h-100 items-center justify-center rounded-xl z-30 bg-light_sky_blue shadow-primary outline-primary border border-personal"
+        className="absolute bottom-0 right-0 m-8 py-2 flex flex-col gap-1.5 min-h-7 w-80 h-100 items-center justify-center rounded-xl z-30 bg-light_sky_blue shadow-primary outline-primary border border-personal overflow-hidden"
       >
-        <div className="w-full h-full relative">
-          <Virtuoso
-            className={`w-full !h-86 rounded-md bg-light_sky_blue-700 border-personal `}
-            data={messages}
-            skipAnimationFrameInResizeObserver={true}
-            initialTopMostItemIndex={messages.length - 1}
-            itemContent={(index, message) => (
-              <MessageBubble index={index} message={message} />
-            )}
-          ></Virtuoso>
-        </div>
+        {isChatUp ? (
+          <IconChevronCompactUp
+            className="-m-0.5 top-0 absolute z-50"
+            size={18}
+            stroke={3}
+          />
+        ) : (
+          <div className="w-full !h-86 pb-2 relative rounded-md bg-light_sky_blue-700 border-personal ">
+            <div className="-mt-0.5 w-6 h-6 top-0 left-1/2 -translate-1/2 absolute  bg-light_sky_blue p-1 rounded-xl border border-black"></div>
+            <Virtuoso
+              className={`w-full `}
+              data={messages}
+              skipAnimationFrameInResizeObserver={true}
+              initialTopMostItemIndex={messages.length - 1}
+              itemContent={(index, message) => (
+                <MessageBubble
+                  isOwn={message.sender_id === "u001"}
+                  messageStyle={colotAttachedParticipants[message.sender_id]}
+                  index={index}
+                  message={message}
+                />
+              )}
+            ></Virtuoso>
+          </div>
+        )}
 
         <div
           draggable={false}
@@ -266,13 +312,13 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
           <div
             onMouseEnter={() => setPlaceholder("Ask AI for help!")}
             onMouseLeave={() => setPlaceholder("Say hello to chat!")}
-            className="absolute left-3 outline-personal w-6 h-6 rounded-full cursor-pointer p-1 hover:bg-light_sky_blue"
+            className="absolute left-3 outline-personal w-6 h-6 rounded-full cursor-pointer p-1 bg-light_sky_blue-700 hover:bg-light_sky_blue"
           >
             <IconSlash size={15} />
           </div>
           <input
             placeholder={placeholder}
-            className="font-[google_sans_code] placeholder:text-xs text-sm min-w-40 max-w-200 h-8 flex-1 rounded-2xl bg-light_sky_blue-700 mr-0 py-4 pr-1.5 pl-9 outline-personal "
+            className="font-[google_sans_code] placeholder:text-xs text-sm min-w-40 max-w-200 h-8 flex-1 rounded-2xl bg-white mr-0 py-4 pr-1.5 pl-9 outline-personal "
           ></input>
           <Button
             onClick={handleMessageSend}

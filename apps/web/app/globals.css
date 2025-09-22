@@ -1,4 +1,5 @@
-@import url("https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap");
+
 @import "tailwindcss";
 
 @import "tw-animate-css";
@@ -211,10 +212,10 @@
     font-style: normal;
   } */
   .outline-personal {
-    @apply outline outline-black/50;
+    @apply outline outline-black;
   }
   .border-personal {
-    @apply border border-black/50;
+    @apply border border-black;
   }
   .shadow-primary {
     box-shadow: 5px 5px 0px black;

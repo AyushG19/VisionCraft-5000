@@ -10,7 +10,7 @@ export default function RootLayout({
       <head>
         <style>
           @import
-          url('https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&display=swap');
+          url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&display=swap');
         </style>
       </head>
       <body className={`overflow-hidden`}>{children}</body>
