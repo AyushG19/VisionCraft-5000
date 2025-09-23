@@ -30,7 +30,7 @@ const ColorSelector = ({
 
   const size: number = 100;
   const center: number = size / 2;
-  const radius: number = center - 20;
+  const radius: number = center - 5;
 
   // Convert OKLCH to CSS color string
   const oklchToCSS = (l: number, c: number, h: number): string => {
@@ -86,11 +86,11 @@ const ColorSelector = ({
       const mouseUpHandler = () => handleMouseUp();
 
       window.addEventListener("mousemove", mouseMoveHandler);
-      document.addEventListener("mouseup", mouseUpHandler);
+      window.addEventListener("mouseup", mouseUpHandler);
 
       return () => {
         window.removeEventListener("mousemove", mouseMoveHandler);
-        document.removeEventListener("mouseup", mouseUpHandler);
+        window.removeEventListener("mouseup", mouseUpHandler);
       };
     }
   }, [isDragging]);
@@ -141,7 +141,7 @@ const ColorSelector = ({
 
           {/* Selected color indicator */}
           <div
-            className="absolute w-4 h-4 rounded-full border border-black pointer-events-none"
+            className="absolute w-4 h-4 aspect-square rounded-full border border-black pointer-events-none transition-all ease-linear"
             style={{
               left: selectedPosition.x - 8,
               top: selectedPosition.y - 8,

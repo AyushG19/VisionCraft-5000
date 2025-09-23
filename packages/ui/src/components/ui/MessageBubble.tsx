@@ -4,24 +4,24 @@ const MessageBubble = ({
   index,
   message,
   isOwn,
-  messageStyle,
+  // messageStyle,
 }: {
   index: number;
   message: any;
   isOwn: boolean;
-  messageStyle: any;
+  // messageStyle: any;
 }) => {
   return (
     <div
       key={index}
-      className={`${isOwn ? "bg-white ml-auto rounded-r-xs rounded-tr-xl rounded-l-xl  mr-2" : "rounded-l-xs rounded-r-xl rounded-tl-xl"} w-fit max-w-4/5 ml-2 mb-2 border-personal  px-2.5 py-1`}
+      className={`${isOwn ? "bg-white ml-auto rounded-r-xs rounded-tr-xl rounded-l-xl  mr-2" : "bg-light_sky_blue-800 rounded-l-xs rounded-r-xl rounded-tl-xl"} w-fit max-w-4/5 ml-2 mb-2 border-personal  px-2.5 py-1`}
     >
       {!isOwn && (
         <h3
           className="font-[google_sans_code] text-sm font-semibold opacity-60"
-          style={{ color: messageStyle.color }}
+          // style={{ color: messageStyle.color }}
         >
-          {messageStyle.name}
+          {message.name}
         </h3>
       )}
       <p

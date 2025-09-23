@@ -20,8 +20,9 @@ interface User {
 
 type EventType = {
   userId: string;
-  type: "ADD" | "DEL" | "UPD";
-  shape: ShapeType;
+  type: "ADD" | "DEL" | "UPD" | "CHAT";
+  shape?: ShapeType;
+  message?: string;
 };
 const users: User[] = [];
 
@@ -66,19 +67,23 @@ wss.on("connection", function connection(ws, req) {
   const decoded = check.decoded;
 
   ws.on("message", async (data) => {
-    let validatedData = WebSocketData.safeParse(parseData(data));
+    const validatedData = WebSocketData.safeParse(parseData(data));
     if (!validatedData.success || !validatedData.data.type) {
+      console.log(validatedData.data, validatedData.success);
       ws.send(JSON.stringify({ type: "ERROR", message: "Invalid data" }));
       return;
     }
     console.log(validatedData);
     const payload = validatedData.data.payload;
-    if (!payload || !payload.shape || !payload.userId) {
-      ws.send(JSON.stringify({ type: "ERROR", message: "Malformed Payload" }));
-      return;
-    }
+
     switch (validatedData.data.type) {
       case "JOIN_ROOM":
+        if (!payload || !payload.userId) {
+          ws.send(
+            JSON.stringify({ type: "ERROR", message: "Malformed Payload" })
+          );
+          return;
+        }
         try {
           const exists = await redisPub.sIsMember(
             `room:${roomId}:users`,
@@ -117,6 +122,12 @@ wss.on("connection", function connection(ws, req) {
         break;
 
       case "LEAVE_ROOM":
+        if (!payload || !payload.userId) {
+          ws.send(
+            JSON.stringify({ type: "ERROR", message: "Malformed Payload" })
+          );
+          return;
+        }
         try {
           await redisPub.sRem(`room:${roomId}:users`, payload.userId);
           ws.close(1000);
@@ -145,24 +156,46 @@ wss.on("connection", function connection(ws, req) {
         }
         break;
 
-      // case "CHAT":
-      //   const messagePayload = {
-      //     userId: decoded.userId,
-      //     message: validatedData.data.message,
-      //   };
-      //   try {
-      //     const result = await redisPub.publish(
-      //       `room:${roomId}:users`,
-      //       JSON.stringify(messagePayload)
-      //     );
-      //     ws.send(JSON.stringify({ status: "published", result }));
-      //   } catch (error) {
-      //     console.log("error in publish : ", error);
-      //   } finally {
-      //     return;
-      //   }
+      case "CHAT":
+        if (!payload || !payload.userId) {
+          ws.send(
+            JSON.stringify({ type: "ERROR", message: "Malformed Payload" })
+          );
+          return;
+        }
+        try {
+          await redisPub.hSet(
+            `room:${roomId}:chats`,
+            payload.userId,
+            JSON.stringify(payload.message)
+          );
+          const event: EventType = {
+            type: "CHAT",
+            userId: payload.userId,
+            message: payload.message,
+          };
+          await redisPub.publish(
+            `room:${roomId}:events`,
+            JSON.stringify(event)
+          );
+          ws.send(
+            JSON.stringify({
+              type: "INFO",
+              message: "Succesfully published message",
+            })
+          );
+        } catch (error) {
+          console.log("error in chat : ", error);
+        }
+        break;
 
       case "ADD_SHAPE":
+        if (!payload || !payload.shape || !payload.userId) {
+          ws.send(
+            JSON.stringify({ type: "ERROR", message: "Malformed Payload" })
+          );
+          return;
+        }
         try {
           await redisPub.hSet(
             `room:${roomId}:shapes`,

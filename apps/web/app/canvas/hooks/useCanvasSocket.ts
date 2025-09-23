@@ -4,7 +4,6 @@ import { useWhiteBoard } from "./useWhiteBoard";
 
 export function useCanvasSocket(enabled: boolean) {
   const wsRef = useRef<WebSocket | null>(null);
-  const [messages, setMessages] = useState<string[]>([]);
   const { state, dispatch } = useWhiteBoard(enabled);
   const send = (message: string) => {
     if (!wsRef.current) return;
@@ -43,5 +42,5 @@ export function useCanvasSocket(enabled: boolean) {
 
     return () => ws.close();
   }, [enabled]);
-  return { send, messages };
+  return { send };
 }
