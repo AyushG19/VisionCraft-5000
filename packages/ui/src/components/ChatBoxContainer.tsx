@@ -2,11 +2,16 @@
 import React, { RefObject, useEffect, useRef, useState } from "react";
 import ChatModal from "./ChatModal";
 import { useFetchChat } from "@repo/common/api";
+import { Message } from "./types";
 
 const ChatBoxContainer = ({
   wsRef,
+  messages,
+  setMessages,
 }: {
   wsRef: RefObject<WebSocket | null>;
+  messages: Message;
+  setMessages: React.Dispatch<Message>;
 }) => {
   const [chatVisible, setChatVisible] = useState<boolean>(false);
   const fetchChatHistory = async () => {

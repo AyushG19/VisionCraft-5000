@@ -16,7 +16,6 @@ import { drawShape } from "./utils/drawing";
 
 const page = () => {
   const [inRoom, setInRoom] = useState(false);
-  const [inChat, setInChat] = useState(false);
   // const { send, messages } = useCanvasSocket(inRoom);
 
   const {
@@ -30,8 +29,9 @@ const page = () => {
     isDrawing,
     canvasDispatch,
     wsRef,
+    messages,
   } = useWhiteboardWithSocket(inRoom);
-  useEffect(() => {}, [state.drawnShapes]);
+
   const verifyJoin = async (code: string) => {
     if (canvasRef.current) {
       const ctx = canvasRef.current.getContext("2d");
@@ -74,12 +74,16 @@ const page = () => {
       {/* <Button className="absolute top-0 left-0" onClick={() => send("hii")}>
         send
       </Button> */}
-      {/* <ChatModal wsRef={wsRef} /> */}
 
       {inRoom ? (
         <>
           <RoomOptions />
-          <ChatBoxContainer wsRef={wsRef} />
+          <ChatModal messages={messages} wsRef={wsRef} />
+          {/* <ChatBoxContainer
+            // messages={messages}
+            // setMessage={setMessages}
+            wsRef={wsRef}
+          /> */}
         </>
       ) : (
         <JoinRoomModal verifyJoin={verifyJoin} />

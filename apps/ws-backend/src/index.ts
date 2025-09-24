@@ -12,19 +12,13 @@ import { redisPub, redisSub } from "@repo/db/redis";
 const wss = new WebSocketServer({ port: 3001 });
 console.log("ready");
 
-interface User {
-  ws: WebSocket;
-  rooms: string[];
-  userId: string;
-}
-
 type EventType = {
   userId: string;
   type: "ADD" | "DEL" | "UPD" | "CHAT";
   shape?: ShapeType;
   message?: string;
 };
-const users: User[] = [];
+const roomSocket: Map<string, Map<string, WebSocket>> = new Map();
 
 console.log(process.env.REDIS_PASS);
 
@@ -53,11 +47,7 @@ wss.on("connection", function connection(ws, req) {
 
   const check = verifyToken(token);
   console.log(check);
-  if (
-    !check.valid ||
-    check.decoded === undefined ||
-    typeof check.decoded === "string"
-  ) {
+  if (!check.valid || !check.decoded || typeof check.decoded === "string") {
     ws.close();
     return null;
   }
@@ -85,11 +75,7 @@ wss.on("connection", function connection(ws, req) {
           return;
         }
         try {
-          const exists = await redisPub.sIsMember(
-            `room:${roomId}:users`,
-            payload.userId
-          );
-          if (exists) {
+          if (roomSocket.get(roomId)?.has(payload.userId)) {
             ws.send(
               JSON.stringify({
                 type: "INFO",
@@ -98,11 +84,18 @@ wss.on("connection", function connection(ws, req) {
             );
             return;
           }
-          await redisPub.sAdd(`room:${roomId}:users`, payload.userId);
+          if (!roomSocket.has(roomId)) {
+            roomSocket.set(roomId, new Map());
+          }
+          roomSocket.get(roomId)?.set(decoded.userId!, ws);
           await redisSub.subscribe(`room:${roomId}:events`, (message) => {
             const parsedMessage: EventType = JSON.parse(message);
-            if (parsedMessage.userId === decoded.userId) return;
-            ws.send(JSON.stringify(parsedMessage));
+            const roomUsers = roomSocket.get(roomId);
+            if (!roomUsers) return;
+            for (const [userId, userSocket] of roomUsers) {
+              if (parsedMessage.userId === userId) return;
+              userSocket.send(JSON.stringify(parsedMessage));
+            }
           });
           ws.send(
             JSON.stringify({
@@ -225,6 +218,14 @@ wss.on("connection", function connection(ws, req) {
           );
         }
         break;
+    }
+  });
+  ws.on("close", () => {
+    const userSocket = roomSocket.get(roomId);
+    if (!userSocket || !decoded.userId) return;
+    userSocket.delete(decoded.userId);
+    if (userSocket.size === 0) {
+      roomSocket.delete(roomId);
     }
   });
 

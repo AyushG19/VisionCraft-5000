@@ -1,4 +1,4 @@
-interface CustomUserPayload {
+export default interface CustomUserPayload {
   userId?: string;
   role?: string;
   roomId?: string;
@@ -6,5 +6,3 @@ interface CustomUserPayload {
   iat?: number;
   exp?: number;
 }
-
-export type UserPayload = CustomUserPayload;

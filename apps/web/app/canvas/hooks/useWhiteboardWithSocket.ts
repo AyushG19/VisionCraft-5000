@@ -1,8 +1,8 @@
 "use client";
 import { ToolState } from "@repo/common/toolState";
-import React, { useRef, useEffect, useReducer } from "react";
+import React, { useRef, useEffect, useReducer, useState } from "react";
 import oklchToCSS from "../utils/oklchToCss";
-import { Action, State } from "../types/index";
+import { Action, Message, State } from "../types/index";
 import { type ShapeType } from "@repo/common/types";
 import { drawShape } from "../utils/drawing";
 import debounce from "../utils/debounce";
@@ -115,6 +115,7 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
       brushSize: 10,
     },
   };
+  const [messages, setMessages] = useState<Message[] | []>([]);
 
   const [state, canvasDispatch] = useReducer(canvasReducer, initState);
   const debounceCanvasSave = useRef(debounce(saveCanvasState, 10000));
@@ -156,6 +157,9 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
         break;
       case "DEL":
         canvasDispatch({ type: "DEL_SHAPE", payload: event.shape });
+        break;
+      case "CHAT":
+        setMessages((prev) => [...prev, event.message]);
         break;
     }
   };
@@ -344,5 +348,6 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
     state,
     wsRef,
     isDrawing,
+    messages,
   };
 };

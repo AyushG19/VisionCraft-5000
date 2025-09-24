@@ -1,3 +1,4 @@
+import { RefObject } from "react";
 import { ToolState } from "@repo/common/toolState";
 import { ShapeType } from "@repo/common/types";
 
@@ -23,3 +24,15 @@ export type Action =
   | { type: "CHANGE_TOOL"; payload: ToolState["currentTool"] }
   | { type: "CHANGE_COLOR"; payload: ToolState["currentColor"] }
   | { type: "CHANGE_BRUSHSIZE"; payload: ToolState["brushSize"] };
+
+export interface Message {
+  sender_id: string;
+  name: string;
+  timestamp_ms: Date;
+  content: string;
+}
+export interface ChatModalProps {
+  wsRef: RefObject<WebSocket | null>;
+  messages: Message[];
+  setMessages: React.Dispatch<React.SetStateAction<never[]>>;
+}

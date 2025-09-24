@@ -9,23 +9,14 @@ import { Button } from "../button";
 import { Virtuoso } from "react-virtuoso";
 import MessageBubble from "./ui/MessageBubble";
 import { attachColorsToParticipants } from "../lib/colorMapper";
-interface ChatModalProps {
-  wsRef: RefObject<WebSocket | null>;
-  pastMessages: Message[];
-}
-interface Message {
-  sender_id: string;
-  name: string;
-  timestamp_ms: Date;
-  content: string;
-}
+import { ChatModalProps, Message } from "./types";
+
 const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
-  ({ wsRef, pastMessages }, ref) => {
+  ({ wsRef, messages }, ref) => {
     const [isChatUp, setIsChatUp] = useState(false);
     const [placeholder, setPlaceholder] =
       useState<string>("Say hello to chat!");
     const [inputText, setInputText] = useState<string>("");
-    const [messages, setMessages] = useState<Message[]>([]);
     // const [participants, setParticipants] = useState([
     //   { user_id: "u001", name: "Alex" },
     //   { user_id: "u002", name: "Maya" },
