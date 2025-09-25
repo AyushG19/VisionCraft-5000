@@ -75,7 +75,7 @@ wss.on("connection", function connection(ws, req) {
           return;
         }
         try {
-          if (roomSocket.get(roomId)?.has(payload.userId)) {
+          if (roomSocket.get(roomId)?.has(decoded.userId!)) {
             ws.send(
               JSON.stringify({
                 type: "INFO",
@@ -86,17 +86,21 @@ wss.on("connection", function connection(ws, req) {
           }
           if (!roomSocket.has(roomId)) {
             roomSocket.set(roomId, new Map());
+            await redisSub.subscribe(`room:${roomId}:events`, (message) => {
+              const parsedMessage: EventType = JSON.parse(message);
+              const roomUsers = roomSocket.get(roomId);
+              if (!roomUsers) {
+                console.log("returning from callback no roomUsers");
+                return;
+              }
+              for (const [userId, userSocket] of roomUsers) {
+                if (parsedMessage.userId === userId) continue;
+                userSocket.send(JSON.stringify(parsedMessage));
+              }
+            });
           }
           roomSocket.get(roomId)?.set(decoded.userId!, ws);
-          await redisSub.subscribe(`room:${roomId}:events`, (message) => {
-            const parsedMessage: EventType = JSON.parse(message);
-            const roomUsers = roomSocket.get(roomId);
-            if (!roomUsers) return;
-            for (const [userId, userSocket] of roomUsers) {
-              if (parsedMessage.userId === userId) return;
-              userSocket.send(JSON.stringify(parsedMessage));
-            }
-          });
+
           ws.send(
             JSON.stringify({
               type: "INFO",

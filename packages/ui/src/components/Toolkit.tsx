@@ -2,9 +2,11 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ToolIcon } from "./ui/ToolIcon";
 import {
+  Icon,
   IconGripVertical,
   IconLocation,
   IconPointer,
+  IconProps,
 } from "@tabler/icons-react";
 import {
   IconArrowBackUp,
@@ -18,6 +20,7 @@ import {
 } from "@tabler/icons-react";
 import type { ToolState } from "@repo/common/toolState";
 import ColorBoxes from "./ui/ColorBoxes";
+import { type ShapeType } from "@repo/common/types";
 
 interface Shape {
   type: ToolState["currentTool"];
@@ -31,21 +34,25 @@ interface Shape {
   points?: { x: number; y: number }[];
 }
 type State = {
-  drawnShapes: Shape[];
+  drawnShapes: ShapeType[];
   history: Shape[][];
   historyIndex: number;
   toolState: ToolState;
 };
-const tools = [
-  { id: "select" as const, icon: IconPointer, label: "select" },
-  { id: "circle" as const, icon: IconCircle, label: "circle" },
-  { id: "square" as const, icon: IconSquare, label: "square" },
-  { id: "triangle" as const, icon: IconTriangle, label: "triangle" },
-  { id: "arrow" as const, icon: IconTrendingUp, label: "arrow" },
-  { id: "pencil" as const, icon: IconPencilMinus, label: "pencil" },
-  { id: "color" as const, icon: IconDropletFilled, label: "color" },
-  { id: "undo" as const, icon: IconArrowBackUp, label: "undo" },
-  { id: "redo" as const, icon: IconArrowForwardUp, label: "redo" },
+const tools: {
+  id: ShapeType["type"];
+  icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<Icon>>;
+  label: string;
+}[] = [
+  { id: "SELECT" as const, icon: IconPointer, label: "select" },
+  { id: "CIRCLE" as const, icon: IconCircle, label: "circle" },
+  { id: "SQUARE" as const, icon: IconSquare, label: "square" },
+  { id: "TRIANGLE" as const, icon: IconTriangle, label: "triangle" },
+  { id: "ARROW" as const, icon: IconTrendingUp, label: "arrow" },
+  { id: "PENCIL" as const, icon: IconPencilMinus, label: "pencil" },
+  { id: "COLOR" as const, icon: IconDropletFilled, label: "color" },
+  { id: "UNDO" as const, icon: IconArrowBackUp, label: "undo" },
+  { id: "REDO" as const, icon: IconArrowForwardUp, label: "redo" },
 ];
 type toolkitProps = {
   toolState: State["toolState"];
@@ -230,9 +237,9 @@ const Toolkit = ({
               onSelectColor={handleColorSelect}
               onSelectStroke={handleStrokeSelect}
               onSelectTool={
-                tool.id !== "undo" && tool.id !== "redo"
+                tool.id !== "UNDO" && tool.id !== "REDO"
                   ? handleToolSelect
-                  : tool.id === "redo"
+                  : tool.id === "REDO"
                     ? handleRedo
                     : handleUndo
               }

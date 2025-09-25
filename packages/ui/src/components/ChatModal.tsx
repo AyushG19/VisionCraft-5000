@@ -281,22 +281,30 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
     return (
       <div
         ref={ref}
-        className={`-translate-x-5 absolute bottom-0 right-0 m-8 py-2 flex flex-col gap-1.5 min-h-7 w-80 ${isChatUp ? "-translate-y-5 h-120" : " h-fit"} items-center justify-center rounded-xl z-30 bg-light_sky_blue shadow-primary outline-primary border border-personal overflow-hidden transition-transform ease-in-out duration-300`}
+        className={`-translate-x-5 absolute bottom-0 right-0 m-8 flex flex-col min-h-7 w-80 ${isChatUp ? "-translate-y-5 h-120" : " h-fit"} items-center justify-center rounded-xl z-30 bg-light_sky_blue shadow-primary border border-personal overflow-hidden transition-transform ease-in-out duration-300`}
       >
         <div
           onClick={() => setIsChatUp((prev) => !prev)}
-          className={`flex items-center justify-center w-6 h-3 rounded-b-full top-2 left-1/2 -translate-x-1/2 absolute bg-light_sky_blue ${isChatUp ? "rounded-xl border-t-0 border border-black" : undefined} z-30 cursor-pointer `}
+          className={`flex items-center justify-center w-7 h-5 rounded-b-full top-0 left-1/2 -translate-x-1/2 absolute bg-light_sky_blue opacity-60 hover:opacity-100 group transition-all ease-in ${isChatUp ? "rounded-xl border-t-0 border border-black" : undefined} z-30 cursor-pointer `}
         >
           {isChatUp ? (
-            <IconChevronsDown className=" mb-2" size={15} stroke={2} />
+            <IconChevronsDown
+              className="hover:animate-bounce hover:m-0 repeat-infinite mb-1"
+              size={15}
+              stroke={2}
+            />
           ) : (
-            <IconChevronsUp className=" mb-2" size={15} stroke={2} />
+            <IconChevronsUp
+              className="hover:animate-bounce hover:m-0 repeat-infinite mb-1"
+              size={15}
+              stroke={2}
+            />
           )}
         </div>
 
         {isChatUp && (
           <div
-            className={`w-full relative !h-105.5 pb-2 rounded-md z-10 bg-light_sky_blue-700 border-personal`}
+            className={`w-full relative !h-full pb-2 rounded-md z-10 bg-light_sky_blue-700 border-personal`}
           >
             <svg className=" absolute top-0 left-0 w-full h-full bg-[url('/pattern-2.svg')] bg-center opacity-20"></svg>
             <Virtuoso
@@ -318,7 +326,7 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
 
         <div
           draggable={false}
-          className="px-2 reltative flex w-full gap-1.5 mt-auto items-center justify-center overflow-visible"
+          className="p-2 reltative flex w-full gap-1.5 mt-auto items-center justify-center overflow-visible"
         >
           <div
             onMouseEnter={() => setPlaceholder("Ask AI for help!")}
@@ -339,7 +347,7 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
               handleMessageSend();
               setInputText("");
             }}
-            className={`translate-x-0 rounded-full aspect-square p-0 w-7 h-7 ml-0 items-center justify-center flex shadow-pressed ${!isChatUp && " rotate-90 shadow-none"} transition-all ease-in`}
+            className={`translate-x-0 rounded-full aspect-square p-0 w-7 h-7 items-center justify-center flex shadow-pressed ${!isChatUp && " rotate-90 shadow-none"} transition-all ease-in`}
             size={"sm"}
           >
             <IconSend2 fill="black" size={18} stroke={1} color="" />

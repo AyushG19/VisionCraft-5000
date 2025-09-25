@@ -9,110 +9,32 @@ import debounce from "../utils/debounce";
 import { saveCanvasState } from "../api";
 import { WS_BE_URL } from "config";
 import canvasReducer from "../utils/canvasReducer";
+import isClickOnShape from "../utils/isPointInShape";
+import redrawPreviousShapes from "../utils/redrawPreviousShapes";
+import resizeCanvas from "../utils/canvasResizeHelper";
 type EventType = {
   userId: string;
   type: "ADD" | "DEL" | "UPD";
   shape: ShapeType;
 };
-// function reducer(state: State, action: Action): State {
-//   switch (action.type) {
-//     case "INITIALIZE_BOARD":
-//       return {
-//         ...state,
-//         drawnShapes: action.payload,
-//       };
-//     case "DEL_SHAPE":
-//       return {
-//         ...state,
-//         drawnShapes: state.drawnShapes.filter(
-//           (shape) => shape.id !== action.payload.id
-//         ),
-//       };
-//     case "ADD_SHAPE":
-//       const previousHistory = state.history.slice(0, state.historyIndex + 1);
-//       const newCanvasState = [...state.drawnShapes, action.payload];
-
-//       return {
-//         ...state,
-//         drawnShapes: newCanvasState,
-//         history: [...previousHistory, newCanvasState],
-//         historyIndex: previousHistory.length,
-//       };
-//     case "UPDATE_PENCIL":
-//       const currentPos = action.payload;
-//       const lastShapeIndex = state.drawnShapes.length - 1;
-//       const lastShape = state.drawnShapes[lastShapeIndex];
-//       if (!lastShape) return state;
-//       const updatedPoints = [...(lastShape.points || []), currentPos];
-//       return {
-//         ...state,
-//         drawnShapes: [
-//           ...state.drawnShapes.slice(0, lastShapeIndex),
-//           {
-//             ...lastShape,
-//             points: updatedPoints,
-//             endX: currentPos.x,
-//             endY: currentPos.y,
-//           },
-//         ],
-//       };
-
-//     case "REDO":
-//       if (state.historyIndex < state.history.length - 1) {
-//         const newIndex = state.historyIndex + 1;
-//         const newState = state.history[newIndex];
-//         return {
-//           ...state,
-//           drawnShapes: newState || [],
-//           historyIndex: newIndex,
-//         };
-//       }
-//       return state;
-//     case "UNDO":
-//       if (state.historyIndex > 0) {
-//         const newIndex = state.historyIndex - 1;
-//         const newState = state.history[newIndex];
-//         return {
-//           ...state,
-//           drawnShapes: newState || [],
-//           historyIndex: newIndex,
-//         };
-//       }
-//       return state;
-//     case "CHANGE_TOOL":
-//       return {
-//         ...state,
-//         toolState: { ...state.toolState, currentTool: action.payload },
-//       };
-//     case "CHANGE_COLOR":
-//       return {
-//         ...state,
-//         toolState: { ...state.toolState, currentColor: action.payload },
-//       };
-//     case "CHANGE_BRUSHSIZE":
-//       return {
-//         ...state,
-//         toolState: { ...state.toolState, brushSize: action.payload },
-//       };
-//     default:
-//       return state;
-//   }
-// }
+const pencilIcon =
+  "data:image/svg+xml,%3Csvg%20%20xmlns=%22http://www.w3.org/2000/svg%22%20%20width=%2220%22%20%20height=%2220%22%20%20viewBox=%220%200%2024%2024%22%20%20fill=%22none%22%20%20stroke=%22white%22%20%20stroke-width=%222%22%20%20stroke-linecap=%22round%22%20%20stroke-linejoin=%22round%22%20%20class=%22icon%20icon-tabler%20icons-tabler-outline%20icon-tabler-pencil%22%3E%3Cpath%20stroke=%22none%22%20d=%22M0%200h24v24H0z%22%20fill=%22none%22/%3E%3Cpath%20d=%22M4%2020h4l10.5%20-10.5a2.828%202.828%200%201%200%20-4%20-4l-10.5%2010.5v4%22%20/%3E%3Cpath%20d=%22M13.5%206.5l4%204%22%20/%3E%3C/svg%3E";
 
 export const useWhiteboardWithSocket = (enabled: boolean) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const startPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const isDrawing = useRef<boolean>(false);
   const wsRef = useRef<WebSocket | null>(null);
+  const crosshairTools = ["SQUARE", "CIRCLE", "ARROW", "TRIANGLE"];
 
   const initState: State = {
     drawnShapes: [],
     history: [[]],
     historyIndex: 0,
     toolState: {
-      currentTool: "none",
+      currentTool: "SELECT",
       currentColor: { l: 0.7, c: 0.1, h: 0 },
-      brushSize: 10,
+      brushSize: 2,
     },
   };
   const [messages, setMessages] = useState<Message[] | []>([]);
@@ -211,19 +133,31 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+    if (crosshairTools.includes(state.toolState.currentTool)) {
+      canvas.style.cursor = "crosshair";
+    } else if (state.toolState.currentTool === "PENCIL") {
+      canvas.style.cursor = `url(${pencilIcon}) 3 20 ,auto`;
+    }
 
-    const dpr = window.devicePixelRatio || 1;
+    resizeCanvas(
+      canvas,
+      ctx,
+      () => redrawPreviousShapes(ctx, state.drawnShapes),
+      state.toolState
+    );
+    const handleResize = () => {
+      resizeCanvas(
+        canvas,
+        ctx,
+        () => redrawPreviousShapes(ctx, state.drawnShapes),
+        state.toolState
+      );
+    };
 
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-
-    ctx.scale(dpr, dpr);
-
-    ctx.lineWidth = 2;
     ctx.strokeStyle = oklchToCSS(state.toolState.currentColor);
 
     const getMousePos = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
       return {
         x: e.clientX - rect.left,
         y: e.clientY - rect.top,
@@ -231,17 +165,15 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
     };
 
     const onMouseDown = (e: MouseEvent) => {
-      if (!startPos.current) return;
-
+      if (state.toolState.currentTool === "SELECT") return;
       isDrawing.current = true;
       startPos.current = getMousePos(e);
-      if (state.toolState.currentTool === "pencil") {
+      if (state.toolState.currentTool === "PENCIL") {
         let newShape = {
           id: crypto.randomUUID(),
           type: state.toolState.currentTool,
           lineWidth: state.toolState.brushSize,
           lineColor: state.toolState.currentColor,
-          fillColor: state.toolState.currentColor,
           startX: startPos.current.x,
           startY: startPos.current.y,
           endX: startPos.current.x,
@@ -253,18 +185,26 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
     };
 
     const onMouseMove = (e: MouseEvent) => {
-      if (!isDrawing.current || !startPos.current) return;
+      if (!canvasRef.current) return;
+      if (state.toolState.currentTool === "SELECT") {
+        const clickedShape = state.drawnShapes.find((shape) =>
+          isClickOnShape(getMousePos(e), shape)
+        );
+
+        canvasRef.current.style.cursor = clickedShape ? "move" : "default";
+        return;
+      }
+      if (!isDrawing.current) return;
 
       const currentPos = getMousePos(e);
       console.log(state.toolState.currentTool);
 
-      if (state.toolState.currentTool !== "pencil") {
-        redrawPreviousShapes({
+      if (state.toolState.currentTool !== "PENCIL") {
+        redrawPreviousShapes(ctx, state.drawnShapes, {
           id: crypto.randomUUID(),
           type: state.toolState.currentTool,
           lineWidth: state.toolState.brushSize,
           lineColor: state.toolState.currentColor,
-          fillColor: state.toolState.currentColor,
           startX: startPos.current.x,
           startY: startPos.current.y,
           endX: currentPos.x,
@@ -276,44 +216,42 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
     };
 
     const onMouseUp = (e: MouseEvent) => {
-      if (!startPos.current) return;
-      if (
-        state.toolState.currentTool === "none" ||
-        state.toolState.currentTool === "select"
-      )
+      if (!isDrawing.current) return;
+      if (state.toolState.currentTool === "SELECT") {
+        isDrawing.current = false;
         return;
+      }
+      const currentPos = getMousePos(e);
+
       const newShape = {
         id: crypto.randomUUID(),
         type: state.toolState.currentTool,
         lineWidth: state.toolState.brushSize,
         lineColor: state.toolState.currentColor,
-        fillColor: state.toolState.currentColor,
         startX: startPos.current.x,
         startY: startPos.current.y,
-        endX: e.clientX,
-        endY: e.clientY,
+        endX: currentPos.x,
+        endY: currentPos.y,
       };
+      console.log("adding a shape");
       dispatchWithSocket({ type: "ADD_SHAPE", payload: newShape });
       isDrawing.current = false;
+      state.toolState.currentTool = "SELECT";
     };
-    const redrawPreviousShapes = (currentShape?: ShapeType) => {
-      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-      state.drawnShapes.forEach((shape) => drawShape(ctx, shape));
-      if (currentShape) {
-        drawShape(ctx, currentShape);
-      }
-    };
-    redrawPreviousShapes();
+
+    redrawPreviousShapes(ctx, state.drawnShapes);
     console.log(state.drawnShapes);
 
     canvas.addEventListener("mousedown", onMouseDown);
     window.addEventListener("mousemove", onMouseMove);
-    canvas.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("resize", handleResize);
 
     return () => {
       canvas.removeEventListener("mousedown", onMouseDown);
       window.removeEventListener("mousemove", onMouseMove);
-      canvas.removeEventListener("mouseup", onMouseUp);
+      window.removeEventListener("mouseup", onMouseUp);
+      window.removeEventListener("resize", handleResize);
     };
   }, [state.toolState, state]);
 

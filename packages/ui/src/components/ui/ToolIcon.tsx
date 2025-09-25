@@ -60,9 +60,9 @@ const ToolIcon = React.forwardRef<HTMLDivElement, ToolIconProps>(
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             ref={ref}
-            className={`w-9 h-9 p-2.5 flex items-center justify-center cursor-pointer z-10 shadow-primary rounded-lg bg-uranian_blue outline-personal hover:scale-[103%] ${toolInfo.id !== "color" && isSelected && "shadow-pressed ml-0.5 mt-0.5 "} transition-all ease-in`}
+            className={`w-9 h-9 p-2.5 flex items-center justify-center cursor-pointer z-10 shadow-primary rounded-lg bg-uranian_blue outline-personal hover:scale-[103%] ${toolInfo.id !== "COLOR" && isSelected && "shadow-pressed ml-0.5 mt-0.5 "} transition-all ease-in`}
           >
-            {toolInfo.id === "color" && isHovered && (
+            {toolInfo.id === "COLOR" && isHovered && (
               <ColorSelector
                 selectedColor={pickedColor}
                 setSelectedColor={setPickedColor}
@@ -70,15 +70,15 @@ const ToolIcon = React.forwardRef<HTMLDivElement, ToolIconProps>(
             )}
             <toolInfo.icon
               color={
-                toolInfo.id === "color"
+                toolInfo.id === "COLOR"
                   ? `oklch(${pickedColor.l} ${pickedColor.c} ${pickedColor.h}`
                   : "black"
               }
             />
           </div>
         </TooltipTrigger>
-        {!(toolInfo.id === "color") && (
-          <TooltipContent>{toolInfo.id}</TooltipContent>
+        {!(toolInfo.id === "COLOR") && (
+          <TooltipContent>{toolInfo.label}</TooltipContent>
         )}
       </Tooltip>
     );

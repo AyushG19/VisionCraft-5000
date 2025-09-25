@@ -1,15 +1,14 @@
 export type ToolState = {
   currentTool:
-    | "select"
-    | "circle"
-    | "square"
-    | "triangle"
-    | "arrow"
-    | "color"
-    | "pencil"
-    | "undo"
-    | "redo"
-    | "none";
+    | "SELECT"
+    | "CIRCLE"
+    | "SQUARE"
+    | "TRIANGLE"
+    | "ARROW"
+    | "COLOR"
+    | "PENCIL"
+    | "UNDO"
+    | "REDO";
   currentColor: { l: number; c: number; h: number };
   brushSize: number;
 };

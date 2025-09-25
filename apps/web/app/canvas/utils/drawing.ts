@@ -1,14 +1,14 @@
 import { useCallback } from "react";
-import { Shape } from "../types";
 import oklchToCSS from "./oklchToCss";
+import { type ShapeType } from "@repo/common/types";
 
-export const drawShape = (ctx: CanvasRenderingContext2D, shape: Shape) => {
+export const drawShape = (ctx: CanvasRenderingContext2D, shape: ShapeType) => {
   const width = shape.endX - shape.startX;
   const height = shape.endY - shape.startY;
   ctx.beginPath();
   ctx.strokeStyle = oklchToCSS(shape.lineColor);
   switch (shape.type) {
-    case "pencil":
+    case "PENCIL":
       if (shape.points && shape.points.length > 1) {
         ctx.beginPath();
         ctx.moveTo(shape.points[0]!.x, shape.points[0]!.y);
@@ -18,7 +18,7 @@ export const drawShape = (ctx: CanvasRenderingContext2D, shape: Shape) => {
         ctx.stroke();
       }
       break;
-    case "arrow":
+    case "ARROW":
       const angle = Math.atan2(height, width);
       ctx.beginPath();
       ctx.moveTo(shape.startX, shape.startY);
@@ -41,7 +41,7 @@ export const drawShape = (ctx: CanvasRenderingContext2D, shape: Shape) => {
       );
       ctx.stroke();
       break;
-    case "circle":
+    case "CIRCLE":
       const centerX = shape.startX + width / 2;
       const centerY = shape.startY + height / 2;
       const radiusX = Math.abs(width / 2);
@@ -49,10 +49,10 @@ export const drawShape = (ctx: CanvasRenderingContext2D, shape: Shape) => {
       ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, Math.PI * 2);
       ctx.stroke();
       break;
-    case "square":
+    case "SQUARE":
       ctx.strokeRect(shape.startX, shape.startY, width, height);
       break;
-    case "triangle":
+    case "TRIANGLE":
       ctx.beginPath();
       ctx.moveTo(shape.endX - width / 2, shape.startY);
       ctx.lineTo(shape.endX - width, shape.startY + height);
@@ -60,7 +60,7 @@ export const drawShape = (ctx: CanvasRenderingContext2D, shape: Shape) => {
       ctx.closePath();
       ctx.stroke();
       break;
-    case "redo":
-    case "undo":
+    case "REDO":
+    case "UNDO":
   }
 };
