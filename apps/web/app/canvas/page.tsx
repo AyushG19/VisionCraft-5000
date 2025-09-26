@@ -25,7 +25,7 @@ const page = () => {
     handleRedo,
     handleUndo,
     canvasRef,
-    state,
+    canvasState,
     isDrawing,
     canvasDispatch,
     wsRef,
@@ -52,14 +52,14 @@ const page = () => {
     }
   };
   const makeNewRoom = async () => {
-    const res: AxiosResponse = await createRoom(state.drawnShapes);
+    const res: AxiosResponse = await createRoom(canvasState.drawnShapes);
     setInRoom(true);
   };
   const toolkitProps: toolkitProps = {
     handleColorSelect,
     handleStrokeSelect,
     handleToolSelect,
-    toolState: state.toolState,
+    toolState: canvasState.toolState,
     handleRedo,
     handleUndo,
   };

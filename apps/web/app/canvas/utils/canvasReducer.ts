@@ -1,5 +1,8 @@
-import { Action, State } from "../types/index";
-export default function canvasReducer(state: State, action: Action): State {
+import { Action, CanvasState } from "../types/index";
+export default function canvasReducer(
+  state: CanvasState,
+  action: Action
+): CanvasState {
   switch (action.type) {
     case "INITIALIZE_BOARD":
       return {
@@ -79,6 +82,33 @@ export default function canvasReducer(state: State, action: Action): State {
         ...state,
         toolState: { ...state.toolState, brushSize: action.payload },
       };
+    case "MOVE": {
+      const { newStartX, newStartY, clickedShapeId } = action.payload;
+      return {
+        ...state,
+        drawnShapes: state.drawnShapes.map((shape) => {
+          if (shape.id !== clickedShapeId) return shape;
+          const dx = shape.endX - shape.startX;
+          const dy = shape.endY - shape.startY;
+          const clampedX = Math.max(
+            0,
+            Math.min(window.innerWidth - dx, newStartX)
+          );
+          const clampedY = Math.max(
+            0,
+            Math.min(window.innerHeight - dy, newStartY)
+          );
+          return {
+            ...shape,
+            startX: clampedX,
+            startY: clampedY,
+            endX: clampedX + dx,
+            endY: clampedY + dy,
+          };
+        }),
+      };
+    }
+
     default:
       return state;
   }
