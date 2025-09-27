@@ -12,7 +12,7 @@ import { attachColorsToParticipants } from "../lib/colorMapper";
 import { ChatModalProps, Message } from "./types";
 
 const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
-  ({ wsRef, messages }, ref) => {
+  ({ wsRef, messages, setMessages }, ref) => {
     const [isChatUp, setIsChatUp] = useState(false);
     const [placeholder, setPlaceholder] =
       useState<string>("Say hello to chat!");
@@ -30,12 +30,12 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
     //     content: "Hey team, are we good to start?",
     //   },
     //   {
-    //     sender_id: "u002",
+    //     sender_id: "u001",
     //     timestamp_ms: 1744558010000,
     //     content: "Yes, just opening my notes.",
     //   },
     //   {
-    //     sender_id: "u003",
+    //     sender_id: "u001",
     //     timestamp_ms: 1744558020000,
     //     content: "All set here.",
     //   },
@@ -244,20 +244,32 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
     //     timestamp_ms: 1744558470000,
     //     content: "Have a nice evening.",
     //   },
-    //   { sender_id: "u001", timestamp_ms: 1744558480000, content: "You too!" },
     //   {
-    //     sender_id: "u003",
+    //     sender_id: "u001",
+    //     name: "daru",
+    //     timestamp_ms: 1744558480000,
+    //     content: "You too!",
+    //   },
+    //   {
+    //     sender_id: "u001",
+    //     name: "daru",
     //     timestamp_ms: 1744558490000,
     //     content: "Remember to update docs before Friday.",
     //   },
-    //   { sender_id: "u002", timestamp_ms: 1744558500000, content: "Will do!" },
     //   {
-    //     sender_id: "u004",
+    //     sender_id: "u003",
+    //     timestamp_ms: 1744558500000,
+    //     content: "Will do!",
+    //   },
+    //   {
+    //     sender_id: "u001",
+    //     name: "daru",
     //     timestamp_ms: 1744558510000,
     //     content: "I’ll check staging for bugs tonight.",
     //   },
     //   {
     //     sender_id: "u001",
+    //     name: "daru",
     //     timestamp_ms: 1744558520000,
     //     content: "Perfect, thanks team.",
     //   },
@@ -266,11 +278,21 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
     // const colotAttachedParticipants: Record<string, ParticipantColor> =
     //   attachColorsToParticipants(participants);
 
-    const handleMessageSend = () => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return;
+    const handleMessageSend = (content: string) => {
       if (!wsRef.current) return;
-      const userId = localStorage.getItem("userId");
-      if (!userId) return;
+
+      const name = localStorage.getItem("name");
+      if (!name) return;
       console.log("sending mess");
+      const userMessage: Message = {
+        sender_id: userId,
+        name: name,
+        timestamp_ms: Date.now(),
+        content: content,
+      };
+      setMessages((prev) => [...prev, userMessage]);
       wsRef.current.send(
         JSON.stringify({
           type: "CHAT",
@@ -304,23 +326,47 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
 
         {isChatUp && (
           <div
-            className={`w-full relative !h-full pb-2 rounded-md z-10 bg-light_sky_blue-700 border-personal`}
+            className={`w-full relative !h-full rounded-md z-10 bg-light_sky_blue-700 border-personal`}
           >
             <svg className=" absolute top-0 left-0 w-full h-full bg-[url('/pattern-2.svg')] bg-center opacity-20"></svg>
             <Virtuoso
-              className={`w-full `}
               data={messages}
               skipAnimationFrameInResizeObserver={true}
               initialTopMostItemIndex={messages.length - 1}
-              itemContent={(index, message) => (
-                <MessageBubble
-                  isOwn={message.sender_id === "u001"}
-                  // messageStyle={colotAttachedParticipants[message.sender_id]}
-                  index={index}
-                  message={message}
-                />
-              )}
-            ></Virtuoso>
+              itemContent={(index, message) => {
+                const prev = index > 0 ? messages[index - 1] : null;
+                const next =
+                  index < messages.length - 1 ? messages[index + 1] : null;
+
+                const isSameAsPrev =
+                  prev && prev.sender_id === message.sender_id;
+                const isSameAsNext =
+                  next && next.sender_id === message.sender_id;
+
+                let position: "single" | "first" | "middle" | "last";
+
+                if (!isSameAsPrev && !isSameAsNext) {
+                  position = "single"; // standalone message
+                } else if (!isSameAsPrev && isSameAsNext) {
+                  position = "first"; // first in a group
+                } else if (isSameAsPrev && isSameAsNext) {
+                  position = "middle"; // middle of a group
+                } else if (isSameAsPrev && !isSameAsNext) {
+                  position = "last"; // last in a group
+                }
+
+                const isOwn = message.sender_id === userId;
+
+                return (
+                  <MessageBubble
+                    key={message.sender_id ?? `${message.sender_id}-${index}`} // Better key
+                    message={message}
+                    isOwn={isOwn}
+                    positionInBlock={position!}
+                  />
+                );
+              }}
+            />
           </div>
         )}
 
@@ -344,7 +390,7 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
           ></input>
           <Button
             onClick={() => {
-              handleMessageSend();
+              handleMessageSend(inputText);
               setInputText("");
             }}
             className={`translate-x-0 rounded-full aspect-square p-0 w-7 h-7 items-center justify-center flex shadow-pressed ${!isChatUp && " rotate-90 shadow-none"} transition-all ease-in`}

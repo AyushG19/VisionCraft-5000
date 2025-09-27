@@ -36,13 +36,13 @@ export type Action =
 export interface Message {
   sender_id: string;
   name: string;
-  timestamp_ms: Date;
+  timestamp_ms: number;
   content: string;
 }
 export interface ChatModalProps {
   wsRef: RefObject<WebSocket | null>;
   messages: Message[];
-  setMessages: React.Dispatch<React.SetStateAction<never[]>>;
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
 }
 export type DragStateType = {
   isDragging: boolean;

@@ -306,5 +306,6 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
     wsRef,
     isDrawing,
     messages,
+    setMessages,
   };
 };

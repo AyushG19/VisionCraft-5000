@@ -30,6 +30,7 @@ const page = () => {
     canvasDispatch,
     wsRef,
     messages,
+    setMessages,
   } = useWhiteboardWithSocket(inRoom);
 
   const verifyJoin = async (code: string) => {
@@ -79,7 +80,11 @@ const page = () => {
       {inRoom ? (
         <>
           <RoomOptions />
-          <ChatModal messages={messages} wsRef={wsRef} />
+          <ChatModal
+            setMessages={setMessages}
+            messages={messages}
+            wsRef={wsRef}
+          />
           {/* <ChatBoxContainer
             // messages={messages}
             // setMessage={setMessages}
