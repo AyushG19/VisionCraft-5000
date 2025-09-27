@@ -197,7 +197,6 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
 
     const onMouseMove = (e: MouseEvent) => {
       if (!canvasRef.current) return;
-      console.log(dragState.current.isDragging);
       if (canvasState.toolState.currentTool === "SELECT") {
         let clickedShape;
         if (!dragState.current.isDragging) {
@@ -207,7 +206,6 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
           canvasRef.current.style.cursor = clickedShape ? "move" : "default";
         }
         const currPos = getMousePos(e);
-        console.log("inside");
         if (!dragState.current.draggedShapeId || !dragState.current.isDragging)
           return;
         canvasDispatch({

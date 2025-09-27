@@ -55,6 +55,7 @@ const tools: {
   { id: "REDO" as const, icon: IconArrowForwardUp, label: "redo" },
 ];
 type toolkitProps = {
+  canvasRef: React.RefObject<HTMLCanvasElement | null>;
   toolState: State["toolState"];
   handleToolSelect: (toolname: ToolState["currentTool"]) => void;
   handleColorSelect: (color: { l: number; c: number; h: number }) => void;
@@ -63,6 +64,7 @@ type toolkitProps = {
   handleRedo: () => void;
 };
 const Toolkit = ({
+  canvasRef,
   toolState,
   handleToolSelect,
   handleColorSelect,
@@ -93,84 +95,13 @@ const Toolkit = ({
   });
   const toolIconRef = useRef<HTMLDivElement | null>(null);
 
-  const [colorVisibility, setColorVisibility] = useState(false);
-
-  const onMouseDown = useCallback((e: MouseEvent) => {
-    if (e.target != toolkitRef.current) return;
-    dragState.current.isDraging = true;
-    const rect = toolkitRef.current!.getBoundingClientRect();
-    dragState.current = {
-      ...dragState.current,
-      dragX: e.clientX - rect.left,
-      dragY: e.clientY - rect.top,
+  const getMousePos = (e: MouseEvent) => {
+    const rect = canvasRef.current!.getBoundingClientRect();
+    return {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
     };
-  }, []);
-
-  const onMouseMove = useCallback((e: MouseEvent) => {
-    if (!dragState.current.isDraging || !toolkitRef.current) return;
-
-    const newX = e.clientX - dragState.current.dragX;
-    const newY = e.clientY - dragState.current.dragY;
-
-    const width = toolkitRef.current.clientWidth;
-    const height = toolkitRef.current.clientHeight;
-
-    const maxX = window.innerWidth - width;
-    const maxY = window.innerHeight - height;
-
-    const adjustedX = Math.max(0, Math.min(newX, maxX));
-    const adjustedY = Math.max(0, Math.min(newY, maxY));
-
-    setCurrPos({
-      x: adjustedX,
-      y: adjustedY,
-    });
-  }, []);
-
-  const onMouseUp = useCallback(() => {
-    dragState.current.isDraging = false;
-    dragState.current = {
-      ...dragState.current,
-      dragX: 0,
-      dragY: 0,
-    };
-  }, []);
-
-  const onResizeMouseDown = useCallback((e: MouseEvent) => {
-    if (!toolkitRef.current) return;
-    console.log(resizeState.current.isResizing);
-    resizeState.current.isResizing = true;
-    resizeState.current.initialX = e.clientX;
-    resizeState.current.initialWidth = toolkitRef.current.scrollWidth;
-  }, []);
-
-  const onResizeMouseMove = useCallback((e: MouseEvent) => {
-    if (!resizeState.current.isResizing) return;
-    if (!toolIconRef.current) return;
-    if (!toolkitRef.current) return;
-
-    const toolIconContainer = toolIconRef.current;
-    console.log("resizing");
-
-    let newWidth =
-      resizeState.current.initialWidth +
-      (e.clientX - resizeState.current.initialX);
-    console.log(
-      resizeState.current.initialWidth,
-      newWidth,
-      toolIconContainer.scrollWidth + 25
-    );
-    if (toolIconContainer.scrollHeight <= 40) {
-      if (newWidth > toolIconContainer.clientWidth) return;
-    }
-    setCurrWidth(Math.max(62, newWidth));
-  }, []);
-
-  const onResizeMouseUp = useCallback(() => {
-    resizeState.current.isResizing = false;
-    resizeState.current.initialWidth = currWidth;
-  }, [currWidth]);
-
+  };
   useEffect(() => {
     const toolkit = toolkitRef.current;
     if (!toolkit) return;
@@ -178,41 +109,88 @@ const Toolkit = ({
     const resizer = resizeRef.current;
     if (!resizer) return;
 
+    const onMouseDown = (e: MouseEvent) => {
+      if (!toolkitRef.current) return;
+      const { x, y } = getMousePos(e);
+      if (e.target !== resizeRef.current) {
+        dragState.current.isDraging = true;
+        const rect = toolkitRef.current.getBoundingClientRect();
+        dragState.current = {
+          ...dragState.current,
+          dragX: x - rect.x,
+          dragY: y - rect.y,
+        };
+      } else if (e.target === resizeRef.current) {
+        resizeState.current.isResizing = true;
+        resizeState.current.initialX = x;
+        console.log("look", toolkitRef.current.scrollWidth);
+        resizeState.current.initialWidth = toolkitRef.current.scrollWidth;
+      }
+    };
+
+    const onMouseMove = (e: MouseEvent) => {
+      if (!toolkitRef.current) return;
+      const { x, y } = getMousePos(e);
+      if (dragState.current.isDraging) {
+        const newX = x - dragState.current.dragX; //dragX ,Y is drag offset
+        const newY = y - dragState.current.dragY;
+
+        const width = toolkitRef.current.clientWidth;
+        const height = toolkitRef.current.clientHeight;
+
+        const adjustedX = Math.max(
+          0,
+          Math.min(newX, window.innerWidth - width)
+        );
+        const adjustedY = Math.max(
+          0,
+          Math.min(newY, window.innerHeight - height)
+        );
+
+        setCurrPos({
+          x: adjustedX,
+          y: adjustedY,
+        });
+      } else if (resizeState.current.isResizing) {
+        if (!toolIconRef.current) return;
+        const toolIconContainer = toolIconRef.current;
+        console.log("resizing");
+        const deltaX = x - resizeState.current.initialX;
+        const newWidth = resizeState.current.initialWidth + deltaX;
+
+        if (toolIconContainer.offsetHeight <= 40) {
+          if (newWidth > toolIconContainer.clientWidth) return;
+        }
+        setCurrWidth(Math.max(62, newWidth));
+      }
+    };
+
+    const onMouseUp = () => {
+      if (dragState.current.isDraging) {
+        dragState.current.isDraging = false;
+        dragState.current = {
+          ...dragState.current,
+          dragX: 0,
+          dragY: 0,
+        };
+      } else if (resizeState.current.isResizing) {
+        resizeState.current.isResizing = false;
+        resizeState.current.initialWidth = currWidth;
+      }
+    };
+
+    const newX = window.innerWidth / 2 - toolkitRef.current!.clientWidth / 2;
+    setCurrPos({ x: newX, y: 0 });
+
     toolkit.addEventListener("mousedown", onMouseDown);
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
-
-    resizer.addEventListener("mousedown", onResizeMouseDown);
-    window.addEventListener("mousemove", onResizeMouseMove);
-    window.addEventListener("mouseup", onResizeMouseUp);
 
     return () => {
       toolkit.removeEventListener("mousedown", onMouseDown);
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
-
-      resizer.removeEventListener("mousedown", onResizeMouseDown);
-      window.removeEventListener("mousemove", onResizeMouseMove);
-      window.removeEventListener("mouseup", onResizeMouseUp);
     };
-  }, [
-    onMouseDown,
-    onMouseMove,
-    onMouseUp,
-    onResizeMouseDown,
-    onResizeMouseMove,
-    onResizeMouseUp,
-  ]);
-
-  useEffect(() => {
-    const toolkit = toolkitRef.current;
-    if (!toolkit) return;
-
-    setCurrPos({
-      x: window.innerWidth / 2 - toolkit.clientWidth / 2,
-      y: 0,
-    });
-    toolkit.classList.remove("translate-x-1/2");
   }, []);
 
   console.log(tools.length);
@@ -220,11 +198,12 @@ const Toolkit = ({
   return (
     <div
       ref={toolkitRef}
-      className="p-3 pb-3.5 pr-0 absolute rounded-lg flex items-center cursor-move bg-light_sky_blue outline-personal shadow-primary "
+      draggable={false}
+      className="p-3 pb-3.5 pr-0 absolute rounded-lg flex items-center cursor-move  bg-light_sky_blue outline-personal shadow-primary "
       style={{
         top: currPos.y,
         left: currPos.x,
-        width: `${!currWidth ? 33.8 * tools.length + (tools.length - 1) * 10 + 30 : currWidth}px`,
+        maxWidth: `${!currWidth ? 31 * tools.length + (tools.length - 1) * 10 + 30 : currWidth}px`,
       }}
     >
       <div ref={toolIconRef} className="flex flex-wrap w-auto gap-2.5 z-50">

@@ -56,6 +56,7 @@ const page = () => {
     setInRoom(true);
   };
   const toolkitProps: toolkitProps = {
+    canvasRef,
     handleColorSelect,
     handleStrokeSelect,
     handleToolSelect,
