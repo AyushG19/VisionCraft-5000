@@ -1,11 +1,10 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   RoomOptions,
   JoinRoomModal,
   Toolkit,
   toolkitProps,
-  ChatBoxContainer,
   ChatModal,
 } from "@repo/ui";
 import { useWhiteboardWithSocket } from "./hooks/useWhiteboardWithSocket";
@@ -77,10 +76,11 @@ const page = () => {
         send
       </Button> */}
 
-      {inRoom ? (
+      {true ? (
         <>
           <RoomOptions />
           <ChatModal
+            boardState={canvasState.drawnShapes}
             setMessages={setMessages}
             messages={messages}
             wsRef={wsRef}

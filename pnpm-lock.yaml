@@ -84,6 +84,9 @@ importers:
       '@repo/common':
         specifier: workspace:*
         version: link:../../packages/common
+      '@repo/hooks':
+        specifier: workspace:*
+        version: link:../../packages/hooks
       '@repo/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
@@ -288,6 +291,28 @@ importers:
         specifier: ^8.29.0
         version: 8.31.0(eslint@9.25.1(jiti@2.4.2))(typescript@5.8.2)
 
+  packages/hooks:
+    dependencies:
+      '@repo/common':
+        specifier: workspace:*
+        version: link:../common
+      '@types/react':
+        specifier: 19.1.0
+        version: 19.1.0
+      '@types/react-dom':
+        specifier: 19.1.1
+        version: 19.1.1(@types/react@19.1.0)
+      react:
+        specifier: ^19.1.0
+        version: 19.1.0
+      react-dom:
+        specifier: ^19.1.0
+        version: 19.1.0(react@19.1.0)
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+
   packages/tailwind-config:
     devDependencies:
       '@repo/typescript-config':
@@ -371,6 +396,9 @@ importers:
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@repo/hooks':
+        specifier: workspace:*
+        version: link:../hooks
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config

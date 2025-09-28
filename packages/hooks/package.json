@@ -1,0 +1,26 @@
+{
+  "name": "@repo/hooks",
+  "version": "0.1.0",
+  "main": "./src/index.js",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "dependencies": {
+    "@repo/common": "workspace:*"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "@types/react": "19.1.0",
+    "@types/react-dom": "19.1.1"
+  }
+}

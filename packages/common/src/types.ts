@@ -1,4 +1,4 @@
-import { number, string, z } from "zod";
+import { z } from "zod";
 
 export const CreateUserSchema = z
   .object({
@@ -43,7 +43,7 @@ const PointSchema = z.object({
   y: z.number(),
 });
 
-const ShapeSchema = z.object({
+export const ShapeSchema = z.object({
   id: z.string(),
   type: z.enum([
     "SELECT",

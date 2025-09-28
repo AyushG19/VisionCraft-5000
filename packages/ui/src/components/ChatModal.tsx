@@ -1,3 +1,4 @@
+"use client";
 import {
   IconChevronsDown,
   IconChevronsUp,
@@ -10,13 +11,16 @@ import { Virtuoso } from "react-virtuoso";
 import MessageBubble from "./ui/MessageBubble";
 import { attachColorsToParticipants } from "../lib/colorMapper";
 import { ChatModalProps, Message } from "./types";
+import { useAiHook } from "@repo/hooks";
+import { json } from "stream/consumers";
 
 const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
-  ({ wsRef, messages, setMessages }, ref) => {
+  ({ wsRef, messages, setMessages, boardState }, ref) => {
     const [isChatUp, setIsChatUp] = useState(false);
     const [placeholder, setPlaceholder] =
       useState<string>("Say hello to chat!");
     const [inputText, setInputText] = useState<string>("");
+    const { runDraw } = useAiHook();
     // const [participants, setParticipants] = useState([
     //   { user_id: "u001", name: "Alex" },
     //   { user_id: "u002", name: "Maya" },
@@ -278,11 +282,26 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
     // const colotAttachedParticipants: Record<string, ParticipantColor> =
     //   attachColorsToParticipants(participants);
 
-    const userId = localStorage.getItem("userId");
-    if (!userId) return;
-    const handleMessageSend = (content: string) => {
-      if (!wsRef.current) return;
+    const handleMessageSend = async (content: string) => {
+      const userId = localStorage.getItem("userId");
+      if (!userId) {
+        console.log("no userID");
+        return;
+      }
+      console.log("content: ", content);
+      if (content.startsWith("/draw")) {
+        const command = content.replace("/draw", "");
+        console.log("content 2: ", content);
 
+        const shapes = await runDraw(command, boardState);
+        shapes.forEach((shape) => {
+          console.log(shape);
+        });
+      }
+      if (!wsRef.current) {
+        console.log("no wsRef");
+        return;
+      }
       const name = localStorage.getItem("name");
       if (!name) return;
       console.log("sending mess");
@@ -354,7 +373,8 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
                 } else if (isSameAsPrev && !isSameAsNext) {
                   position = "last"; // last in a group
                 }
-
+                const userId = localStorage.getItem("userId");
+                if (!userId) return;
                 const isOwn = message.sender_id === userId;
 
                 return (

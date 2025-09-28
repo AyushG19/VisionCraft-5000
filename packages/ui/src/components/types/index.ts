@@ -1,3 +1,4 @@
+import { ShapeType } from "@repo/common/types";
 import { Dispatch, RefObject } from "react";
 
 export interface Message {
@@ -7,6 +8,7 @@ export interface Message {
   content: string;
 }
 export interface ChatModalProps {
+  boardState: ShapeType[];
   wsRef: RefObject<WebSocket | null>;
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[] | []>>;
