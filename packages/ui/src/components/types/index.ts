@@ -12,4 +12,5 @@ export interface ChatModalProps {
   wsRef: RefObject<WebSocket | null>;
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[] | []>>;
+  drawShapeFromAi: (shapes: ShapeType[]) => void;
 }

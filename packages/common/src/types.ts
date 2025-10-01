@@ -51,11 +51,13 @@ export const ShapeSchema = z.object({
     "SQUARE",
     "TRIANGLE",
     "ARROW",
+    "TEXT",
     "COLOR",
     "PENCIL",
     "UNDO",
     "REDO",
   ]),
+  content: z.string().optional(),
   lineWidth: z.number(),
   lineColor: ColorSchema,
   fillColor: z
@@ -65,6 +67,7 @@ export const ShapeSchema = z.object({
   startY: z.number(),
   endX: z.number(),
   endY: z.number(),
+  selected: z.boolean(),
   points: z.array(PointSchema).optional(),
 });
 

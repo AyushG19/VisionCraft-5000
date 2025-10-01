@@ -15,7 +15,7 @@ import { useAiHook } from "@repo/hooks";
 import { json } from "stream/consumers";
 
 const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
-  ({ wsRef, messages, setMessages, boardState }, ref) => {
+  ({ wsRef, messages, setMessages, boardState, drawShapeFromAi }, ref) => {
     const [isChatUp, setIsChatUp] = useState(false);
     const [placeholder, setPlaceholder] =
       useState<string>("Say hello to chat!");
@@ -294,9 +294,7 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
         console.log("content 2: ", content);
 
         const shapes = await runDraw(command, boardState);
-        shapes.forEach((shape) => {
-          console.log(shape);
-        });
+        drawShapeFromAi(shapes);
       }
       if (!wsRef.current) {
         console.log("no wsRef");

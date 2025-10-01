@@ -8,17 +8,49 @@ import debounce from "../utils/debounce";
 import { saveCanvasState } from "../api";
 import { WS_BE_URL } from "config";
 import canvasReducer from "../utils/canvasReducer";
-import isClickOnShape from "../utils/isPointInShape";
+import isClickOnShape, {
+  HandlePosition,
+  isInsideSelectBound,
+  isPointInHandle,
+} from "../utils/isPointInShape";
 import redrawPreviousShapes from "../utils/redrawPreviousShapes";
 import resizeCanvas from "../utils/canvasResizeHelper";
 import pencilIcon from "../utils/pencilIcon";
 import createNewShape from "../utils/createNewShape";
+import { HandleName } from "../utils/getHandles";
 type EventType = {
   userId: string;
   type: "ADD" | "DEL" | "UPD";
   shape: ShapeType;
 };
 
+const handleCursors: Record<HandleName, string> = {
+  TOP: "n-resize",
+  BOTTOM: "s-resize",
+  LEFT: "w-resize",
+  RIGHT: "e-resize",
+  TOP_LEFT: "nw-resize",
+  TOP_RIGHT: "ne-resize",
+  BOTTOM_LEFT: "sw-resize",
+  BOTTOM_RIGHT: "se-resize",
+};
+
+const getOutlineBounds = (shape: ShapeType) => {
+  return {
+    x: shape.startX,
+    y: shape.startY,
+    width: shape.endX - shape.startX,
+    height: shape.endY - shape.startY,
+  };
+};
+const getBoundsForHandles = (shape: ShapeType) => {
+  return {
+    x: shape.startX - 5,
+    y: shape.startY - 5,
+    height: shape.endY - shape.startY + 10,
+    width: shape.endX - shape.startX + 10,
+  };
+};
 export const useWhiteboardWithSocket = (enabled: boolean) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const isDrawing = useRef<boolean>(false);
@@ -37,7 +69,7 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
     },
   };
   const [messages, setMessages] = useState<Message[] | []>([]);
-
+  const [selectedShape, setSelectedShape] = useState<ShapeType | null>(null);
   const [canvasState, canvasDispatch] = useReducer(canvasReducer, initState);
   const dragState = useRef<DragStateType>({
     isDragging: false,
@@ -138,10 +170,15 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+    // const changeCursorStyle = (style: string) => {
+    //   canvas.style.cursor = style;
+    // };
     if (crosshairTools.includes(canvasState.toolState.currentTool)) {
       canvas.style.cursor = "crosshair";
     } else if (canvasState.toolState.currentTool === "PENCIL") {
       canvas.style.cursor = `url(${pencilIcon}) 3 16 ,auto`;
+    } else {
+      canvas.style.cursor = "default";
     }
 
     resizeCanvas(
@@ -169,13 +206,41 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
       };
     };
 
+    const handleClick = (e: MouseEvent) => {
+      if (canvasState.toolState.currentTool === "TEXT") {
+        const currPos = getMousePos(e);
+        // canvasDispatch({type:"TEXT",payload:createNewShape(canvasState,currPos,undefined,"")})
+      }
+    };
     const onMouseDown = (e: MouseEvent) => {
       const currPos = getMousePos(e);
+
       if (canvasState.toolState.currentTool === "SELECT") {
+        if (
+          selectedShape &&
+          isInsideSelectBound(currPos, getOutlineBounds(selectedShape))
+        ) {
+          dragState.current = {
+            isDragging: true,
+            draggedShapeId: selectedShape.id,
+            offsetX: currPos.x - selectedShape.startX,
+            offsetY: currPos.y - selectedShape.startY,
+          };
+        } else if (
+          selectedShape &&
+          isPointInHandle(
+            currPos.x,
+            currPos.y,
+            getBoundsForHandles(selectedShape)
+          )
+        ) {
+          console.log("lets resize");
+        }
         const clickedShape = canvasState.drawnShapes.find((shape: ShapeType) =>
-          isClickOnShape(getMousePos(e), shape)
+          isClickOnShape(currPos, shape)
         );
         if (!clickedShape) return;
+        setSelectedShape(clickedShape);
         dragState.current = {
           isDragging: true,
           draggedShapeId: clickedShape.id,
@@ -184,6 +249,7 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
         };
         return;
       }
+
       isDrawing.current = true;
       canvasState.startPos = currPos;
       if (canvasState.toolState.currentTool === "PENCIL") {
@@ -198,20 +264,47 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
     const onMouseMove = (e: MouseEvent) => {
       if (!canvasRef.current) return;
       if (canvasState.toolState.currentTool === "SELECT") {
-        let clickedShape;
-        if (!dragState.current.isDragging) {
-          clickedShape = canvasState.drawnShapes.find((shape: ShapeType) =>
-            isClickOnShape(getMousePos(e), shape)
-          );
-          canvasRef.current.style.cursor = clickedShape ? "move" : "default";
-        }
+        let hoveredShape;
         const currPos = getMousePos(e);
-        if (!dragState.current.draggedShapeId || !dragState.current.isDragging)
+
+        if (selectedShape && !dragState.current.isDragging) {
+          const outlineBounds = getOutlineBounds(selectedShape);
+          const bounds = getBoundsForHandles(selectedShape);
+
+          const hoveredHandle: HandleName | null = isPointInHandle(
+            currPos.x,
+            currPos.y,
+            bounds,
+            undefined,
+            selectedShape
+          );
+          if (hoveredHandle) {
+            canvas.style.cursor = handleCursors[hoveredHandle];
+          } else if (isInsideSelectBound(currPos, outlineBounds)) {
+            canvas.style.cursor = "move";
+          } else {
+            hoveredShape = canvasState.drawnShapes.find((shape: ShapeType) =>
+              isClickOnShape(currPos, shape)
+            );
+            canvasRef.current.style.cursor = hoveredShape ? "move" : "default";
+          }
+        } else if (!dragState.current.isDragging) {
+          hoveredShape = canvasState.drawnShapes.find((shape: ShapeType) =>
+            isClickOnShape(currPos, shape)
+          );
+          canvasRef.current.style.cursor = hoveredShape ? "move" : "default";
+        }
+        if (
+          selectedShape === null ||
+          dragState.current.draggedShapeId !== selectedShape.id ||
+          !dragState.current.isDragging
+        )
           return;
+        console.log("here");
         canvasDispatch({
           type: "MOVE",
           payload: {
-            clickedShapeId: dragState.current.draggedShapeId,
+            clickedShapeId: dragState.current.draggedShapeId!,
             newStartX: currPos.x - dragState.current.offsetX,
             newStartY: currPos.y - dragState.current.offsetY,
           },
@@ -219,7 +312,8 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
         redrawPreviousShapes(
           ctx,
           canvasState.drawnShapes,
-          createNewShape(canvasState, currPos)
+          createNewShape(canvasState, currPos),
+          selectedShape.id
         );
 
         return;
@@ -228,15 +322,17 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
 
       const currentPos = getMousePos(e);
       console.log(canvasState.toolState.currentTool);
-
-      if (canvasState.toolState.currentTool !== "PENCIL") {
+      if (canvasState.toolState.currentTool === "TEXT") {
+        return;
+      } else if (canvasState.toolState.currentTool === "PENCIL") {
+        canvasDispatch({ type: "UPDATE_PENCIL", payload: currentPos });
+      } else {
         redrawPreviousShapes(
           ctx,
           canvasState.drawnShapes,
-          createNewShape(canvasState, currentPos)
+          createNewShape(canvasState, currentPos),
+          selectedShape ? selectedShape.id : undefined
         );
-      } else {
-        canvasDispatch({ type: "UPDATE_PENCIL", payload: currentPos });
       }
     };
 
@@ -258,13 +354,19 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
       canvasState.toolState.currentTool = "SELECT";
     };
 
-    redrawPreviousShapes(ctx, canvasState.drawnShapes);
+    redrawPreviousShapes(
+      ctx,
+      canvasState.drawnShapes,
+      undefined,
+      selectedShape ? selectedShape.id : undefined
+    );
     console.log(canvasState.drawnShapes);
 
     canvas.addEventListener("mousedown", onMouseDown);
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
     window.addEventListener("resize", handleResize);
+    canvas.addEventListener("click", handleClick);
 
     return () => {
       canvas.removeEventListener("mousedown", onMouseDown);
@@ -272,10 +374,11 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
       window.removeEventListener("mouseup", onMouseUp);
       window.removeEventListener("resize", handleResize);
     };
-  }, [canvasState.toolState, canvasState]);
+  }, [canvasState, selectedShape]);
 
   const handleToolSelect = (toolName: ToolState["currentTool"]) => {
     console.log(toolName);
+    if (!canvasRef.current) return;
     canvasDispatch({ type: "CHANGE_TOOL", payload: toolName });
   };
 

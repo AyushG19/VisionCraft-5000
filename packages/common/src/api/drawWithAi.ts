@@ -1,7 +1,7 @@
 import axios from "axios";
 import { ShapeSchema, ShapeType } from "../types";
 
-const HF_TOKEN = ""; // should move to env var
+const HF_TOKEN = process.env.NEXT_PUBLIC_HF_TOKEN; // should move to env var
 const MODEL = "deepseek-ai/DeepSeek-V3.1-Terminus";
 
 export default async function drawWithAi(
@@ -19,6 +19,7 @@ export default async function drawWithAi(
 You are a drawing assistant.rule 1 never ask for more info or clarify infer the comand given and givea valid response with your utmost understanding, Try to assist your master with its canvas diagramming/drawing. 
 Obey with sincerity and utmost knowledge. Try to reason with the context of the board before addressing the command.
 Respond with **only JSON array** of shapes. Do not include explanations or quotes outside the JSON.
+use the colors from already existing colors and keep for colors lights as the board will always be deep colored make sure your locations match any arrow should start from a meaningfull place and end on a appropriate place keep exptra attention on where you are drawing the shapes if they need to be linked you must keep them viaually in sync on the board.
 
 
 Use this TypeScript type to structure the response: ${typeDef}.  

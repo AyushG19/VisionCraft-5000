@@ -4,6 +4,7 @@ export type ToolState = {
     | "CIRCLE"
     | "SQUARE"
     | "TRIANGLE"
+    | "TEXT"
     | "ARROW"
     | "COLOR"
     | "PENCIL"

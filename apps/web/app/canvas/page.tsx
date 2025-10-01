@@ -12,6 +12,8 @@ import { createRoom, joinRoom, login } from "./api";
 import { Button } from "@workspace/ui/button";
 import { AxiosResponse } from "axios";
 import { drawShape } from "./utils/drawing";
+import { ShapeType } from "@repo/common/types";
+import { createContext } from "vm";
 
 const page = () => {
   const [inRoom, setInRoom] = useState(false);
@@ -55,6 +57,18 @@ const page = () => {
     const res: AxiosResponse = await createRoom(canvasState.drawnShapes);
     setInRoom(true);
   };
+
+  const drawShapeFromAi = (shapes: ShapeType[]) => {
+    if (!canvasRef.current) return;
+    const ctx = canvasRef.current.getContext("2d");
+    if (ctx == null) {
+      console.error("canvas element not available");
+      return;
+    }
+    shapes.forEach((shape: ShapeType) => {
+      drawShape(ctx, shape);
+    });
+  };
   const toolkitProps: toolkitProps = {
     canvasRef,
     handleColorSelect,
@@ -80,6 +94,7 @@ const page = () => {
         <>
           <RoomOptions />
           <ChatModal
+            drawShapeFromAi={drawShapeFromAi}
             boardState={canvasState.drawnShapes}
             setMessages={setMessages}
             messages={messages}
