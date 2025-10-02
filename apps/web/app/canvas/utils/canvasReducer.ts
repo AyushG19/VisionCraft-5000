@@ -1,3 +1,4 @@
+import { ShapeType } from "@repo/common/types";
 import { Action, CanvasState } from "../types/index";
 export default function canvasReducer(
   state: CanvasState,
@@ -82,29 +83,19 @@ export default function canvasReducer(
         ...state,
         toolState: { ...state.toolState, brushSize: action.payload },
       };
-    case "MOVE": {
-      const { newStartX, newStartY, clickedShapeId } = action.payload;
+    case "UPDATE": {
       return {
         ...state,
-        drawnShapes: state.drawnShapes.map((shape) => {
-          if (shape.id !== clickedShapeId) return shape;
-          const dx = shape.endX - shape.startX;
-          const dy = shape.endY - shape.startY;
-          const clampedX = Math.max(
-            0,
-            Math.min(window.innerWidth - dx, newStartX)
-          );
-          const clampedY = Math.max(
-            0,
-            Math.min(window.innerHeight - dy, newStartY)
-          );
-          return {
-            ...shape,
-            startX: clampedX,
-            startY: clampedY,
-            endX: clampedX + dx,
-            endY: clampedY + dy,
-          };
+        drawnShapes: state.drawnShapes.map((s) => {
+          if (s.id === action.payload.shape.id)
+            return {
+              ...s,
+              startX: action.payload.shape.startX,
+              startY: action.payload.shape.startY,
+              endX: action.payload.shape.endX,
+              endY: action.payload.shape.endY,
+            };
+          return s;
         }),
       };
     }

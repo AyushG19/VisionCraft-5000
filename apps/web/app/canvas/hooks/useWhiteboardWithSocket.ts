@@ -2,7 +2,13 @@
 import { ToolState } from "@repo/common/toolState";
 import React, { useRef, useEffect, useReducer, useState } from "react";
 import oklchToCSS from "../utils/oklchToCss";
-import { Action, Message, CanvasState, DragStateType } from "../types/index";
+import {
+  Action,
+  Message,
+  CanvasState,
+  DragStateType,
+  ResizeStateType,
+} from "../types/index";
 import { type ShapeType } from "@repo/common/types";
 import debounce from "../utils/debounce";
 import { saveCanvasState } from "../api";
@@ -18,6 +24,14 @@ import resizeCanvas from "../utils/canvasResizeHelper";
 import pencilIcon from "../utils/pencilIcon";
 import createNewShape from "../utils/createNewShape";
 import { HandleName } from "../utils/getHandles";
+import {
+  getBoundsForHandles,
+  getOutlineBounds,
+} from "../utils/getBoundsHelpers";
+import {
+  createDraggedShape,
+  createResizedShape,
+} from "../utils/createTempShapeHelper";
 type EventType = {
   userId: string;
   type: "ADD" | "DEL" | "UPD";
@@ -35,47 +49,37 @@ const handleCursors: Record<HandleName, string> = {
   BOTTOM_RIGHT: "se-resize",
 };
 
-const getOutlineBounds = (shape: ShapeType) => {
-  return {
-    x: shape.startX,
-    y: shape.startY,
-    width: shape.endX - shape.startX,
-    height: shape.endY - shape.startY,
-  };
-};
-const getBoundsForHandles = (shape: ShapeType) => {
-  return {
-    x: shape.startX - 5,
-    y: shape.startY - 5,
-    height: shape.endY - shape.startY + 10,
-    width: shape.endX - shape.startX + 10,
-  };
+const initState: CanvasState = {
+  startPos: { x: 0, y: 0 },
+  drawnShapes: [],
+  history: [[]],
+  historyIndex: 0,
+  toolState: {
+    currentTool: "SELECT",
+    currentColor: { l: 0.7, c: 0.1, h: 0 },
+    brushSize: 2,
+  },
 };
 export const useWhiteboardWithSocket = (enabled: boolean) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const isDrawing = useRef<boolean>(false);
   const wsRef = useRef<WebSocket | null>(null);
   const crosshairTools = ["SQUARE", "CIRCLE", "ARROW", "TRIANGLE"];
-
-  const initState: CanvasState = {
-    startPos: { x: 0, y: 0 },
-    drawnShapes: [],
-    history: [[]],
-    historyIndex: 0,
-    toolState: {
-      currentTool: "SELECT",
-      currentColor: { l: 0.7, c: 0.1, h: 0 },
-      brushSize: 2,
-    },
-  };
   const [messages, setMessages] = useState<Message[] | []>([]);
-  const [selectedShape, setSelectedShape] = useState<ShapeType | null>(null);
+  const [selectedShape, setSelectedShape] = useState<ShapeType | undefined>(
+    undefined
+  );
+  const currMousePos = useRef({ x: 0, y: 0 });
   const [canvasState, canvasDispatch] = useReducer(canvasReducer, initState);
   const dragState = useRef<DragStateType>({
     isDragging: false,
     draggedShapeId: null,
     offsetX: 0,
     offsetY: 0,
+  });
+  const resizeState = useRef<ResizeStateType>({
+    isResizing: false,
+    resizeDirection: null,
   });
   const debounceCanvasSave = useRef(debounce(saveCanvasState, 10000));
 
@@ -177,6 +181,11 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
       canvas.style.cursor = "crosshair";
     } else if (canvasState.toolState.currentTool === "PENCIL") {
       canvas.style.cursor = `url(${pencilIcon}) 3 16 ,auto`;
+    } else if (
+      selectedShape &&
+      isInsideSelectBound(currMousePos.current, getOutlineBounds(selectedShape))
+    ) {
+      canvas.style.cursor = "move";
     } else {
       canvas.style.cursor = "default";
     }
@@ -206,52 +215,81 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
       };
     };
 
-    const handleClick = (e: MouseEvent) => {
-      if (canvasState.toolState.currentTool === "TEXT") {
-        const currPos = getMousePos(e);
-        // canvasDispatch({type:"TEXT",payload:createNewShape(canvasState,currPos,undefined,"")})
-      }
-    };
     const onMouseDown = (e: MouseEvent) => {
-      const currPos = getMousePos(e);
-
+      currMousePos.current = getMousePos(e);
+      canvasState.startPos = getMousePos(e);
       if (canvasState.toolState.currentTool === "SELECT") {
-        if (
-          selectedShape &&
-          isInsideSelectBound(currPos, getOutlineBounds(selectedShape))
-        ) {
-          dragState.current = {
-            isDragging: true,
-            draggedShapeId: selectedShape.id,
-            offsetX: currPos.x - selectedShape.startX,
-            offsetY: currPos.y - selectedShape.startY,
-          };
-        } else if (
-          selectedShape &&
-          isPointInHandle(
-            currPos.x,
-            currPos.y,
-            getBoundsForHandles(selectedShape)
-          )
-        ) {
-          console.log("lets resize");
+        if (selectedShape) {
+          if (
+            isInsideSelectBound(
+              currMousePos.current,
+              getOutlineBounds(selectedShape)
+            )
+          ) {
+            dragState.current = {
+              isDragging: true,
+              draggedShapeId: selectedShape.id,
+              offsetX: currMousePos.current.x - selectedShape.startX,
+              offsetY: currMousePos.current.y - selectedShape.startY,
+            };
+          } else if (
+            isPointInHandle(
+              currMousePos.current.x,
+              currMousePos.current.y,
+              getBoundsForHandles(selectedShape),
+              undefined,
+              selectedShape
+            )
+          ) {
+            resizeState.current = {
+              isResizing: true,
+              resizeDirection: isPointInHandle(
+                currMousePos.current.x,
+                currMousePos.current.y,
+                getBoundsForHandles(selectedShape),
+                undefined,
+                selectedShape
+              ),
+            };
+          }
         }
         const clickedShape = canvasState.drawnShapes.find((shape: ShapeType) =>
-          isClickOnShape(currPos, shape)
+          isClickOnShape(currMousePos.current, shape)
         );
-        if (!clickedShape) return;
-        setSelectedShape(clickedShape);
-        dragState.current = {
-          isDragging: true,
-          draggedShapeId: clickedShape.id,
-          offsetX: currPos.x - clickedShape.startX,
-          offsetY: currPos.y - clickedShape.startY,
-        };
+        //helps in reclicking of same shape
+        setSelectedShape(() => {
+          if (
+            selectedShape &&
+            (isInsideSelectBound(
+              currMousePos.current,
+              getOutlineBounds(selectedShape)
+            ) ||
+              isPointInHandle(
+                currMousePos.current.x,
+                currMousePos.current.y,
+                getBoundsForHandles(selectedShape),
+                undefined,
+                selectedShape
+              ))
+          ) {
+            return selectedShape;
+          } else if (clickedShape) {
+            dragState.current = {
+              isDragging: true,
+              draggedShapeId: clickedShape.id,
+              offsetX: currMousePos.current.x - clickedShape.startX,
+              offsetY: currMousePos.current.y - clickedShape.startY,
+            };
+            return clickedShape;
+          } else {
+            return undefined;
+          }
+        });
         return;
       }
 
+      setSelectedShape(undefined);
       isDrawing.current = true;
-      canvasState.startPos = currPos;
       if (canvasState.toolState.currentTool === "PENCIL") {
         canvasDispatch({
           type: "ADD_SHAPE",
@@ -265,54 +303,83 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
       if (!canvasRef.current) return;
       if (canvasState.toolState.currentTool === "SELECT") {
         let hoveredShape;
-        const currPos = getMousePos(e);
-
+        currMousePos.current = getMousePos(e);
+        if (selectedShape && dragState.current.isDragging) {
+          console.log("in draggin");
+          redrawPreviousShapes(
+            ctx,
+            canvasState.drawnShapes,
+            createDraggedShape(
+              dragState.current,
+              currMousePos.current,
+              selectedShape
+            ),
+            selectedShape.id
+          );
+          return;
+        }
+        if (
+          selectedShape &&
+          resizeState.current.isResizing &&
+          resizeState.current.resizeDirection !== null
+        ) {
+          const resizingPayload = {
+            selectedShapeId: selectedShape.id,
+            currPos: currMousePos.current,
+            direction: resizeState.current.resizeDirection,
+          };
+          console.log(resizeState);
+          redrawPreviousShapes(
+            ctx,
+            canvasState.drawnShapes,
+            createResizedShape(
+              resizeState.current,
+              currMousePos.current,
+              selectedShape
+            ),
+            selectedShape.id
+          );
+          return;
+        }
         if (selectedShape && !dragState.current.isDragging) {
           const outlineBounds = getOutlineBounds(selectedShape);
           const bounds = getBoundsForHandles(selectedShape);
 
           const hoveredHandle: HandleName | null = isPointInHandle(
-            currPos.x,
-            currPos.y,
+            currMousePos.current.x,
+            currMousePos.current.y,
             bounds,
             undefined,
             selectedShape
           );
           if (hoveredHandle) {
             canvas.style.cursor = handleCursors[hoveredHandle];
-          } else if (isInsideSelectBound(currPos, outlineBounds)) {
+          } else if (isInsideSelectBound(currMousePos.current, outlineBounds)) {
             canvas.style.cursor = "move";
           } else {
             hoveredShape = canvasState.drawnShapes.find((shape: ShapeType) =>
-              isClickOnShape(currPos, shape)
+              isClickOnShape(currMousePos.current, shape)
             );
             canvasRef.current.style.cursor = hoveredShape ? "move" : "default";
           }
         } else if (!dragState.current.isDragging) {
           hoveredShape = canvasState.drawnShapes.find((shape: ShapeType) =>
-            isClickOnShape(currPos, shape)
+            isClickOnShape(currMousePos.current, shape)
           );
           canvasRef.current.style.cursor = hoveredShape ? "move" : "default";
         }
         if (
-          selectedShape === null ||
+          !selectedShape ||
           dragState.current.draggedShapeId !== selectedShape.id ||
           !dragState.current.isDragging
         )
           return;
         console.log("here");
-        canvasDispatch({
-          type: "MOVE",
-          payload: {
-            clickedShapeId: dragState.current.draggedShapeId!,
-            newStartX: currPos.x - dragState.current.offsetX,
-            newStartY: currPos.y - dragState.current.offsetY,
-          },
-        });
+
         redrawPreviousShapes(
           ctx,
           canvasState.drawnShapes,
-          createNewShape(canvasState, currPos),
+          selectedShape,
           selectedShape.id
         );
 
@@ -320,35 +387,87 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
       }
       if (!isDrawing.current) return;
 
-      const currentPos = getMousePos(e);
+      currMousePos.current = getMousePos(e);
       console.log(canvasState.toolState.currentTool);
       if (canvasState.toolState.currentTool === "TEXT") {
         return;
       } else if (canvasState.toolState.currentTool === "PENCIL") {
-        canvasDispatch({ type: "UPDATE_PENCIL", payload: currentPos });
+        canvasDispatch({
+          type: "UPDATE_PENCIL",
+          payload: currMousePos.current,
+        });
       } else {
         redrawPreviousShapes(
           ctx,
           canvasState.drawnShapes,
-          createNewShape(canvasState, currentPos),
-          selectedShape ? selectedShape.id : undefined
+          createNewShape(canvasState, currMousePos.current),
+          selectedShape?.id
         );
       }
     };
 
     const onMouseUp = (e: MouseEvent) => {
       console.log(canvasState.toolState.currentTool);
-      if (canvasState.toolState.currentTool === "SELECT") {
-        dragState.current.isDragging = false;
-        return;
+      currMousePos.current = getMousePos(e);
+
+      if (canvasState.toolState.currentTool === "SELECT" && selectedShape) {
+        if (dragState.current.isDragging) {
+          canvasDispatch({
+            type: "UPDATE",
+            payload: {
+              shape: createDraggedShape(
+                dragState.current,
+                currMousePos.current,
+                selectedShape
+              ),
+            },
+          });
+          setSelectedShape(
+            createDraggedShape(
+              dragState.current,
+              currMousePos.current,
+              selectedShape
+            )
+          );
+          console.log(
+            "drag",
+            createDraggedShape(
+              dragState.current,
+              currMousePos.current,
+              selectedShape
+            )
+          );
+          dragState.current.isDragging = false;
+          return;
+        } else if (resizeState.current.isResizing) {
+          canvasDispatch({
+            type: "UPDATE",
+            payload: {
+              shape: createResizedShape(
+                resizeState.current,
+                currMousePos.current,
+                selectedShape
+              ),
+            },
+          });
+          setSelectedShape(
+            createResizedShape(
+              resizeState.current,
+              currMousePos.current,
+              selectedShape
+            )
+          );
+        }
       }
+      dragState.current.isDragging = false;
+      resizeState.current.isResizing = false;
+
       if (!isDrawing.current) return;
-      const currentPos = getMousePos(e);
 
       console.log("adding a shape");
       dispatchWithSocket({
         type: "ADD_SHAPE",
-        payload: createNewShape(canvasState, currentPos),
+        payload: createNewShape(canvasState, currMousePos.current),
       });
       isDrawing.current = false;
       canvasState.toolState.currentTool = "SELECT";
@@ -357,7 +476,7 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
     redrawPreviousShapes(
       ctx,
       canvasState.drawnShapes,
-      undefined,
+      selectedShape ? selectedShape : undefined,
       selectedShape ? selectedShape.id : undefined
     );
     console.log(canvasState.drawnShapes);
@@ -366,7 +485,6 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
     window.addEventListener("resize", handleResize);
-    canvas.addEventListener("click", handleClick);
 
     return () => {
       canvas.removeEventListener("mousedown", onMouseDown);

@@ -109,33 +109,32 @@ const page = () => {
       ) : (
         <JoinRoomModal verifyJoin={verifyJoin} />
       )}
-      <Button className="absolute top-100 left-200" onClick={makeNewRoom}>
-        new room
-      </Button>
-      <Button
-        className="absolute top-100 left-0 bg-amber-500"
-        onClick={() => login()}
-      >
-        ayush login
-      </Button>
-      <Button
-        className="absolute top-100 left-100 bg-amber-500"
-        onClick={() => {
-          const userId = localStorage.getItem("userId");
-          if (!wsRef.current || !userId) {
-            return;
-          }
-          setInRoom(false);
-          wsRef.current.send(
-            JSON.stringify({
-              type: "LEAVE_ROOM",
-              payload: { userId: userId },
-            })
-          );
-        }}
-      >
-        leave room
-      </Button>
+      <div className="absolute top-0 left-0 gap-2 flex">
+        <Button className="" onClick={makeNewRoom}>
+          new room
+        </Button>
+        <Button className=" bg-pink-500" onClick={() => login()}>
+          ayush login
+        </Button>
+        <Button
+          className=" bg-amber-500"
+          onClick={() => {
+            const userId = localStorage.getItem("userId");
+            if (!wsRef.current || !userId) {
+              return;
+            }
+            setInRoom(false);
+            wsRef.current.send(
+              JSON.stringify({
+                type: "LEAVE_ROOM",
+                payload: { userId: userId },
+              })
+            );
+          }}
+        >
+          leave room
+        </Button>
+      </div>
     </div>
   );
 };
