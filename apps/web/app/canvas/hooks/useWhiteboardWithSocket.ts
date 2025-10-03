@@ -32,6 +32,7 @@ import {
   createDraggedShape,
   createResizedShape,
 } from "../utils/createTempShapeHelper";
+import { createDotPattern } from "../utils/createPatterns";
 type EventType = {
   userId: string;
   type: "ADD" | "DEL" | "UPD";
@@ -81,6 +82,7 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
     isResizing: false,
     resizeDirection: null,
   });
+  const patternRef = useRef<CanvasPattern | null>(null);
   const debounceCanvasSave = useRef(debounce(saveCanvasState, 10000));
 
   const dispatchWithSocket = (action: Action) => {
@@ -437,8 +439,6 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
               selectedShape
             )
           );
-          dragState.current.isDragging = false;
-          return;
         } else if (resizeState.current.isResizing) {
           canvasDispatch({
             type: "UPDATE",

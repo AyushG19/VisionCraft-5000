@@ -13,6 +13,7 @@ import { attachColorsToParticipants } from "../lib/colorMapper";
 import { ChatModalProps, Message } from "./types";
 import { useAiHook } from "@repo/hooks";
 import { json } from "stream/consumers";
+import { drawWithAi } from "@repo/common/api";
 
 const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
   ({ wsRef, messages, setMessages, boardState, drawShapeFromAi }, ref) => {
@@ -20,7 +21,6 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
     const [placeholder, setPlaceholder] =
       useState<string>("Say hello to chat!");
     const [inputText, setInputText] = useState<string>("");
-    const { runDraw } = useAiHook();
     // const [participants, setParticipants] = useState([
     //   { user_id: "u001", name: "Alex" },
     //   { user_id: "u002", name: "Maya" },
@@ -293,7 +293,7 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
         const command = content.replace("/draw", "");
         console.log("content 2: ", content);
 
-        const shapes = await runDraw(command, boardState);
+        const shapes = await drawWithAi(command, boardState);
         drawShapeFromAi(shapes);
       }
       if (!wsRef.current) {
@@ -343,9 +343,9 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
 
         {isChatUp && (
           <div
-            className={`w-full relative !h-full rounded-md z-10 bg-light_sky_blue-700 border-personal`}
+            className={`w-full relative !h-full rounded-md z-10 bg-light_sky_blue-700 border-personal overflow-hidden`}
           >
-            <svg className=" absolute top-0 left-0 w-full h-full bg-[url('/pattern-2.svg')] bg-center opacity-20"></svg>
+            <svg className=" absolute top-0 left-0 w-full h-full bg-[url('/pattern-2.svg')] bg-center opacity-20 scale-150"></svg>
             <Virtuoso
               data={messages}
               skipAnimationFrameInResizeObserver={true}

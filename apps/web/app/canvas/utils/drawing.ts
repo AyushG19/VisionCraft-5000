@@ -59,6 +59,7 @@ export const drawHandles = (
   handles.forEach(({ x, y, size }) => {
     ctx.beginPath();
     ctx.rect(x, y, size, size);
+    ctx.fillStyle = "black";
     ctx.fill();
     ctx.stroke();
   });
@@ -186,23 +187,24 @@ const drawEnhancedArrow = (
   ctx.stroke();
 
   // Dynamic arrowhead size based on arrow length
-  const headLength = Math.min(20, length * 0.3);
+  const headLength = Math.min(20, length * 0.2);
   const headWidth = headLength * 0.6;
 
   // Calculate arrowhead points with better proportions
   const arrowX = endX;
   const arrowY = endY;
-  const leftX = arrowX - headLength * Math.cos(angle - Math.PI / 6);
-  const leftY = arrowY - headLength * Math.sin(angle - Math.PI / 6);
-  const rightX = arrowX - headLength * Math.cos(angle + Math.PI / 6);
-  const rightY = arrowY - headLength * Math.sin(angle + Math.PI / 6);
+  const leftX = arrowX - headLength * Math.cos(angle - Math.PI / 8);
+  const leftY = arrowY - headLength * Math.sin(angle - Math.PI / 8);
+  const rightX = arrowX - headLength * Math.cos(angle + Math.PI / 8);
+  const rightY = arrowY - headLength * Math.sin(angle + Math.PI / 8);
 
   // Draw filled arrowhead with rounded joins
   ctx.lineJoin = "round";
   ctx.beginPath();
   ctx.moveTo(arrowX, arrowY);
   ctx.lineTo(leftX, leftY);
-  ctx.lineTo(rightX, rightY);
+  ctx.moveTo(rightX, rightY);
+  ctx.lineTo(arrowX, arrowY);
   ctx.closePath();
 
   if (fillColor) {
@@ -400,7 +402,6 @@ export const drawShape = (
   selectedShapeId?: string
 ): void => {
   if (!ctx || !shape) return;
-
   const width = shape.endX - shape.startX;
   const height = shape.endY - shape.startY;
 
@@ -438,7 +439,7 @@ export const drawShape = (
           shape.startY,
           shape.endX,
           shape.endY,
-          hasFillColor(shape) ? shape.fillColor : null
+          shape.lineColor
         );
         break;
 

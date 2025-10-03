@@ -9,10 +9,8 @@ export default function useAi() {
     try {
       console.log("trying send ai");
       const data = await drawWithAi(userCommand, boardContext);
-      console.log(data.choices[0].message.content);
+      console.log(data);
       setResult(data);
-      const parsedData = JSON.parse(data.choices[0].message.content);
-      return parsedData;
     } catch {
       console.log("error in runDraw");
     }

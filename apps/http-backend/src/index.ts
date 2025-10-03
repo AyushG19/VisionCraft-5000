@@ -1,6 +1,7 @@
 import express from "express";
 import authRouter from "./routes/authRouter.js";
 import roomRouter from "./routes/roomRouter.js";
+import aiRouter from "./routes/aiRouter.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
@@ -11,6 +12,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use("/api/auth", authRouter);
 app.use("/api/rooms", roomRouter);
+app.use("/api/ai", aiRouter);
 
 app.listen(4000, () => {
   console.log("server running on 4000");
