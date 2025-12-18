@@ -1,21 +1,43 @@
-import * as React from "react";
+import React from "react";
+import { InputProps } from "../types";
 
-import { cn } from "../../lib/utils";
-
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+const Input: React.FC<InputProps> = ({
+  label,
+  icon,
+  error,
+  className,
+  id,
+  ...props
+}) => {
   return (
-    <input
-      type={type}
-      data-slot="input"
-      className={cn(
-        "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-        "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
-        className
+    <div className="space-y-1.5">
+      <label htmlFor={id} className="block text-sm font-medium text-slate-300">
+        {label}
+      </label>
+      <div className="relative group">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 group-focus-within:text-indigo-400 transition-colors duration-200">
+          {icon}
+        </div>
+        <input
+          id={id}
+          className={`
+            block w-full pl-10 pr-3 py-2.5 
+            bg-slate-800/50 border border-slate-700 
+            rounded-xl text-slate-200 placeholder-slate-500
+            focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500
+            transition-all duration-200 ease-in-out
+            hover:border-slate-600
+            ${error ? "border-red-500 focus:ring-red-500/50 focus:border-red-500" : ""}
+            ${className || ""}
+          `}
+          {...props}
+        />
+      </div>
+      {error && (
+        <p className="text-xs text-red-400 mt-1 animate-fade-in">{error}</p>
       )}
-      {...props}
-    />
+    </div>
   );
-}
+};
 
-export { Input };
+export default Input;

@@ -1,3 +1,11 @@
+"use client";
+import { AuthForm } from "@repo/ui";
+import { loginService, signupService } from "./services";
 export default function Home() {
-  return <div className="border w-20 h-10 ">hel</div>;
+  return (
+    <AuthForm
+      signUpHelper={signupService}
+      loginHelper={loginService}
+    ></AuthForm>
+  );
 }

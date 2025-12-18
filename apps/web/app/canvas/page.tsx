@@ -8,12 +8,13 @@ import {
   ChatModal,
 } from "@repo/ui";
 import { useWhiteboardWithSocket } from "./hooks/useWhiteboardWithSocket";
-import { createRoom, joinRoom, login } from "./api";
-import { Button } from "@workspace/ui/button";
+import { createRoom, joinRoom, login } from "../api";
+import { Button } from "@repo/ui/button";
 import { AxiosResponse } from "axios";
 import { drawShape } from "./utils/drawing";
 import { ShapeType } from "@repo/common/types";
 import { createContext } from "vm";
+import { createRoomService, joinRoomService } from "app/services";
 
 const page = () => {
   const [inRoom, setInRoom] = useState(false);
@@ -41,21 +42,23 @@ const page = () => {
         console.error("canvas element not available");
         return;
       }
-      const res: AxiosResponse = await joinRoom(code);
-      if (res.status == 200) {
-        setInRoom(true);
-        drawShape(ctx, res.data.canvasState);
-        canvasDispatch({
-          type: "INITIALIZE_BOARD",
-          payload: res.data.canvasState,
-        });
-      }
+      const res = await joinRoomService(code);
+      if (!res) return;
+      setInRoom(true);
+      drawShape(ctx, res.canvasState);
+      canvasDispatch({
+        type: "INITIALIZE_BOARD",
+        payload: [res.canvasState],
+      });
+
       console.log("From page verifyJoin: ", res);
     }
   };
   const makeNewRoom = async () => {
-    const res: AxiosResponse = await createRoom(canvasState.drawnShapes);
-    setInRoom(true);
+    const res = await createRoomService(canvasState.drawnShapes);
+    if (res) {
+      setInRoom(true);
+    }
   };
 
   const drawShapeFromAi = (shapes: ShapeType[]) => {
@@ -90,16 +93,16 @@ const page = () => {
         send
       </Button> */}
 
-      {true ? (
+      {inRoom ? (
         <>
           <RoomOptions />
-          <ChatModal
+          {/* <ChatModal
             drawShapeFromAi={drawShapeFromAi}
             boardState={canvasState.drawnShapes}
             setMessages={setMessages}
             messages={messages}
             wsRef={wsRef}
-          />
+          /> */}
           {/* <ChatBoxContainer
             // messages={messages}
             // setMessage={setMessages}
@@ -107,9 +110,9 @@ const page = () => {
           /> */}
         </>
       ) : (
-        <JoinRoomModal verifyJoin={verifyJoin} />
+        <JoinRoomModal makeNewRoom={makeNewRoom} verifyJoin={verifyJoin} />
       )}
-      <div className="absolute top-0 left-0 gap-2 flex">
+      {/* <div className="absolute top-0 left-0 gap-2 flex">
         <Button className="" onClick={makeNewRoom}>
           new room
         </Button>
@@ -134,7 +137,7 @@ const page = () => {
         >
           leave room
         </Button>
-      </div>
+      </div> */}
     </div>
   );
 };

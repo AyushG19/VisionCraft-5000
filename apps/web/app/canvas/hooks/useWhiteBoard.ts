@@ -6,7 +6,7 @@ import { Action, State } from "../types/index";
 import { type ShapeType } from "@repo/common/types";
 import { drawShape } from "../utils/drawing";
 import debounce from "../utils/debounce";
-import { saveCanvasState } from "../api";
+import { saveCanvasState } from "../../api";
 import { useRoomID } from "./useRoomID";
 // const oklchToCSS = ({
 //   l,

@@ -11,7 +11,7 @@ import {
 } from "../types/index";
 import { type ShapeType } from "@repo/common/types";
 import debounce from "../utils/debounce";
-import { saveCanvasState } from "../api";
+import { saveCanvasState } from "../../api";
 import { WS_BE_URL } from "config";
 import canvasReducer from "../utils/canvasReducer";
 import isClickOnShape, {

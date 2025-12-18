@@ -1,14 +1,22 @@
 import { Request, Response } from "express";
 import { prismaClient, Prisma } from "@repo/db/db";
-import { CreateUserSchema, LoginSchema } from "@repo/common/types";
+import {
+  CreateUserSchema,
+  LoginSchema,
+  SignupResponse,
+} from "@repo/common/types";
 import bcrypt from "bcrypt";
 import { BCRYPT_SALT } from "@repo/backend-common/config";
 import jwtService from "@repo/backend-common/jwt.service";
 import { decode } from "punycode";
+import { loginResponse } from "@repo/common/types";
 
 const isDev = process.env.NODE_ENV === "development";
 
-export const signup = async (req: Request, res: Response) => {
+export const signup = async (
+  req: Request,
+  res: Response
+): Promise<SignupResponse | undefined> => {
   try {
     const parsed = CreateUserSchema.safeParse(req.body);
     if (!parsed.success) {
@@ -75,7 +83,10 @@ export const signup = async (req: Request, res: Response) => {
   }
 };
 
-export const login = async (req: Request, res: Response) => {
+export const login = async (
+  req: Request,
+  res: Response
+): Promise<loginResponse | undefined> => {
   try {
     const parsed = LoginSchema.safeParse(req.body);
     if (!parsed.success) {

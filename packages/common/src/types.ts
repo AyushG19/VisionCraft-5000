@@ -110,7 +110,33 @@ export const MessageSocketSchema = z.object({
   participants: z.array(ParticipantsSchema),
   messages: z.array(MessageSchema),
 });
+const loginResponse = z.object({
+  userId: z.string(),
+  name: z.string(),
+  token: z.string(),
+});
+const SignupResponse = z.object({
+  id: z.string(),
+  email: z.string().email(),
+  name: z.string(),
+  token: z.string(),
+});
+const RoomSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  adminId: z.string(),
+  canvas: z.any(),
+});
+const checkCodeResponse = z.object({
+  id: z.string(),
+  canvasState: ShapeSchema,
+  slug: z.string(),
+});
+export type loginResponse = z.infer<typeof loginResponse>;
 export type LoginFormValues = z.infer<typeof LoginSchema>;
+export type SignupResponse = z.infer<typeof SignupResponse>;
 export type SignupFormValues = z.infer<typeof CreateUserSchema>;
 export type JoinRoomValues = z.infer<typeof JoinRoomSchema>;
 export type CreateRoomValues = z.infer<typeof CreateRoomSchema>;
@@ -118,3 +144,5 @@ export type UuidType = z.infer<typeof UuidSchema>;
 export type WebSocketDataType = z.infer<typeof WebSocketData>;
 export type ShapeType = z.infer<typeof ShapeSchema>;
 export type MessageSocketType = z.infer<typeof MessageSocketSchema>;
+export type RoomSchema = z.infer<typeof RoomSchema>;
+export type checkCodeResponse = z.infer<typeof checkCodeResponse>;

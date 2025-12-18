@@ -5,6 +5,7 @@
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
+      "next/*": ["../../apps/web/node_modules/next/*"],
       "@/*": ["./*"]
     }
   },

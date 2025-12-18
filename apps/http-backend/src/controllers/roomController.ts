@@ -1,9 +1,16 @@
 import { Request, Response } from "express";
 import { prismaClient } from "@repo/db/db";
-import { CreateRoomSchema } from "@repo/common/types";
+import {
+  checkCodeResponse,
+  CreateRoomSchema,
+  RoomSchema,
+} from "@repo/common/types";
 import { generateRandomCode } from "../utils/codeGenerator.js";
 
-const checkCode = async (req: Request, res: Response) => {
+const checkCode = async (
+  req: Request,
+  res: Response
+): Promise<checkCodeResponse | undefined> => {
   try {
     console.log("in check code");
     // const { roomId } = req.query;
@@ -32,7 +39,10 @@ const checkCode = async (req: Request, res: Response) => {
     res.status(505).json("Internam Server Error");
   }
 };
-const createRoom = async (req: Request, res: Response) => {
+const createRoom = async (
+  req: Request,
+  res: Response
+): Promise<RoomSchema | undefined> => {
   try {
     const userId = req.user.userId;
     const canvas = req.body.canvas;

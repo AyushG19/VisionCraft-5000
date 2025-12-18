@@ -3,8 +3,8 @@ import axios, {
   AxiosResponse,
   InternalAxiosRequestConfig,
 } from "axios";
-import { HTTP_BE_URL } from "../../config/index";
-import { ShapeType } from "@repo/common/types";
+import { HTTP_BE_URL } from "../config/index";
+import { LoginFormValues, ShapeType } from "@repo/common/types";
 
 let isRefreshing = false;
 let refreshSubscribers: ((newToken: string) => void)[] = [];
@@ -95,8 +95,8 @@ export const joinRoom = async (roomCode: string): Promise<any> => {
       slug: roomCode,
     };
     const res = await axiosInstance.post(`/api/rooms/check-code`, data);
-    localStorage.setItem("roomId", res.data.id);
-    localStorage.setItem("slug", res.data.slug);
+    // localStorage.setItem("roomId", res.data.id);
+    // localStorage.setItem("slug", res.data.slug);
     return res;
   } catch (error) {
     return error;
@@ -109,7 +109,7 @@ export const createRoom = async (canvas: ShapeType[]): Promise<any> => {
       canvas: canvas,
     };
     const res = await axiosInstance.post("/api/rooms/create", data);
-    localStorage.setItem("roomId", res.data.id);
+    // localStorage.setItem("roomId", res.data.id);
     return res;
   } catch (error) {
     return error;
@@ -136,20 +136,20 @@ export const saveCanvasState = async (
   }
 };
 
-export const login = async () => {
+export const login = async (data: LoginFormValues): Promise<AxiosResponse> => {
   try {
-    let data = {
-      email: "ayush@gamil.com",
-      password: "@Ayush1900",
-    };
-    console.log("loggin in");
+    // let data = {
+    //   email: "ayush@gamil.com",
+    //   password: "@Ayush1900",
+    // };
+    console.log("loggin api hit");
     const res = await axiosInstance.post(`/api/auth/login`, data);
-    localStorage.setItem("token", res.data.token);
-    localStorage.setItem("userId", res.data.userId);
-    localStorage.setItem("name", res.data.name);
-    console.log("login res :", res);
+    // localStorage.setItem("token", res.data.token);
+    // localStorage.setItem("userId", res.data.userId);
+    // localStorage.setItem("name", res.data.name);
+    console.log("login api res :", res);
     return res;
   } catch (error) {
-    return error;
+    throw error;
   }
 };
