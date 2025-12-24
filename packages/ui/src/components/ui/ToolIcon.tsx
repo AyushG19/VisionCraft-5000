@@ -1,13 +1,7 @@
 "use client";
-import React, { Component, forwardRef, useEffect, useState } from "react";
-import { cn } from "@/src/lib/utils";
+import React, { useEffect, useState } from "react";
 
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-  TooltipProvider,
-} from "./ToolTip";
+import { Tooltip, TooltipTrigger, TooltipContent } from "./ToolTip";
 import { ToolState } from "@repo/common/toolState";
 import ColorSelector from "./ColorSelector";
 
