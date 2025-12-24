@@ -193,7 +193,7 @@ const AuthForm: React.FC<AuthFormPops> = ({ loginHelper, signUpHelper }) => {
               </div>
             )}
 
-            <Button type="submit" className="mt-2">
+            <Button type="submit" className="mt-2 bg-purple-500">
               {authMode === AuthMode.LOGIN ? "Sign In" : "Sign Up"}{" "}
               <ArrowRight size={18} className="ml-2 inline-block" />
             </Button>

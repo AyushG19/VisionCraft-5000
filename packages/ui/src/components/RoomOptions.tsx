@@ -7,7 +7,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "./ui/ToolTip";
 const RoomOptions = () => {
   return (
     <div className="flex items-center justify-center gap-2 absolute top-0 right-0 m-6 z-10">
-      <Tooltip>
+      {/* <Tooltip>
         <TooltipTrigger asChild>
           <Button
             size={"sm"}
@@ -19,10 +19,11 @@ const RoomOptions = () => {
         <TooltipContent>
           <p>Join Chat</p>
         </TooltipContent>
-      </Tooltip>
+      </Tooltip> */}
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
+            onClick={() => window.location.reload()}
             className="shadow-primary opacity-60 hover:opacity-100"
             variant={"destructive"}
             size={"sm"}

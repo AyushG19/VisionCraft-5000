@@ -6,8 +6,8 @@ export const redisPub: RedisClientType = createClient({
   username: "default",
   password: process.env.REDIS_PASS,
   socket: {
-    host: "redis-15800.crce206.ap-south-1-1.ec2.redns.redis-cloud.com",
-    port: 15800,
+    host: process.env.HOST,
+    port: process.env.PORT ? parseInt(process.env.PORT) : undefined,
     reconnectStrategy: (retries) => Math.min(retries * 50, 2000),
     keepAlive: 5000,
   },
@@ -16,8 +16,8 @@ export const redisSub: RedisClientType = createClient({
   username: "default",
   password: process.env.REDIS_PASS,
   socket: {
-    host: "redis-15800.crce206.ap-south-1-1.ec2.redns.redis-cloud.com",
-    port: 15800,
+    host: process.env.HOST,
+    port: process.env.PORT ? parseInt(process.env.PORT) : undefined,
     reconnectStrategy: (retries) => Math.min(retries * 50, 2000),
     keepAlive: 5000,
   },

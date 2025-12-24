@@ -58,6 +58,7 @@ const page = () => {
     const res = await createRoomService(canvasState.drawnShapes);
     if (res) {
       setInRoom(true);
+      alert(res.slug);
     }
   };
 
