@@ -39,7 +39,7 @@ node_modules/
 !.vscode/extensions.json
 
 # Env files
-.env
+.env.*
 .env.development
 
 # Temporary files

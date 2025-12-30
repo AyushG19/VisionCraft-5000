@@ -1,19 +1,21 @@
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
-import authRouter from "./routes/authRouter.js";
+import authRouter from "./routes/auth.router.js";
 import roomRouter from "./routes/roomRouter.js";
 import aiRouter from "./routes/aiRouter.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-
+import { errorHandler } from "./middlewares/error.middleware.js";
+console.log("l");
 const app = express();
-
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 app.use("/api/auth", authRouter);
 app.use("/api/rooms", roomRouter);
 app.use("/api/ai", aiRouter);
-
+app.use(errorHandler);
 app.listen(4000, () => {
   console.log("server running on 4000");
 });

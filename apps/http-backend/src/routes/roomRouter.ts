@@ -1,5 +1,5 @@
 import express, { Router } from "express";
-import { checkAuth } from "../middlewares/authMiddleware.js";
+import { checkAuth } from "../middlewares/auth.middleware.js";
 import {
   checkCode,
   createRoom,

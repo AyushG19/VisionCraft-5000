@@ -1,24 +1,41 @@
-import jwt from "jsonwebtoken";
+import jwt, { JwtHeader } from "jsonwebtoken";
 import { aTokenExpiry, rTokenExpiry, JWT_SECRET } from "./config";
 import CustomUserPayload from "./jwt-payload";
 
-export const createAccessToken = (payload: CustomUserPayload): string => {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: aTokenExpiry });
-};
+export class JwtService {
+  constructor(private secret: string) {}
+  sign(payload: CustomUserPayload, expiresIn: number) {
+    return jwt.sign(payload, this.secret, { expiresIn });
+  }
+  verify<T>(token: string) {
+    return jwt.verify(token, this.secret) as T;
+  }
+}
+// export const createAccessToken = (
+//   payload: CustomUserPayload,
+//   secret: string
+//   options
+// ): string => {
+//   return jwt.sign(payload, secret, { expiresIn: aTokenExpiry });
+// };
 
-export const createRefreshToken = (payload: CustomUserPayload): string => {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: rTokenExpiry });
-};
+// export const createRefreshToken = (
+//   payload: CustomUserPayload,
+//   secret: string
+// ): string => {
+//   return jwt.sign(payload, secret, { expiresIn: rTokenExpiry });
+// };
 
 export const verifyToken = (
-  token: string
+  token: string,
+  secret: string
 ): {
   valid: boolean;
   decoded: CustomUserPayload | null;
   error?: unknown;
 } => {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, secret);
     if (typeof decoded === "object" && decoded !== null) {
       return { valid: true, decoded: decoded as CustomUserPayload };
     } else {

@@ -1,5 +1,6 @@
+"use client";
 import React, { useState } from "react";
-import { Button } from "../button";
+import { Button } from "./ui/button";
 import {
   IconMessage,
   IconMessageCircleUser,

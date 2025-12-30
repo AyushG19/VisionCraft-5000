@@ -15,9 +15,6 @@ export const CreateUserSchema = z
       })
       .regex(/[0-9]/, { message: "Password must contain at least one number" }),
     confirmPassword: z.string(),
-    terms: z.literal(true, {
-      errorMap: () => ({ message: "You must accept the terms and conditions" }),
-    }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
@@ -110,6 +107,46 @@ export const MessageSocketSchema = z.object({
   participants: z.array(ParticipantsSchema),
   messages: z.array(MessageSchema),
 });
+export const User = z.object({
+  userId: z.string(),
+  name: z.string(),
+});
+
+const RoomSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  adminId: z.string(),
+  canvas: z.any(),
+});
+const checkCodeResponse = z.object({
+  id: z.string(),
+  canvasState: ShapeSchema,
+  slug: z.string(),
+});
+export const HttpEnv = z.object({
+  NODE_ENV: z.enum(["production", "development"]),
+  PORT: z.number(),
+  JWT_SECRET: z.string(),
+  BCRYPT_SALT: z.string(),
+  MODEL: z.string(),
+  GROQ_API_KEY: z.string(),
+  RF_TOKEN_EXPIRY: z.number(),
+  AC_TOKEN_EXPIRY: z.number(),
+});
+export const JwtPayloadSchema = z.object({
+  userId: z.string(),
+  role: z.string().optional(),
+  roomId: z.string().optional(),
+  iat: z.number(),
+  exp: z.number(),
+});
+export const JwtExpiry = z.number({
+  message: "Invalid format. Use number",
+});
+
+export type UserType = z.infer<typeof User>;
 export type LoginFormValues = z.infer<typeof LoginSchema>;
 export type SignupFormValues = z.infer<typeof CreateUserSchema>;
 export type JoinRoomValues = z.infer<typeof JoinRoomSchema>;
@@ -118,3 +155,8 @@ export type UuidType = z.infer<typeof UuidSchema>;
 export type WebSocketDataType = z.infer<typeof WebSocketData>;
 export type ShapeType = z.infer<typeof ShapeSchema>;
 export type MessageSocketType = z.infer<typeof MessageSocketSchema>;
+export type RoomSchema = z.infer<typeof RoomSchema>;
+export type checkCodeResponse = z.infer<typeof checkCodeResponse>;
+export type JwtPayloadType = z.infer<typeof JwtPayloadSchema>;
+export type { ZodTypeAny } from "zod";
+export type JwtExpiryType = z.infer<typeof JwtExpiry>;

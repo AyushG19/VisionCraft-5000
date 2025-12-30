@@ -1,6 +1,6 @@
 import React from "react";
 import ChatModal from "./ChatModal";
-import { Button } from "../button";
+import { Button } from "./ui/button";
 import { IconLogout, IconMessagePlus } from "@tabler/icons-react";
 import { Tooltip, TooltipTrigger, TooltipContent } from "./ui/ToolTip";
 

@@ -5,14 +5,11 @@ import {
   IconSend2,
   IconSlash,
 } from "@tabler/icons-react";
-import React, { RefObject, useEffect, useState } from "react";
-import { Button } from "../button";
+import React, { useState } from "react";
+import { Button } from "./ui/button";
 import { Virtuoso } from "react-virtuoso";
 import MessageBubble from "./ui/MessageBubble";
-import { attachColorsToParticipants } from "../lib/colorMapper";
 import { ChatModalProps, Message } from "./types";
-import { useAiHook } from "@repo/hooks";
-import { json } from "stream/consumers";
 import { drawWithAi } from "@repo/common/api";
 
 const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(

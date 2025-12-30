@@ -9,7 +9,7 @@ import {
 } from "@repo/ui";
 import { useWhiteboardWithSocket } from "./hooks/useWhiteboardWithSocket";
 import { createRoom, joinRoom, login } from "./api";
-import { Button } from "@workspace/ui/button";
+import { Button } from "@repo/ui/button";
 import { AxiosResponse } from "axios";
 import { drawShape } from "./utils/drawing";
 import { ShapeType } from "@repo/common/types";
