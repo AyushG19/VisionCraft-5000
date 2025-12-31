@@ -1,24 +1,12 @@
 import { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from "axios";
-import axiosInstance from "./axios";
+import { axiosInstance, refreshInstance } from "./axios";
+import { AppError } from "./error";
 let isRefreshing = false;
-let refreshSubscribers: ((newToken: string) => void)[] = [];
-const subscribersCallback = (newToken: string) => {
-  refreshSubscribers.forEach((callback) => callback(newToken));
+let refreshSubscribers: (() => void)[] = [];
+const subscribersCallback = () => {
+  refreshSubscribers.forEach((callback) => callback());
+  refreshSubscribers = [];
 };
-
-axiosInstance.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem("token");
-    if (token && config.headers) {
-      config.headers["Authorization"] = `Bearer ${token}`;
-    }
-    config.withCredentials = true;
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
 
 axiosInstance.interceptors.response.use(
   (res: AxiosResponse) => res,
@@ -26,40 +14,71 @@ axiosInstance.interceptors.response.use(
     const originalReq = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
     };
-    if (
-      !error.response ||
-      error.response.status !== 401 ||
-      originalReq._retry
-    ) {
-      return Promise.reject(error);
+    if (!error.response) {
+      throw new AppError(
+        "Network error.Please check internet connection.",
+        "NETWORK_ERROR"
+      );
     }
 
-    originalReq._retry = true;
-    if (isRefreshing) {
-      return new Promise((resolve, reject) => {
-        refreshSubscribers.push((newToken: string) => {
-          originalReq.headers["Authorization"] = newToken;
-          resolve(axiosInstance(originalReq));
+    const { status } = error.response;
+    if (status === 401 && originalReq && !originalReq._retry) {
+      if (originalReq.url?.includes("auth/refresh-token")) {
+        throw new AppError("Session expired", "UNAUTHORIZED", 401);
+      }
+      originalReq._retry = true;
+
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          refreshSubscribers.push(() => {
+            resolve(axiosInstance(originalReq));
+          });
         });
-      });
-    }
-    isRefreshing = true;
-    try {
-      console.log("Refreshing");
-      const res = await axiosInstance.post("api/auth/refresh-token");
-      const newToken = res.data.token; //make sure res has only string token not in aobject form
-      localStorage.setItem("token", newToken);
-      originalReq.headers["Authorization"] = newToken;
+      }
 
-      subscribersCallback(newToken);
-      return axiosInstance(originalReq);
-    } catch (err: any) {
-      refreshSubscribers = [];
-      localStorage.removeItem("token");
-      //log the user out here
-      return Promise.reject(err);
-    } finally {
-      isRefreshing = false;
+      isRefreshing = true;
+      try {
+        console.log("Refreshing");
+        //clg
+        await refreshInstance.post("api/auth/refresh-token");
+        subscribersCallback();
+        return axiosInstance(originalReq);
+      } catch (err) {
+        refreshSubscribers = [];
+        //log the user out here
+        throw new AppError(
+          "Session expired. Please login again.",
+          "UNAUTHORIZED",
+          401
+        );
+      } finally {
+        isRefreshing = false;
+      }
+    }
+    switch (status) {
+      case 400:
+        throw new AppError("Invalid request", "VALIDATION_ERROR", 400);
+
+      case 403:
+        throw new AppError(
+          "You do not have permission to perform this action.",
+          "UNAUTHORIZED",
+          403
+        );
+
+      case 500:
+        throw new AppError(
+          "Server error. Please try again later.",
+          "SERVER_ERROR",
+          500
+        );
+
+      default:
+        throw new AppError(
+          "Unexpected error occurred.",
+          "UNKNOWN_ERROR",
+          status
+        );
     }
   }
 );
