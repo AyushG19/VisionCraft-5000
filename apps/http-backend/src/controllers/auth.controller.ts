@@ -5,7 +5,7 @@ import jwtService from "@repo/backend-common/jwt.service";
 import { authConfig, rfTokenExpiry } from "../config/index.js";
 import { AppError } from "../error/index.js";
 import { accessJwtService, refreshJwtService } from "../utils/jwtInstance.js";
-import { JwtPayloadType } from "@repo/common/types";
+import { JwtPayloadType, UserType } from "@repo/common/types";
 
 export const signup = async (req: Request, res: Response) => {
   try {
@@ -39,7 +39,7 @@ export const signup = async (req: Request, res: Response) => {
         authConfig.accessCookies
       )
       .json({
-        id: user.id,
+        userId: user.id,
         name: user.name,
       });
   } catch (error) {
@@ -69,10 +69,11 @@ export const login = async (req: Request, res: Response) => {
         authConfig.accessCookies
       )
       .json({
-        id: user.id,
+        userId: user.id,
         name: user.name,
       });
   } catch (error) {
+    console.log(error);
     throw new AppError(500, "some internal error");
   }
 };

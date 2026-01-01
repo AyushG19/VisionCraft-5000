@@ -145,7 +145,15 @@ export const JwtPayloadSchema = z.object({
 export const JwtExpiry = z.number({
   message: "Invalid format. Use number",
 });
-
+// app/errors/AppError.ts
+export const AppErrorCode = z.enum([
+  "UNAUTHORIZED",
+  "INVALID_CREDENTIALS",
+  "VALIDATION_ERROR",
+  "NETWORK_ERROR",
+  "SERVER_ERROR",
+  "UNKNOWN_ERROR",
+]);
 export type UserType = z.infer<typeof User>;
 export type LoginFormValues = z.infer<typeof LoginSchema>;
 export type SignupFormValues = z.infer<typeof CreateUserSchema>;
@@ -160,3 +168,4 @@ export type checkCodeResponse = z.infer<typeof checkCodeResponse>;
 export type JwtPayloadType = z.infer<typeof JwtPayloadSchema>;
 export type { ZodTypeAny } from "zod";
 export type JwtExpiryType = z.infer<typeof JwtExpiry>;
+export type AppErrorCodeType = z.infer<typeof AppErrorCode>;

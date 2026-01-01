@@ -7,6 +7,11 @@ import {
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import EmailModal from "./ui/EmailModal";
+import {
+  LoginFormValues,
+  SignupFormValues,
+  UserType,
+} from "@repo/common/types";
 
 // Dots pattern component
 export function DotsPattern() {
@@ -143,12 +148,24 @@ export function TopSection() {
 }
 
 // Main content with EASY Diagram box and email modal
-export function MainContent() {
+export function MainContent({
+  signupService,
+  loginService,
+  navigate,
+}: {
+  signupService: (signupData: SignupFormValues) => Promise<UserType>;
+  loginService: (loginData: LoginFormValues) => Promise<UserType>;
+  navigate: (route: string) => void;
+}) {
   return (
     <div className="w-screen h-screen flex items-center justify-center">
       {/* Email Login Modal */}
       <div className="block w-full p-4 lg:p-0 lg:w-auto lg:absolute lg:left-1/4 lg:top-3/5 lg:-translate-1/2">
-        <EmailModal />
+        <EmailModal
+          signupService={signupService}
+          loginService={loginService}
+          navigate={navigate}
+        />
       </div>
 
       {/* Center content area */}

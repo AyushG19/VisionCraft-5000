@@ -7,6 +7,12 @@ import {
   IconBrandGithubFilled,
   IconBrandGoogleFilled,
 } from "@tabler/icons-react";
+import {
+  LoginFormValues,
+  SignupFormValues,
+  UserType,
+} from "@repo/common/types";
+import { AppError } from "@repo/common/api";
 
 type FieldState = {
   label: string;
@@ -14,45 +20,96 @@ type FieldState = {
   setState: React.Dispatch<React.SetStateAction<string>>;
   placeholder: string;
 };
-const EmailModal = () => {
+const EmailModal = ({
+  signupService,
+  loginService,
+  navigate,
+}: {
+  signupService: (signupData: SignupFormValues) => Promise<UserType>;
+  loginService: (loginData: LoginFormValues) => Promise<UserType>;
+  navigate: (route: string) => void;
+}) => {
   const [email, setEmail] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [stage, setStage] = useState<number>(0);
-  const stages: FieldState[] = [
-    {
-      label: "email",
-      state: email,
-      setState: setEmail,
-      placeholder: "easy@something.com",
-    },
-    {
-      label: "password",
-      state: password,
-      setState: setPassword,
-      placeholder: "*********",
-    },
-    {
-      label: "confirm password",
-      state: confirmPassword,
-      setState: setConfirmPassword,
-      placeholder: "*********",
-    },
-    {
-      label: "name",
-      state: name,
-      setState: setName,
-      placeholder: "skibidi toilet",
-    },
-  ];
+  const [signupOrLogin, setSignupOrLogin] = useState<"signup" | "login">(
+    "login"
+  );
+  const stages: FieldState[] =
+    signupOrLogin === "signup"
+      ? [
+          {
+            label: "email",
+            state: email,
+            setState: setEmail,
+            placeholder: "easy@something.com",
+          },
+          {
+            label: "password",
+            state: password,
+            setState: setPassword,
+            placeholder: "*********",
+          },
+          {
+            label: "confirm password",
+            state: confirmPassword,
+            setState: setConfirmPassword,
+            placeholder: "*********",
+          },
+          {
+            label: "name",
+            state: name,
+            setState: setName,
+            placeholder: "skibidi toilet",
+          },
+        ]
+      : [
+          {
+            label: "email",
+            state: email,
+            setState: setEmail,
+            placeholder: "easy@something.com",
+          },
+          {
+            label: "password",
+            state: password,
+            setState: setPassword,
+            placeholder: "*********",
+          },
+        ];
   const currStage = stages[stage];
-
+  const handleSubmit = async () => {
+    try {
+      if (signupOrLogin === "signup") {
+        const signupData: SignupFormValues = {
+          email: email,
+          password: password,
+          confirmPassword: confirmPassword,
+          name: name,
+        };
+        const res = await signupService(signupData);
+        navigate("canvas"); //use just the name "/" is auto
+      } else if (signupOrLogin === "login") {
+        const loginData: LoginFormValues = {
+          email: email,
+          password: password,
+        };
+        const res = await loginService(loginData);
+        navigate("canvas");
+      }
+    } catch (error) {
+      if (error instanceof AppError) {
+        console.error(error.message);
+      }
+    }
+  };
   return (
     <div>
       <div className="relative w-full lg:w-110 shadow-primary outline-personal">
         {/* Main modal content */}
-        <div className="flex h-full w-full flex-col items-center justify-center gap-5 rounded-[20px] border border-black bg-easy-purple px-6 lg:px-8 py-10 box-shadow-black">
+        <div className="flex h-full w-full flex-col items-center justify-center gap-5 rounded-[20px] border border-black bg-easy-purple px-4 lg:px-6 py-6 box-shadow-black">
           {/* Email section */}
           <div className="flex flex-col gap-2.5 w-full h-full ">
             <h2 className="font-krona text-4xl text-white text-shadow-primary capitalize">
@@ -61,6 +118,12 @@ const EmailModal = () => {
             <div className="flex items-center w-full h-fullfl">
               {currStage && (
                 <Input
+                  type={
+                    currStage.label === "password" ||
+                    currStage.label === "confirm password"
+                      ? "password"
+                      : ""
+                  }
                   value={currStage.state}
                   onInput={(e) => currStage.setState(e.currentTarget.value)}
                   placeholder={currStage?.placeholder}
@@ -68,7 +131,11 @@ const EmailModal = () => {
                 ></Input>
               )}
               <Button
-                onClick={() => setStage((prev) => (prev + 1) % 4)}
+                onClick={() =>
+                  currStage === stages.at(-1)
+                    ? handleSubmit()
+                    : setStage((prev) => (prev + 1) % 4)
+                }
                 className="w-16 -ml-4  bg-easy-purple-muted text-easy-bg"
                 variant={"iconic"}
                 size={"xl"}
@@ -115,6 +182,37 @@ const EmailModal = () => {
                 Github
               </p>
             </Button>
+          </div>
+          <div>
+            {signupOrLogin === "login" ? (
+              <div className="flex gap-1 items-center justify-center text-easy-bg text-xs ">
+                <p>Don't have an account?</p>
+                <Button
+                  onClick={() => {
+                    setSignupOrLogin("signup");
+                    setStage(0);
+                  }}
+                  className="p-0 text-sm h-full hover:text-easy-purple-muted hover:cursor-pointer font-semibold -mt-0.5"
+                  variant="link"
+                >
+                  signup
+                </Button>
+              </div>
+            ) : (
+              <div className="flex gap-1 items-center justify-center text-easy-bg text-xs ">
+                <p>Already have an account?</p>
+                <Button
+                  onClick={() => {
+                    setSignupOrLogin("login");
+                    setStage(0);
+                  }}
+                  className="p-0 text-sm h-full hover:text-easy-purple-muted hover:cursor-pointer font-semibold -mt-0.5"
+                  variant="link"
+                >
+                  login
+                </Button>
+              </div>
+            )}
           </div>
         </div>
         {/* Corner markers */}
@@ -168,9 +266,19 @@ const EmailModal = () => {
             ></path>
           </g>
         </svg>
+        <p className="absolute bottom-0 translate-y-full text-white opacity-50 text-xs w-full -mb-2">
+          By continuing you are agreeing to our <br />
+          <a className="text-easy-light-blue hover:underline hover:cursor-pointer mr-1">
+            Terms of Use
+          </a>
+          &
+          <a className="text-easy-light-blue hover:underline hover:cursor-pointer ml-1">
+            Privacy Policy
+          </a>
+        </p>
       </div>
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-[140%] bg-easy-blue px-3 py-1.5 text-xs rounded-sm font-semibold ">
-        440 x 355
+      <div className="absolute bottom-0 right-0 translate-y-9/5 bg-easy-blue px-3 py-1.5 text-xs rounded-sm font-semibold font-google-sans-code">
+        {signupOrLogin}
       </div>
     </div>
   );

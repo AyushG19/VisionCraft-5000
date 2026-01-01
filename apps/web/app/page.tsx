@@ -1,3 +1,4 @@
+"use client";
 import {
   DotsPattern,
   TopSection,
@@ -6,7 +7,13 @@ import {
   FloatingShapes,
   DecorativeLines,
 } from "@workspace/ui/index";
+import { loginService, signupService } from "./services/auth.service";
+import { useRouter } from "next/navigation";
 export default function Page() {
+  const router = useRouter();
+  const navigate = (route: string) => {
+    router.push(`/${route}`);
+  };
   return (
     <div className="relative min-h-screen overflow-hidden bg-easy-bg">
       {/* Decorative dots pattern on the left */}
@@ -16,7 +23,11 @@ export default function Page() {
       <TopSection />
 
       {/* Main content area */}
-      <MainContent />
+      <MainContent
+        signupService={signupService}
+        loginService={loginService}
+        navigate={navigate}
+      />
 
       {/* Bottom section with shapes label */}
       <BottomSection />

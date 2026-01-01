@@ -1,13 +1,20 @@
-import { AppErrorCodeType } from "@repo/common/types";
+// app/errors/AppError.ts
+export type AppErrorCode =
+  | "UNAUTHORIZED"
+  | "INVALID_CREDENTIALS"
+  | "VALIDATION_ERROR"
+  | "NETWORK_ERROR"
+  | "SERVER_ERROR"
+  | "UNKNOWN_ERROR";
 
 export class AppError extends Error {
-  code: AppErrorCodeType;
+  code: AppErrorCode;
   status?: number;
   fieldErrors?: Record<string, string>;
 
   constructor(
     message: string,
-    code: AppErrorCodeType,
+    code: AppErrorCode,
     status?: number,
     fieldErrors?: Record<string, string>
   ) {

@@ -11,6 +11,7 @@ export const loginService = async (
   loginData: LoginFormValues
 ): Promise<UserType> => {
   const data = await loginApi(loginData);
+  console.log(data);
   const parsedData = User.safeParse(data);
   if (!parsedData.success) {
     console.error(parsedData.error);
