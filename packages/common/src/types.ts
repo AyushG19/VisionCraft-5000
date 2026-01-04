@@ -78,6 +78,11 @@ export const JoinRoomSchema = z.object({
 });
 
 export const UuidSchema = z.string().uuid({ message: "Invalid RoomID" });
+export const WebSocketDataPayload = z.object({
+  message: z.string().optional(),
+  shape: ShapeSchema.optional(),
+  userId: z.string(),
+});
 export const WebSocketData = z.object({
   type: z.enum([
     "JOIN_ROOM",
@@ -88,11 +93,7 @@ export const WebSocketData = z.object({
     "DEL_SHAPE",
     "UPD_SHAPE",
   ]),
-  payload: z.object({
-    message: z.string().optional(),
-    shape: ShapeSchema.optional(),
-    userId: z.string().optional(),
-  }),
+  payload: WebSocketDataPayload,
 });
 const ParticipantsSchema = z.object({
   id: z.string(),
@@ -135,6 +136,21 @@ export const HttpEnv = z.object({
   RF_TOKEN_EXPIRY: z.number(),
   AC_TOKEN_EXPIRY: z.number(),
 });
+export const wsEnv = z.object({
+  NODE_ENV: z.enum(["production", "development"]),
+  PORT: z.number(),
+  JWT_SECRET: z.string(),
+  BCRYPT_SALT: z.string(),
+  RF_TOKEN_EXPIRY: z.number(),
+  AC_TOKEN_EXPIRY: z.number(),
+});
+export const dbEnvSchema = z.object({
+  RS_HOST: z.string(), //rs for redis
+  RS_PORT: z.number(),
+  RS_USERNAME: z.string(),
+  RS_PASSWORD: z.string(),
+  PG_URL: z.string(), // pg for postgres
+});
 export const JwtPayloadSchema = z.object({
   userId: z.string(),
   role: z.string().optional(),
@@ -144,6 +160,11 @@ export const JwtPayloadSchema = z.object({
 });
 export const JwtExpiry = z.number({
   message: "Invalid format. Use number",
+});
+export const JwtVerifyResponseSchema = z.object({
+  valid: z.boolean(),
+  decoded: JwtPayloadSchema,
+  error: z.any().optional(),
 });
 // app/errors/AppError.ts
 export const AppErrorCode = z.enum([
@@ -169,3 +190,7 @@ export type JwtPayloadType = z.infer<typeof JwtPayloadSchema>;
 export type { ZodTypeAny } from "zod";
 export type JwtExpiryType = z.infer<typeof JwtExpiry>;
 export type AppErrorCodeType = z.infer<typeof AppErrorCode>;
+export type WsEnvType = z.infer<typeof wsEnv>;
+export type DbEnvType = z.infer<typeof dbEnvSchema>;
+export type JwtVerifyResponseType = z.infer<typeof JwtVerifyResponseSchema>;
+export type WebSocketDataPayloadType = z.infer<typeof WebSocketDataPayload>;

@@ -394,6 +394,7 @@ export const useWhiteboardWithSocket = (enabled: boolean) => {
       if (canvasState.toolState.currentTool === "TEXT") {
         return;
       } else if (canvasState.toolState.currentTool === "PENCIL") {
+        console.log("updating pencil");
         canvasDispatch({
           type: "UPDATE_PENCIL",
           payload: currMousePos.current,

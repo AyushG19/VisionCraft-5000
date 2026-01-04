@@ -1,7 +1,7 @@
 import jwt, { JwtHeader } from "jsonwebtoken";
 import { aTokenExpiry, rTokenExpiry, JWT_SECRET } from "./config";
 import CustomUserPayload from "./jwt-payload";
-
+import { JwtPayloadType, type JwtVerifyResponseType } from "@repo/common/types";
 export class JwtService {
   constructor(private secret: string) {}
   sign(payload: CustomUserPayload, expiresIn: number) {
@@ -26,25 +26,21 @@ export class JwtService {
 //   return jwt.sign(payload, secret, { expiresIn: rTokenExpiry });
 // };
 
-export const verifyToken = (
-  token: string,
-  secret: string
-): {
-  valid: boolean;
-  decoded: CustomUserPayload | null;
-  error?: unknown;
-} => {
-  try {
-    const decoded = jwt.verify(token, secret);
-    if (typeof decoded === "object" && decoded !== null) {
-      return { valid: true, decoded: decoded as CustomUserPayload };
-    } else {
-      return { valid: true, decoded: null };
-    }
-  } catch (err) {
-    return { valid: false, decoded: null, error: err };
-  }
-};
+// export const verifyToken = (
+//   token: string,
+//   secret: string
+// ): JwtVerifyResponseType => {
+//   try {
+//     const decoded = jwt.verify(token, secret);
+//     if (typeof decoded === "object" && decoded !== null) {
+//       return { valid: true, decoded: decoded as JwtPayloadType };
+//     } else {
+//       return { valid: true, decoded: null };
+//     }
+//   } catch (err) {
+//     return { valid: false, decoded: null, error: err };
+//   }
+// };
 export const createTokens = (payload: CustomUserPayload): object => {
   return {
     accessToken: jwt.sign(payload, JWT_SECRET, { expiresIn: aTokenExpiry }),
