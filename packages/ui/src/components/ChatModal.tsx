@@ -5,15 +5,16 @@ import {
   IconSend2,
   IconSlash,
 } from "@tabler/icons-react";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Button } from "./ui/button";
 import { Virtuoso } from "react-virtuoso";
 import MessageBubble from "./ui/MessageBubble";
 import { ChatModalProps, Message } from "./types";
 import { drawWithAi } from "@repo/common/api";
+import { useUser } from "@repo/hooks";
 
 const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
-  ({ wsRef, messages, setMessages, boardState, drawShapeFromAi }, ref) => {
+  ({ send, messages, setMessages, boardState, drawShapeFromAi }, ref) => {
     const [isChatUp, setIsChatUp] = useState(false);
     const [placeholder, setPlaceholder] =
       useState<string>("Say hello to chat!");
@@ -280,7 +281,8 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
     //   attachColorsToParticipants(participants);
 
     const handleMessageSend = async (content: string) => {
-      const userId = localStorage.getItem("userId");
+      const { currentUser } = useUser();
+      const userId = currentUser?.userId;
       if (!userId) {
         console.log("no userID");
         return;
@@ -293,11 +295,7 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
         const shapes = await drawWithAi(command, boardState);
         drawShapeFromAi(shapes);
       }
-      if (!wsRef.current) {
-        console.log("no wsRef");
-        return;
-      }
-      const name = localStorage.getItem("name");
+      const name = currentUser?.name;
       if (!name) return;
       console.log("sending mess");
       const userMessage: Message = {
@@ -307,7 +305,7 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
         content: content,
       };
       setMessages((prev) => [...prev, userMessage]);
-      wsRef.current.send(
+      send(
         JSON.stringify({
           type: "CHAT",
           payload: { message: inputText, userId },

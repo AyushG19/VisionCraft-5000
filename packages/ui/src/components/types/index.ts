@@ -9,7 +9,7 @@ export interface Message {
 }
 export interface ChatModalProps {
   boardState: ShapeType[];
-  wsRef: RefObject<WebSocket | null>;
+  send: (action: any) => void;
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[] | []>>;
   drawShapeFromAi: (shapes: ShapeType[]) => void;

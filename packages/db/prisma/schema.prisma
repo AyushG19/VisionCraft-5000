@@ -27,7 +27,7 @@ model Room {
   updatedAt     DateTime      @default(now())
   admin         User          @relation(fields: [adminId], references: [id])
   adminId       String
-  canvas        Json          
+  canvas        Json?       
   userRooms     RoomUser[]
   chats         Chat[]
 }

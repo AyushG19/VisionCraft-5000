@@ -2,6 +2,7 @@ import { createContext } from "vm";
 import oklchToCSS from "./oklchToCss";
 import { ShapeSchema, type ShapeType } from "@repo/common/types";
 import { Bounds, getHandles, Handle } from "./getHandles";
+import { start } from "repl";
 
 // Type definitions for better type safety
 interface Point {
@@ -19,7 +20,7 @@ interface ColorType {
 
 // Type guard to check if shape has points
 const hasPoints = (
-  shape: ShapeType
+  shape: ShapeType,
 ): shape is ShapeType & { points: Point[] } => {
   return (
     "points" in shape && Array.isArray(shape.points) && shape.points.length > 0
@@ -28,20 +29,20 @@ const hasPoints = (
 
 // Type guard to check if shape has fill color
 const hasFillColor = (
-  shape: ShapeType
+  shape: ShapeType,
 ): shape is ShapeType & { fillColor: ColorType } => {
   return "fillColor" in shape && shape.fillColor != null;
 };
 
 // Type guard to check if shape has line width
 const hasLineWidth = (
-  shape: ShapeType
+  shape: ShapeType,
 ): shape is ShapeType & { lineWidth: number } => {
   return "lineWidth" in shape && typeof shape.lineWidth === "number";
 };
 
 const hasContent = (
-  shape: ShapeType
+  shape: ShapeType,
 ): shape is ShapeType & { content: string } => {
   return "content" in shape && typeof shape.content === "string";
 };
@@ -50,7 +51,7 @@ const hasContent = (
 export const drawHandles = (
   ctx: CanvasRenderingContext2D,
   bounds: Bounds,
-  handleSize: number = 6
+  handleSize: number = 6,
 ): Handle[] => {
   const handles = getHandles(bounds, handleSize);
 
@@ -71,7 +72,7 @@ export const drawHandles = (
 const highlightShape = (
   ctx: CanvasRenderingContext2D,
   shape: ShapeType,
-  bounds: { x: number; y: number; width: number; height: number }
+  bounds: { x: number; y: number; width: number; height: number },
 ) => {
   ctx.save();
   ctx.beginPath();
@@ -84,7 +85,7 @@ const highlightShape = (
     bounds.x - 5,
     bounds.y - 5,
     bounds.width + 10,
-    bounds.height + 10
+    bounds.height + 10,
   );
 
   ctx.restore();
@@ -104,7 +105,7 @@ const createRoundedRectPath = (
   y: number,
   width: number,
   height: number,
-  radius: number = 8
+  radius: number = 8,
 ): void => {
   // Normalize coordinates to handle drawing in any direction
   const left = Math.abs(Math.min(x, x + width));
@@ -133,32 +134,58 @@ const createRoundedRectPath = (
 // Helper function for smooth pencil drawing using quadratic curves
 const drawSmoothPencilPath = (
   ctx: CanvasRenderingContext2D,
-  points: readonly Point[]
+  points: readonly Point[],
+  width: number,
+  height: number,
+  startPos: { x: number; y: number },
+  isNormalized: boolean,
 ): void => {
   if (points.length < 2) return;
 
-  ctx.beginPath();
-  ctx.moveTo(points[0]!.x, points[0]!.y);
-
-  if (points.length === 2) {
-    ctx.lineTo(points[1]!.x, points[1]!.y);
-  } else {
-    // Use quadratic curves for smoother lines
-    for (let i = 1; i < points.length - 1; i++) {
-      const currentPoint = points[i]!;
-      const nextPoint = points[i + 1]!;
-      const controlX = currentPoint.x;
-      const controlY = currentPoint.y;
-      const endX = (currentPoint.x + nextPoint.x) / 2;
-      const endY = (currentPoint.y + nextPoint.y) / 2;
-
-      ctx.quadraticCurveTo(controlX, controlY, endX, endY);
+  // 1. Helper to get screen coordinates regardless of mode
+  const getScreenPoint = (p: Point) => {
+    if (isNormalized) {
+      console.log("it works ig");
+      return {
+        x: startPos.x + p.x * width,
+        y: startPos.y + p.y * height,
+      };
     }
+    return { x: p.x, y: p.y };
+  };
 
-    // Connect to the last point
-    const lastPoint = points[points.length - 1]!;
-    ctx.lineTo(lastPoint.x, lastPoint.y);
+  const p0 = getScreenPoint(points[0]!);
+  const p1 = getScreenPoint(points[1]!);
+
+  ctx.beginPath();
+  ctx.moveTo(p0.x, p0.y);
+
+  // 2. Handle Simple Line (2 points)
+  if (points.length === 2) {
+    ctx.lineTo(p1.x, p1.y);
+    return; // Don't forget to stroke in the parent function!
   }
+
+  // 3. Smooth Curve Loop
+  // We loop from index 1 to length - 2
+  for (let i = 1; i < points.length - 1; i++) {
+    const currentPoint = getScreenPoint(points[i]!);
+    const nextPoint = getScreenPoint(points[i + 1]!);
+
+    // The Control Point is the current point (pulls the curve)
+    const controlX = currentPoint.x;
+    const controlY = currentPoint.y;
+
+    // The End Point is the midpoint between current and next
+    const endX = (currentPoint.x + nextPoint.x) / 2;
+    const endY = (currentPoint.y + nextPoint.y) / 2;
+
+    ctx.quadraticCurveTo(controlX, controlY, endX, endY);
+  }
+
+  // 4. Connect to the very last point explicitly
+  const lastPoint = getScreenPoint(points[points.length - 1]!);
+  ctx.lineTo(lastPoint.x, lastPoint.y);
 };
 
 // Helper function for enhanced arrow with rounded arrowhead
@@ -168,7 +195,7 @@ const drawEnhancedArrow = (
   startY: number,
   endX: number,
   endY: number,
-  fillColor?: ColorType | null
+  fillColor?: ColorType | null,
 ): void => {
   const width = endX - startX;
   const height = endY - startY;
@@ -222,7 +249,7 @@ const drawRoundedTriangle = (
   width: number,
   height: number,
   radius: number = 6,
-  gap: number = 0 // gap for outline spacing
+  gap: number = 0, // gap for outline spacing
 ): void => {
   // Normalize dimensions to handle negative width/height
   const normalizedWidth = Math.abs(width);
@@ -279,13 +306,13 @@ const drawRoundedTriangle = (
 
   // Calculate side lengths for radius clamping
   const sideLength1 = Math.sqrt(
-    (scaledRightX - scaledTopX) ** 2 + (scaledRightY - scaledTopY) ** 2
+    (scaledRightX - scaledTopX) ** 2 + (scaledRightY - scaledTopY) ** 2,
   );
   const sideLength2 = Math.sqrt(
-    (scaledLeftX - scaledRightX) ** 2 + (scaledLeftY - scaledRightY) ** 2
+    (scaledLeftX - scaledRightX) ** 2 + (scaledLeftY - scaledRightY) ** 2,
   );
   const sideLength3 = Math.sqrt(
-    (scaledTopX - scaledLeftX) ** 2 + (scaledTopY - scaledLeftY) ** 2
+    (scaledTopX - scaledLeftX) ** 2 + (scaledTopY - scaledLeftY) ** 2,
   );
 
   const minSide = Math.min(sideLength1, sideLength2, sideLength3);
@@ -307,7 +334,7 @@ const drawRoundedTriangle = (
     fromX: number,
     fromY: number,
     toX: number,
-    toY: number
+    toY: number,
   ) => {
     const dx = toX - fromX;
     const dy = toY - fromY;
@@ -320,37 +347,37 @@ const drawRoundedTriangle = (
     scaledTopX,
     scaledTopY,
     scaledRightX,
-    scaledRightY
+    scaledRightY,
   );
   const topToLeft = getUnitVector(
     scaledTopX,
     scaledTopY,
     scaledLeftX,
-    scaledLeftY
+    scaledLeftY,
   );
   const rightToLeft = getUnitVector(
     scaledRightX,
     scaledRightY,
     scaledLeftX,
-    scaledLeftY
+    scaledLeftY,
   );
   const rightToTop = getUnitVector(
     scaledRightX,
     scaledRightY,
     scaledTopX,
-    scaledTopY
+    scaledTopY,
   );
   const leftToTop = getUnitVector(
     scaledLeftX,
     scaledLeftY,
     scaledTopX,
-    scaledTopY
+    scaledTopY,
   );
   const leftToRight = getUnitVector(
     scaledLeftX,
     scaledLeftY,
     scaledRightX,
-    scaledRightY
+    scaledRightY,
   );
 
   // Calculate offset points for rounded corners
@@ -376,21 +403,21 @@ const drawRoundedTriangle = (
     scaledRightX,
     scaledRightY,
     rightLeftOffsetX,
-    rightLeftOffsetY
+    rightLeftOffsetY,
   );
   ctx.lineTo(leftRightOffsetX, leftRightOffsetY);
   ctx.quadraticCurveTo(
     scaledLeftX,
     scaledLeftY,
     leftTopOffsetX,
-    leftTopOffsetY
+    leftTopOffsetY,
   );
   ctx.lineTo(topLeftOffsetX, topLeftOffsetY);
   ctx.quadraticCurveTo(
     scaledTopX,
     scaledTopY,
     topRightOffsetX,
-    topRightOffsetY
+    topRightOffsetY,
   );
   ctx.closePath();
 };
@@ -399,7 +426,7 @@ const drawRoundedTriangle = (
 export const drawShape = (
   ctx: CanvasRenderingContext2D,
   shape: ShapeType,
-  selectedShapeId?: string
+  selectedShapeId?: string,
 ): void => {
   if (!ctx || !shape) return;
   const width = shape.endX - shape.startX;
@@ -426,12 +453,45 @@ export const drawShape = (
     switch (shape.type) {
       case "PENCIL":
         if (hasPoints(shape)) {
+          // const points = shape.points;
+          // if (points.length < 2) return;
           ctx.beginPath();
-          drawSmoothPencilPath(ctx, shape.points);
+          drawSmoothPencilPath(
+            ctx,
+            shape.points,
+            width,
+            height,
+            {
+              x: shape.startX,
+              y: shape.startY,
+            },
+            shape.isNormalized,
+          );
+          // ctx.moveTo(points[0]!.x, points[0]!.y);
+          // let currentPoint;
+          // if (points.length === 2) {
+          //   ctx.lineTo(points[1]!.x, points[1]!.y);
+          // } else if (!shape.isNormalized) {
+          //   for (let i = 1; i < points.length - 1; i++) {
+          //     currentPoint = points[i]!;
+
+          //     ctx.lineTo(currentPoint.x, currentPoint.y);
+
+          //     ctx.stroke();
+          //   }
+          // } else {
+          //   for (let i = 1; i < points.length - 1; i++) {
+          //     currentPoint = points[i]!;
+          //     const realCurrPos = {
+          //       x: currentPoint.x * width + shape.startX,
+          //       y: currentPoint.y * height + shape.startY,
+          //     };
+          //     ctx.lineTo(realCurrPos.x, realCurrPos.y);
+          //   }
+          // }
           ctx.stroke();
         }
         break;
-
       case "ARROW":
         drawEnhancedArrow(
           ctx,
@@ -439,7 +499,7 @@ export const drawShape = (
           shape.startY,
           shape.endX,
           shape.endY,
-          shape.lineColor
+          shape.lineColor,
         );
         break;
 
@@ -465,7 +525,7 @@ export const drawShape = (
           shape.startY,
           width,
           height,
-          radius
+          radius,
         );
         if (hasFillColor(shape))
           (ctx.fillStyle = oklchToCSS(shape.fillColor)), ctx.fill();
@@ -481,7 +541,7 @@ export const drawShape = (
           shape.startY,
           width,
           height,
-          radius
+          radius,
         );
         if (hasFillColor(shape))
           (ctx.fillStyle = oklchToCSS(shape.fillColor)), ctx.fill();
@@ -501,11 +561,7 @@ export const drawShape = (
   }
 
   // Selected → draw highlight (outline + resize handles)
-  if (
-    (shape.id === selectedShapeId && shape.type === "CIRCLE") ||
-    (shape.id === selectedShapeId && shape.type === "SQUARE") ||
-    (shape.id === selectedShapeId && shape.type === "TRIANGLE")
-  ) {
+  if (shape.id === selectedShapeId && shape.type !== "ARROW") {
     highlightShape(ctx, shape, bounds);
   }
 };

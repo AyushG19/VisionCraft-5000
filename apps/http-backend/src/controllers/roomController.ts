@@ -22,9 +22,7 @@ const checkCode = async (req: Request, res: Response) => {
       },
     });
     if (room && slug === room.slug) {
-      res
-        .status(200)
-        .json({ id: room.id, canvasState: room.canvas, slug: slug });
+      res.status(200).json({ roomId: room.id, canvasState: room.canvas });
       return;
     }
     res.status(400).json("Bad Request");

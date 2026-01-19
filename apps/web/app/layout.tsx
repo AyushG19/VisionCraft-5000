@@ -1,5 +1,5 @@
 import "./globals.css";
-import { Providers } from "./provider";
+import { UserProvider } from "@repo/hooks";
 
 export default function RootLayout({
   children,
@@ -15,7 +15,7 @@ export default function RootLayout({
         </style>
       </head>
       <body className={`overflow-hidden`}>
-        <Providers>{children}</Providers>
+        <UserProvider>{children}</UserProvider>
       </body>
     </html>
   );

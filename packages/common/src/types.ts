@@ -57,6 +57,7 @@ export const ShapeSchema = z.object({
   content: z.string().optional(),
   lineWidth: z.number(),
   lineColor: ColorSchema,
+  isNormalized: z.boolean().default(false),
   fillColor: z
     .object({ l: z.number(), c: z.number(), h: z.number() })
     .optional(),
@@ -81,13 +82,11 @@ export const UuidSchema = z.string().uuid({ message: "Invalid RoomID" });
 export const WebSocketDataPayload = z.object({
   message: z.string().optional(),
   shape: ShapeSchema.optional(),
-  userId: z.string(),
 });
 export const WebSocketData = z.object({
   type: z.enum([
     "JOIN_ROOM",
     "LEAVE_ROOM",
-    "SUBSCRIBE",
     "CHAT",
     "ADD_SHAPE",
     "DEL_SHAPE",
@@ -141,8 +140,12 @@ export const wsEnv = z.object({
   PORT: z.number(),
   JWT_SECRET: z.string(),
   BCRYPT_SALT: z.string(),
-  RF_TOKEN_EXPIRY: z.number(),
-  AC_TOKEN_EXPIRY: z.number(),
+  MODEL: z.string(),
+  GROQ_API_KEY: z.string(),
+  RS_HOST: z.string(), //rs for redis
+  RS_PORT: z.number(),
+  RS_USERNAME: z.string(),
+  RS_PASSWORD: z.string(),
 });
 export const dbEnvSchema = z.object({
   RS_HOST: z.string(), //rs for redis

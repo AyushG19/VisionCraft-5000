@@ -3,21 +3,21 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export const redisPub: RedisClientType = createClient({
-  username: "default",
-  password: process.env.REDIS_PASS,
+  username: process.env.RS_USERNAME,
+  password: process.env.RS_PASSWORD,
   socket: {
-    host: "redis-15800.crce206.ap-south-1-1.ec2.redns.redis-cloud.com",
-    port: 15800,
+    host: process.env.RS_HOST,
+    port: Number(process.env.RS_PORT),
     reconnectStrategy: (retries) => Math.min(retries * 50, 2000),
     keepAlive: 5000,
   },
 });
 export const redisSub: RedisClientType = createClient({
-  username: "default",
-  password: process.env.REDIS_PASS,
+  username: process.env.RS_USERNAME,
+  password: process.env.RS_PASSWORD,
   socket: {
-    host: "redis-15800.crce206.ap-south-1-1.ec2.redns.redis-cloud.com",
-    port: 15800,
+    host: process.env.RS_HOST,
+    port: Number(process.env.RS_PORT),
     reconnectStrategy: (retries) => Math.min(retries * 50, 2000),
     keepAlive: 5000,
   },

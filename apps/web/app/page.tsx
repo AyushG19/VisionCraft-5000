@@ -1,4 +1,3 @@
-"use client";
 import {
   DotsPattern,
   TopSection,
@@ -9,6 +8,7 @@ import {
 } from "@workspace/ui/index";
 import { loginService, signupService } from "./services/auth.service";
 import { useRouter } from "next/navigation";
+
 export default function Page() {
   const router = useRouter();
   const navigate = (route: string) => {

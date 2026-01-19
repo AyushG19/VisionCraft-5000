@@ -14,43 +14,68 @@ import { AxiosResponse } from "axios";
 import { drawShape } from "./utils/drawing";
 import { ShapeType } from "@repo/common/types";
 import { createContext } from "vm";
+import { useWhiteBoard } from "./hooks/useWhiteboard";
+import { useSocketWithWhiteboard } from "./hooks/useSocketWithWhiteboard";
+import { joinRoomService } from "app/services/canvas.service";
+import redrawPreviousShapes from "./utils/redrawPreviousShapes";
 
 const page = () => {
   const [inRoom, setInRoom] = useState(false);
+  const [roomId, setRoomId] = useState("");
+  const [slug, setSlug] = useState("");
   // const { send, messages } = useCanvasSocket(inRoom);
 
+  // const {
+  //   handleColorSelect,
+  //   handleStrokeSelect,
+  //   handleToolSelect,
+  //   handleRedo,
+  //   handleUndo,
+  //   canvasRef,
+  //   canvasState,
+  //   isDrawing,
+  //   canvasDispatch,
+  //   wsRef,
+  //   messages,
+  //   setMessages,
+  // } = useWhiteboardWithSocket(inRoom);
   const {
+    canvasRef,
+    canvasDispatch,
+    canvasState,
     handleColorSelect,
+    handleRedo,
     handleStrokeSelect,
     handleToolSelect,
-    handleRedo,
     handleUndo,
-    canvasRef,
-    canvasState,
-    isDrawing,
-    canvasDispatch,
-    wsRef,
+    send,
     messages,
     setMessages,
-  } = useWhiteboardWithSocket(inRoom);
+  } = useSocketWithWhiteboard(inRoom, roomId, slug);
 
   const verifyJoin = async (code: string) => {
-    if (canvasRef.current) {
-      const ctx = canvasRef.current.getContext("2d");
-      if (ctx == null) {
-        console.error("canvas element not available");
-        return;
+    try {
+      if (canvasRef.current) {
+        const ctx = canvasRef.current.getContext("2d");
+        if (ctx == null) {
+          console.error("canvas element not available");
+          return;
+        }
+        const data = await joinRoomService(code);
+        if (data.canvasState) {
+          setInRoom(true);
+          setRoomId(data.roomId);
+          redrawPreviousShapes(ctx, data.canvasState);
+          setSlug(code);
+          canvasDispatch({
+            type: "INITIALIZE_BOARD",
+            payload: data.canvasState,
+          });
+        }
+        console.log("From page verifyJoin: ", data);
       }
-      const res: AxiosResponse = await joinRoom(code);
-      if (res.status == 200) {
-        setInRoom(true);
-        drawShape(ctx, res.data.canvasState);
-        canvasDispatch({
-          type: "INITIALIZE_BOARD",
-          payload: res.data.canvasState,
-        });
-      }
-      console.log("From page verifyJoin: ", res);
+    } catch (error) {
+      console.error("error in join room");
     }
   };
   const makeNewRoom = async () => {
@@ -98,7 +123,7 @@ const page = () => {
             boardState={canvasState.drawnShapes}
             setMessages={setMessages}
             messages={messages}
-            wsRef={wsRef}
+            send={send}
           />
           {/* <ChatBoxContainer
             // messages={messages}
@@ -109,7 +134,7 @@ const page = () => {
       ) : (
         <JoinRoomModal verifyJoin={verifyJoin} />
       )}
-      <div className="absolute top-0 left-0 gap-2 flex">
+      {/* <div className="absolute top-0 left-0 gap-2 flex">
         <Button className="" onClick={makeNewRoom}>
           new room
         </Button>
@@ -134,7 +159,7 @@ const page = () => {
         >
           leave room
         </Button>
-      </div>
+      </div> */}
     </div>
   );
 };

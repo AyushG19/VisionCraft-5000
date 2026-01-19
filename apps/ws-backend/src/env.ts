@@ -1,15 +1,22 @@
 import { wsEnv, WsEnvType } from "@repo/common/types";
 
 function shutdown(code: number): never {
+  console.log("error in env");
   process.exit(code);
 }
 const envSchema = {
-  NODE_ENV: process.env.NODE_ENV,
-  PORT: process.env.PORT,
+  NODE_ENV: process.env.NODE_ENV ?? "development",
+  PORT: Number(process.env.PORT) ?? 3001,
   JWT_SECRET: process.env.JWT_SECRET,
   BCRYPT_SALT: process.env.BCRYPT_SALT,
-  RF_TOKEN_EXPIRY: process.env.RF_TPKEN_EXPIRY,
-  AC_TOKEN_EXPIRY: process.env.AC_TOKEN_EXPIRY,
+  HOST: process.env.HOST,
+  REDIS_PASS: process.env.REDIS_PASS,
+  MODEL: process.env.MODEL,
+  GROQ_API_KEY: process.env.GROQ_API_KEY,
+  RS_HOST: process.env.RS_HOST,
+  RS_PORT: Number(process.env.PORT),
+  RS_USERNAME: process.env.RS_USERNAME,
+  RS_PASSWORD: process.env.RS_PASSWORD,
 };
 const parsedEnv = wsEnv.safeParse(envSchema);
 if (!parsedEnv.success) {

@@ -4,6 +4,7 @@
   "exports": {
     "./types": {
       "import": "./dist/types.js",
+      "require": "./dist/types.js",
       "types": "./dist/types.d.ts"
     },
     "./toolState": "./dist/toolState.js",

@@ -14,7 +14,7 @@ export const isPointInHandle = (
   py: number,
   bounds: Bounds,
   handleSize: number = 6,
-  selectedShape?: ShapeType | undefined
+  selectedShape?: ShapeType | undefined,
 ): HandleName | null => {
   const handles = getHandles(bounds, handleSize);
 
@@ -44,7 +44,7 @@ const triangleArea = (
   bx: number,
   by: number,
   cx: number,
-  cy: number
+  cy: number,
 ): number => {
   return Math.abs((ax * (by - cy) + bx * (cy - ay) + cx * (ay - by)) / 2);
 };
@@ -55,7 +55,7 @@ const isPointNearLine = (
   ay: number,
   bx: number,
   by: number,
-  tol: number
+  tol: number,
 ): boolean => {
   const dx = bx - ax;
   const dy = by - ay;
@@ -86,7 +86,7 @@ const isPointInCornerCutout = (
   leftY: number,
   rightX: number,
   rightY: number,
-  radius: number
+  radius: number,
 ): boolean => {
   // Check each corner
   const corners = [
@@ -117,7 +117,7 @@ const hitTestRoundedTriangleStroke = (
   rightX: number,
   rightY: number,
   radius: number,
-  tolerance: number
+  tolerance: number,
 ): boolean => {
   // Calculate side lengths for radius clamping
   const sideLength1 = Math.sqrt((rightX - topX) ** 2 + (rightY - topY) ** 2);
@@ -145,7 +145,7 @@ const hitTestRoundedTriangleStroke = (
     fromX: number,
     fromY: number,
     toX: number,
-    toY: number
+    toY: number,
   ) => {
     const dx = toX - fromX;
     const dy = toY - fromY;
@@ -198,7 +198,7 @@ const hitTestRoundedTriangleStroke = (
       edge1Start.y,
       edge1End.x,
       edge1End.y,
-      tolerance
+      tolerance,
     ) ||
     isPointNearLine(
       px,
@@ -207,7 +207,7 @@ const hitTestRoundedTriangleStroke = (
       edge2Start.y,
       edge2End.x,
       edge2End.y,
-      tolerance
+      tolerance,
     ) ||
     isPointNearLine(
       px,
@@ -216,7 +216,7 @@ const hitTestRoundedTriangleStroke = (
       edge3Start.y,
       edge3End.x,
       edge3End.y,
-      tolerance
+      tolerance,
     ) ||
     isPointNearCornerArc(px, py, topX, topY, maxRadius, tolerance) ||
     isPointNearCornerArc(px, py, rightX, rightY, maxRadius, tolerance) ||
@@ -229,14 +229,14 @@ const isPointNearCornerArc = (
   cornerX: number,
   cornerY: number,
   radius: number,
-  tolerance: number
+  tolerance: number,
 ): boolean => {
   const dist = Math.sqrt((px - cornerX) ** 2 + (py - cornerY) ** 2);
   return Math.abs(dist - radius) <= tolerance;
 };
 export default function isClickOnShape(
   points: { x: number; y: number },
-  shape: ShapeType
+  shape: ShapeType,
 ): boolean {
   switch (shape.type) {
     case "SQUARE": {
@@ -324,7 +324,7 @@ export default function isClickOnShape(
             leftX,
             leftY,
             rightX,
-            rightY
+            rightY,
           );
           const area1 = triangleArea(
             points.x,
@@ -332,7 +332,7 @@ export default function isClickOnShape(
             leftX,
             leftY,
             rightX,
-            rightY
+            rightY,
           );
           const area2 = triangleArea(
             topX,
@@ -340,7 +340,7 @@ export default function isClickOnShape(
             points.x,
             points.y,
             rightX,
-            rightY
+            rightY,
           );
           const area3 = triangleArea(
             topX,
@@ -348,7 +348,7 @@ export default function isClickOnShape(
             leftX,
             leftY,
             points.x,
-            points.y
+            points.y,
           );
           return Math.abs(totalArea - (area1 + area2 + area3)) < 0.01;
         } else {
@@ -359,7 +359,7 @@ export default function isClickOnShape(
             leftX,
             leftY,
             rightX,
-            rightY
+            rightY,
           );
           const area1 = triangleArea(
             points.x,
@@ -367,7 +367,7 @@ export default function isClickOnShape(
             leftX,
             leftY,
             rightX,
-            rightY
+            rightY,
           );
           const area2 = triangleArea(
             topX,
@@ -375,7 +375,7 @@ export default function isClickOnShape(
             points.x,
             points.y,
             rightX,
-            rightY
+            rightY,
           );
           const area3 = triangleArea(
             topX,
@@ -383,7 +383,7 @@ export default function isClickOnShape(
             leftX,
             leftY,
             points.x,
-            points.y
+            points.y,
           );
 
           if (Math.abs(totalArea - (area1 + area2 + area3)) < 0.01) {
@@ -397,7 +397,7 @@ export default function isClickOnShape(
               leftY,
               rightX,
               rightY,
-              radius
+              radius,
             );
           }
           return false;
@@ -419,7 +419,7 @@ export default function isClickOnShape(
             topY,
             rightX,
             rightY,
-            tolerance
+            tolerance,
           ) ||
           isPointNearLine(
             points.x,
@@ -428,7 +428,7 @@ export default function isClickOnShape(
             rightY,
             leftX,
             leftY,
-            tolerance
+            tolerance,
           ) ||
           isPointNearLine(
             points.x,
@@ -437,7 +437,7 @@ export default function isClickOnShape(
             leftY,
             topX,
             topY,
-            tolerance
+            tolerance,
           )
         );
       } else {
@@ -452,7 +452,7 @@ export default function isClickOnShape(
           rightX,
           rightY,
           radius,
-          tolerance
+          tolerance,
         );
       }
     }
@@ -472,7 +472,7 @@ export default function isClickOnShape(
         ay: number,
         bx: number,
         by: number,
-        tol: number
+        tol: number,
       ) => {
         const A = px - ax;
         const B = py - ay;
@@ -510,7 +510,7 @@ export default function isClickOnShape(
         shape.startY,
         shape.endX,
         shape.endY,
-        shaftTolerance
+        shaftTolerance,
       );
 
       // --- Arrowhead hit-test (triangle) ---
@@ -531,7 +531,7 @@ export default function isClickOnShape(
         bx: number,
         by: number,
         cx: number,
-        cy: number
+        cy: number,
       ) => Math.abs((ax * (by - cy) + bx * (cy - ay) + cx * (ay - by)) / 2);
 
       const A = area(arrowX, arrowY, leftX, leftY, rightX, rightY);
@@ -547,6 +547,16 @@ export default function isClickOnShape(
       if (!shape.points || shape.points.length < 2) return false;
 
       const tol = shape.lineWidth;
+      const getScreenPoint = (p: { x: number; y: number }) => {
+        if (shape.isNormalized) {
+          console.log("it works ig");
+          return {
+            x: shape.startX + p.x * (shape.endX - shape.startX),
+            y: shape.startY + p.y * (shape.endY - shape.startY),
+          };
+        }
+        return { x: p.x, y: p.y };
+      };
 
       // check if points is near any line segment in the path
       const isNearSegment = (
@@ -555,7 +565,7 @@ export default function isClickOnShape(
         x1: number,
         y1: number,
         x2: number,
-        y2: number
+        y2: number,
       ) => {
         const dx = x2 - x1;
         const dy = y2 - y1;
@@ -569,8 +579,8 @@ export default function isClickOnShape(
       };
 
       for (let i = 0; i < shape.points.length - 1; i++) {
-        const p1 = shape.points[i]!;
-        const p2 = shape.points[i + 1]!;
+        const p1 = getScreenPoint(shape.points[i]!);
+        const p2 = getScreenPoint(shape.points[i + 1]!);
         if (isNearSegment(points.x, points.y, p1.x, p1.y, p2.x, p2.y))
           return true;
       }
@@ -582,7 +592,7 @@ export default function isClickOnShape(
 }
 export const isInsideSelectBound = (
   points: { x: number; y: number },
-  bounds: Bounds
+  bounds: Bounds,
 ): boolean => {
   const minX = bounds.x;
   const maxX = bounds.x + bounds.width;

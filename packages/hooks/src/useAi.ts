@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 import { drawWithAi } from "@repo/common/api";
 import { ShapeType } from "@repo/common/types";

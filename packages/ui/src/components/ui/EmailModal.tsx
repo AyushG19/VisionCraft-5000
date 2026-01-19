@@ -13,6 +13,7 @@ import {
   UserType,
 } from "@repo/common/types";
 import { AppError } from "@repo/common/api";
+import { useUser } from "@repo/hooks";
 
 type FieldState = {
   label: string;
@@ -37,6 +38,8 @@ const EmailModal = ({
   const [signupOrLogin, setSignupOrLogin] = useState<"signup" | "login">(
     "login"
   );
+  const { setCurrentUser } = useUser();
+
   const stages: FieldState[] =
     signupOrLogin === "signup"
       ? [
@@ -97,6 +100,7 @@ const EmailModal = ({
           password: password,
         };
         const res = await loginService(loginData);
+        setCurrentUser({ userId: res.userId, name: res.name, avatar: "" });
         navigate("canvas");
       }
     } catch (error) {

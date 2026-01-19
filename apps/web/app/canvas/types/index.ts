@@ -59,3 +59,16 @@ export type ResizeStateType = {
   isResizing: boolean;
   resizeDirection: HandleName | null;
 };
+export type InteractionState = {
+  isDrawing: boolean;
+  isDragging: boolean;
+  isResizing: boolean;
+  draggedShapeId: string | null;
+  resizeDirection: HandleName | null;
+  startPos: { x: number; y: number };
+  dragOffset: { x: number; y: number };
+};
+export type JoinRoomResponseType = {
+  roomId: string;
+  canvasState: ShapeType[];
+};

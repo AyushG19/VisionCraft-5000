@@ -1,51 +1,56 @@
 import { ShapeType } from "@repo/common/types";
-import { CanvasState } from "../types";
+import {} from "../types";
+import { ToolState } from "@repo/common/toolState";
 export default function createNewShape(
-  canvasState: CanvasState,
+  toolState: ToolState,
+  startPos: { x: number; y: number },
   currentPos: { x: number; y: number },
   shapeToCopy?: ShapeType,
-  content?: string
+  content?: string,
 ): ShapeType {
   if (content) {
     return {
       id: crypto.randomUUID(),
-      type: canvasState.toolState.currentTool,
-      lineWidth: canvasState.toolState.brushSize,
-      lineColor: canvasState.toolState.currentColor,
+      type: toolState.currentTool,
+      lineWidth: toolState.brushSize,
+      lineColor: toolState.currentColor,
       content: content,
+      isNormalized: false,
       selected: false,
-      startX: canvasState.startPos.x,
-      startY: canvasState.startPos.y,
-      endX: canvasState.startPos.x,
-      endY: canvasState.startPos.y,
+      startX: startPos.x,
+      startY: startPos.y,
+      endX: startPos.x,
+      endY: startPos.y,
     };
   }
-  switch (canvasState.toolState.currentTool) {
+  switch (toolState.currentTool) {
     case "PENCIL": {
       return {
         id: crypto.randomUUID(),
-        type: canvasState.toolState.currentTool,
-        lineWidth: canvasState.toolState.brushSize,
-        lineColor: canvasState.toolState.currentColor,
+        type: toolState.currentTool,
+        lineWidth: toolState.brushSize,
+        lineColor: toolState.currentColor,
         selected: false,
-        startX: canvasState.startPos.x,
-        startY: canvasState.startPos.y,
-        endX: canvasState.startPos.x,
-        endY: canvasState.startPos.y,
-        points: [canvasState.startPos],
+        isNormalized: false,
+        startX: startPos.x,
+        startY: startPos.y,
+        endX: currentPos.x,
+        endY: currentPos.y,
+        points: [startPos],
       };
     }
     default: {
       return {
         id: crypto.randomUUID(),
-        type: canvasState.toolState.currentTool,
-        lineWidth: canvasState.toolState.brushSize,
-        lineColor: canvasState.toolState.currentColor,
+        type: toolState.currentTool,
+        lineWidth: toolState.brushSize,
+        lineColor: toolState.currentColor,
         selected: false,
-        startX: canvasState.startPos.x,
-        startY: canvasState.startPos.y,
-        endX: currentPos.x,
-        endY: currentPos.y,
+        isNormalized: false,
+        startX: Math.min(startPos.x, currentPos.x),
+        startY: Math.min(startPos.y, currentPos.y),
+        endX: Math.max(startPos.x, currentPos.x),
+        endY: Math.max(startPos.y, currentPos.y),
       };
     }
   }
