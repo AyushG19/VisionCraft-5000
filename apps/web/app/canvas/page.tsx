@@ -18,11 +18,12 @@ import { useWhiteBoard } from "./hooks/useWhiteboard";
 import { useSocketWithWhiteboard } from "./hooks/useSocketWithWhiteboard";
 import { joinRoomService } from "app/services/canvas.service";
 import redrawPreviousShapes from "./utils/redrawPreviousShapes";
+import { useSocketContext } from "@repo/hooks";
 
+let token = "";
 const page = () => {
-  const [inRoom, setInRoom] = useState(false);
-  const [roomId, setRoomId] = useState("");
-  const [slug, setSlug] = useState("");
+  const { inRoom, slug, roomId, setInRoom, setSlug, setRoomId } =
+    useSocketContext();
   // const { send, messages } = useCanvasSocket(inRoom);
 
   // const {
@@ -51,7 +52,7 @@ const page = () => {
     send,
     messages,
     setMessages,
-  } = useSocketWithWhiteboard(inRoom, roomId, slug);
+  } = useSocketWithWhiteboard(inRoom, roomId, slug, token);
 
   const verifyJoin = async (code: string) => {
     try {
@@ -62,11 +63,13 @@ const page = () => {
           return;
         }
         const data = await joinRoomService(code);
+        setInRoom(true);
+        setRoomId(data.roomId);
+        setSlug(code);
+        token = data.token;
+
         if (data.canvasState) {
-          setInRoom(true);
-          setRoomId(data.roomId);
           redrawPreviousShapes(ctx, data.canvasState);
-          setSlug(code);
           canvasDispatch({
             type: "INITIALIZE_BOARD",
             payload: data.canvasState,
@@ -115,7 +118,7 @@ const page = () => {
         send
       </Button> */}
 
-      {true ? (
+      {inRoom ? (
         <>
           <RoomOptions />
           <ChatModal

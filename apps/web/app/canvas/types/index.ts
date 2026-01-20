@@ -71,4 +71,5 @@ export type InteractionState = {
 export type JoinRoomResponseType = {
   roomId: string;
   canvasState: ShapeType[];
+  token: string;
 };

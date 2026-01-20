@@ -33,229 +33,252 @@ wss.on("connection", function connection(ws, req) {
     const data = validateConnection(url);
     token = data.token;
     roomId = data.roomId;
+    console.log("validation me lafda");
     res = validateToken(token);
+    console.log("ignore above");
     const mainUserId = res.userId;
 
     ws.on("message", async (data) => {
-      const cleanData = validateSocketData(data);
+      try {
+        const cleanData = validateSocketData(data);
 
-      switch (cleanData.type) {
-        case "JOIN_ROOM":
-          // if (!cleanData.payload || !cleanData.payload.userId) {
-          //   ws.send(
-          //     JSON.stringify({ type: "ERROR", message: "MALFORMED_PAYLOAD" })
-          //   );
-          //   return;
-          // }
-          try {
-            if (roomSocket.get(roomId)?.has(mainUserId)) {
+        switch (cleanData.type) {
+          case "JOIN_ROOM":
+            // if (!cleanData.payload || !cleanData.payload.userId) {
+            //   ws.send(
+            //     JSON.stringify({ type: "ERROR", message: "MALFORMED_PAYLOAD" })
+            //   );
+            //   return;
+            // }
+            try {
+              if (roomSocket.get(roomId)?.has(mainUserId)) {
+                ws.send(
+                  JSON.stringify({
+                    type: "INFO",
+                    message: "Already subscribed",
+                  }),
+                );
+                return;
+              }
+              if (!roomSocket.has(roomId)) {
+                roomSocket.set(roomId, new Map());
+                await redisSub.subscribe(`room:${roomId}:events`, (message) => {
+                  //probably add validation for mesage type ig
+                  const parsedMessage: EventType = JSON.parse(message);
+                  const roomUsers = roomSocket.get(roomId);
+                  if (!roomUsers) {
+                    console.log("returning from callback no roomUsers");
+                    return;
+                  }
+                  for (const [userId, userSocket] of roomUsers) {
+                    if (parsedMessage.userId === userId) continue;
+                    userSocket.send(JSON.stringify(parsedMessage));
+                  }
+                });
+              }
+              roomSocket.get(roomId)?.set(mainUserId, ws);
+
               ws.send(
                 JSON.stringify({
                   type: "INFO",
-                  message: "Already subscribed",
+                  message: "subscribed successfully/join room",
                 }),
               );
-              return;
+            } catch (error) {
+              console.log("error in subscribe : ", error);
+              ws.send(
+                JSON.stringify({
+                  type: "ERROR",
+                  message: "Failed to subscribe/join room",
+                }),
+              );
             }
-            if (!roomSocket.has(roomId)) {
-              roomSocket.set(roomId, new Map());
-              await redisSub.subscribe(`room:${roomId}:events`, (message) => {
-                //probably add validation for mesage type ig
-                const parsedMessage: EventType = JSON.parse(message);
-                const roomUsers = roomSocket.get(roomId);
-                if (!roomUsers) {
-                  console.log("returning from callback no roomUsers");
-                  return;
-                }
-                for (const [userId, userSocket] of roomUsers) {
-                  if (parsedMessage.userId === userId) continue;
-                  userSocket.send(JSON.stringify(parsedMessage));
-                }
-              });
+            break;
+
+          //need to write this logic
+          case "LEAVE_ROOM":
+            // if (!cleanData.payload || !cleanData.payload.userId) {
+            //   ws.send(
+            //     JSON.stringify({ type: "ERROR", message: "Malformed Payload" })
+            //   );
+            //   return;
+            // }
+            try {
+              await redisPub.sRem(`room:${roomId}:users`, mainUserId);
+              ws.close(1000);
+            } catch (error) {
+              ws.send(
+                JSON.stringify({ type: "ERROR", message: "INTERNAL_ERROR" }),
+              );
             }
-            roomSocket.get(roomId)?.set(mainUserId, ws);
+            break;
 
-            ws.send(
-              JSON.stringify({
-                type: "INFO",
-                message: "subscribed successfully/join room",
-              }),
-            );
-          } catch (error) {
-            console.log("error in subscribe : ", error);
-            ws.send(
-              JSON.stringify({
-                type: "ERROR",
-                message: "Failed to subscribe/join room",
-              }),
-            );
-          }
-          break;
+          case "CHAT":
+            // if (!cleanData.payload || !cleanData.payload.userId) {
+            //   ws.send(
+            //     JSON.stringify({ type: "ERROR", message: "Malformed Payload" })
+            //   );
+            //   return;
+            // }
+            try {
+              //we use two set of data store chat and event
+              await redisPub.hSet(
+                `room:${roomId}:chats`,
+                mainUserId,
+                JSON.stringify(cleanData.payload.message),
+              );
+              const event: EventType = {
+                type: "CHAT",
+                userId: mainUserId,
+                message: cleanData.payload.message,
+              };
+              await redisPub.publish(
+                `room:${roomId}:events`,
+                JSON.stringify(event),
+              );
+              ws.send(
+                JSON.stringify({
+                  type: "INFO",
+                  message: "Succesfully published message",
+                }),
+              );
+            } catch (error) {
+              console.log("error in chat : ", error);
+            }
+            break;
 
-        //need to write this logic
-        case "LEAVE_ROOM":
-          // if (!cleanData.payload || !cleanData.payload.userId) {
-          //   ws.send(
-          //     JSON.stringify({ type: "ERROR", message: "Malformed Payload" })
-          //   );
-          //   return;
-          // }
-          try {
-            await redisPub.sRem(`room:${roomId}:users`, mainUserId);
-            ws.close(1000);
-          } catch (error) {
-            ws.send(
-              JSON.stringify({ type: "ERROR", message: "INTERNAL_ERROR" }),
-            );
-          }
-          break;
-
-        case "CHAT":
-          // if (!cleanData.payload || !cleanData.payload.userId) {
-          //   ws.send(
-          //     JSON.stringify({ type: "ERROR", message: "Malformed Payload" })
-          //   );
-          //   return;
-          // }
-          try {
-            //we use two set of data store chat and event
-            await redisPub.hSet(
-              `room:${roomId}:chats`,
-              mainUserId,
-              JSON.stringify(cleanData.payload.message),
-            );
-            const event: EventType = {
-              type: "CHAT",
-              userId: mainUserId,
-              message: cleanData.payload.message,
-            };
-            await redisPub.publish(
-              `room:${roomId}:events`,
-              JSON.stringify(event),
-            );
-            ws.send(
-              JSON.stringify({
-                type: "INFO",
-                message: "Succesfully published message",
-              }),
-            );
-          } catch (error) {
-            console.log("error in chat : ", error);
-          }
-          break;
-
-        case "ADD_SHAPE":
-          if (!cleanData.payload.shape) {
-            ws.send(
-              JSON.stringify({ type: "ERROR", message: "Malformed Payload" }),
-            );
-            return;
-          }
-          try {
-            //shapes have a seperate data
-            await redisPub.hSet(
-              `room:${roomId}:shapes`,
-              cleanData.payload.shape.id,
-              JSON.stringify(cleanData.payload.shape),
-            );
-            await redisPub.rPush(
-              `room:${roomId}:order`,
-              cleanData.payload.shape.id,
-            );
-            const event: EventType = {
-              type: "ADD",
-              userId: mainUserId,
-              shape: cleanData.payload.shape,
-            };
-            await redisPub.publish(
-              `room:${roomId}:events`,
-              JSON.stringify(event),
-            );
-            ws.send(
-              JSON.stringify({
-                type: "INFO",
-                message: "Succesfully published shape",
-              }),
-            );
-          } catch (error) {
-            console.log("error in adding shape : ", error);
-            ws.send(
-              JSON.stringify({ type: "ERROR", message: "Failed to add shape" }),
-            );
-          }
-          break;
-        case "UPD_SHAPE": {
-          // we are currentlty not cahnginorder on shape updates
-          try {
+          case "ADD_SHAPE":
             if (!cleanData.payload.shape) {
               ws.send(
                 JSON.stringify({ type: "ERROR", message: "Malformed Payload" }),
               );
               return;
             }
-            await redisPub.hSet(
-              `room:${roomId}:shapes`,
-              cleanData.payload.shape.id,
-              JSON.stringify(cleanData.payload.shape),
-            );
-            const event: EventType = {
-              type: "UPD",
-              userId: mainUserId,
-              shape: cleanData.payload.shape,
-            };
-            await redisPub.publish(
-              `room:${roomId}:events`,
-              JSON.stringify(event),
-            );
-            ws.send(
-              JSON.stringify({ type: "INFO", message: "Update published" }),
-            );
-          } catch (error) {
-            console.log("error in adding shape : ", error);
-            ws.send(
-              JSON.stringify({
-                type: "ERROR",
-                message: "Failed to Update shape",
-              }),
-            );
-          }
-          break;
-        }
-        case "DEL_SHAPE": {
-          try {
-            if (!cleanData.payload.shape) {
-              ws.send(
-                JSON.stringify({ type: "ERROR", message: "Malformed Payload" }),
+            try {
+              //shapes have a seperate data
+              await redisPub.hSet(
+                `room:${roomId}:shapes`,
+                cleanData.payload.shape.id,
+                JSON.stringify(cleanData.payload.shape),
               );
-              return;
+              await redisPub.rPush(
+                `room:${roomId}:order`,
+                cleanData.payload.shape.id,
+              );
+              const event: EventType = {
+                type: "ADD",
+                userId: mainUserId,
+                shape: cleanData.payload.shape,
+              };
+              await redisPub.publish(
+                `room:${roomId}:events`,
+                JSON.stringify(event),
+              );
+              ws.send(
+                JSON.stringify({
+                  type: "INFO",
+                  message: "Succesfully published shape",
+                }),
+              );
+            } catch (error) {
+              console.log("error in adding shape : ", error);
+              ws.send(
+                JSON.stringify({
+                  type: "ERROR",
+                  message: "Failed to add shape",
+                }),
+              );
             }
-            await redisPub.hDel(
-              `room:${roomId}:shapes`,
-              cleanData.payload.shape.id,
-            );
-            const event: EventType = {
-              type: "DEL",
-              userId: mainUserId,
-              shape: cleanData.payload.shape,
-            };
-            await redisPub.publish(
-              `room:${roomId}:events`,
-              JSON.stringify(event),
-            );
-            ws.send(
-              JSON.stringify({ type: "INFO", message: "Delete published" }),
-            );
-          } catch (error) {
-            console.log("error in adding shape : ", error);
-            ws.send(
-              JSON.stringify({
-                type: "ERROR",
-                message: "Failed to Delete shape",
-              }),
-            );
+            break;
+          case "UPD_SHAPE": {
+            // we are currentlty not cahnginorder on shape updates
+            try {
+              if (!cleanData.payload.shape) {
+                ws.send(
+                  JSON.stringify({
+                    type: "ERROR",
+                    message: "Malformed Payload",
+                  }),
+                );
+                return;
+              }
+              await redisPub.hSet(
+                `room:${roomId}:shapes`,
+                cleanData.payload.shape.id,
+                JSON.stringify(cleanData.payload.shape),
+              );
+              const event: EventType = {
+                type: "UPD",
+                userId: mainUserId,
+                shape: cleanData.payload.shape,
+              };
+              await redisPub.publish(
+                `room:${roomId}:events`,
+                JSON.stringify(event),
+              );
+              ws.send(
+                JSON.stringify({ type: "INFO", message: "Update published" }),
+              );
+            } catch (error) {
+              console.log("error in adding shape : ", error);
+              ws.send(
+                JSON.stringify({
+                  type: "ERROR",
+                  message: "Failed to Update shape",
+                }),
+              );
+            }
+            break;
           }
-          break;
+          case "DEL_SHAPE": {
+            try {
+              if (!cleanData.payload.shape) {
+                ws.send(
+                  JSON.stringify({
+                    type: "ERROR",
+                    message: "Malformed Payload",
+                  }),
+                );
+                return;
+              }
+              await redisPub.hDel(
+                `room:${roomId}:shapes`,
+                cleanData.payload.shape.id,
+              );
+              const event: EventType = {
+                type: "DEL",
+                userId: mainUserId,
+                shape: cleanData.payload.shape,
+              };
+              await redisPub.publish(
+                `room:${roomId}:events`,
+                JSON.stringify(event),
+              );
+              ws.send(
+                JSON.stringify({ type: "INFO", message: "Delete published" }),
+              );
+            } catch (error) {
+              console.log("error in adding shape : ", error);
+              ws.send(
+                JSON.stringify({
+                  type: "ERROR",
+                  message: "Failed to Delete shape",
+                }),
+              );
+            }
+            break;
+          }
         }
+      } catch (error) {
+        ws.send(
+          JSON.stringify({
+            type: "ERROR",
+            //@ts-ignore
+            message: error.message ? error.message : "Malformed Payload",
+          }),
+        );
+
+        ws.close(1008, "Malformed Payload"); // 1008 = Policy Violation
       }
     });
     ws.on("close", () => {
@@ -267,7 +290,13 @@ wss.on("connection", function connection(ws, req) {
       }
     });
   } catch (error) {
-    ws.send(JSON.stringify({ type: "ERROR", message: "Malformed Payload" }));
+    ws.send(
+      JSON.stringify({
+        type: "ERROR",
+        //@ts-ignore
+        message: error.message ? error.message : "Malformed Payload",
+      }),
+    );
 
     ws.close(1008, "Malformed Payload"); // 1008 = Policy Violation
   }

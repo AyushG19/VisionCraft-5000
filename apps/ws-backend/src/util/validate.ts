@@ -15,7 +15,7 @@ const parseData = (data: any) => {
   }
 };
 export const validateConnection = (
-  url: URL
+  url: URL,
 ): { token: string; roomId: string } => {
   const { token, roomId } = Object.fromEntries(url.searchParams.entries());
   if (!token || !roomId) {
@@ -25,12 +25,14 @@ export const validateConnection = (
 };
 
 export const validateToken = (token: string) => {
-  const res = jwtInstance.verify<JwtVerifyResponseType>(token);
-  if (!res.valid || !res.decoded) {
+  const res = jwtInstance.verify(token);
+  if (!res) {
+    console.log("yaya", res);
     throw new Error("INVALID_REQIEST");
   }
-  const parsedDecoded = JwtPayloadSchema.safeParse(res.decoded);
+  const parsedDecoded = JwtPayloadSchema.safeParse(res);
   if (!parsedDecoded.success) {
+    console.log("wawa", parsedDecoded.data);
     throw new Error("INVALID_REQUEST");
   }
   return parsedDecoded.data;

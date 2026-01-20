@@ -8,7 +8,7 @@ export default function redrawPreviousShapes(
   ctx: CanvasRenderingContext2D,
   drawnShapes: ShapeType[],
   currentShape?: ShapeType,
-  selectedShapeId?: string
+  selectedShapeId?: string,
 ) {
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   if (!patternRef.current) {
@@ -19,7 +19,7 @@ export default function redrawPreviousShapes(
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   }
   for (const shape of drawnShapes) {
-    if (shape.id === selectedShapeId) continue;
+    if (shape.id === selectedShapeId && currentShape?.id === shape.id) continue;
     drawShape(ctx, shape, selectedShapeId);
   }
   if (currentShape) {

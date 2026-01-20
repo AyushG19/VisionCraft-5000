@@ -1,3 +1,4 @@
+"use client";
 import { AppErrorCodeType } from "@repo/common/types";
 
 export class AppError extends Error {
@@ -9,7 +10,7 @@ export class AppError extends Error {
     message: string,
     code: AppErrorCodeType,
     status?: number,
-    fieldErrors?: Record<string, string>
+    fieldErrors?: Record<string, string>,
   ) {
     super(message);
     this.code = code;

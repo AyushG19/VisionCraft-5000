@@ -11,6 +11,7 @@ const checkCode = async (req: Request, res: Response) => {
     //   res.status(400).json("Undefined or Invalid room ID");
     //   return;
     // }
+    const { accessToken } = req.cookies;
     const slug = req.body.slug;
     if (!slug) {
       res.status(400).json("Invalid room Id");
@@ -22,7 +23,11 @@ const checkCode = async (req: Request, res: Response) => {
       },
     });
     if (room && slug === room.slug) {
-      res.status(200).json({ roomId: room.id, canvasState: room.canvas });
+      res.status(200).json({
+        roomId: room.id,
+        canvasState: room.canvas,
+        token: accessToken,
+      });
       return;
     }
     res.status(400).json("Bad Request");

@@ -13,7 +13,8 @@ type EventType = {
 export const useSocketWithWhiteboard = (
   enabled: boolean,
   roomId: string,
-  slug: string
+  slug: string,
+  token: string,
 ) => {
   const initState: CanvasState = {
     startPos: { x: 0, y: 0 },
@@ -29,7 +30,7 @@ export const useSocketWithWhiteboard = (
   const [canvasState, canvasDispatch] = useReducer(canvasReducer, initState);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [selectedShape, setSelectedShape] = useState<ShapeType | undefined>(
-    undefined
+    undefined,
   );
   const [messages, setMessages] = useState<Message[] | []>([]);
   const handleMessage = (event: any) => {
@@ -48,7 +49,7 @@ export const useSocketWithWhiteboard = (
   const onMessage = (event: any) => {
     handleMessage(JSON.parse(event.data));
   };
-  const { send } = useCanvasSocket(enabled, onMessage, roomId, slug);
+  const { send } = useCanvasSocket(enabled, onMessage, roomId, slug, token);
 
   const dispatchWithSocket = (action: Action) => {
     canvasDispatch(action);
@@ -76,7 +77,7 @@ export const useSocketWithWhiteboard = (
     selectedShape,
     setSelectedShape,
     canvasDispatch,
-    dispatchWithSocket
+    dispatchWithSocket,
   );
   const handleToolSelect = (toolName: ToolState["currentTool"]) => {
     console.log(toolName);

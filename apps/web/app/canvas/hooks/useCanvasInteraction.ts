@@ -67,7 +67,12 @@ const useCanvasInteraction = (
       const ctx = canvas.getContext("2d");
       if (ctx) {
         ctx.strokeStyle = oklchToCSS(canvasState.toolState.currentColor);
-        redrawPreviousShapes(ctx, canvasState.drawnShapes, selectedShape);
+        redrawPreviousShapes(
+          ctx,
+          canvasState.drawnShapes,
+          selectedShape,
+          selectedShape?.id,
+        );
       }
     }
   }, [canvasState, selectedShape]);
@@ -409,6 +414,12 @@ const useCanvasInteraction = (
         ),
       });
       interactionRef.current.isDrawing = false;
+      redrawPreviousShapes(
+        ctx,
+        currentState.drawnShapes,
+        currentSelected ? currentSelected : undefined,
+        currentSelected ? currentSelected.id : undefined,
+      );
     };
 
     redrawPreviousShapes(

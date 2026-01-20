@@ -6,7 +6,8 @@ export function useCanvasSocket(
   enabled: boolean,
   onMessage: (event: any) => void,
   roomId: string,
-  slug: string
+  slug: string,
+  token: string,
 ) {
   const wsRef = useRef<WebSocket | null>(null);
   const send = (message: any) => {
@@ -22,7 +23,7 @@ export function useCanvasSocket(
       return;
     }
     const ws = new WebSocket(
-      `${WS_BE_URL}?roomId=${encodeURIComponent(roomId)}&slug=${slug}`
+      `${WS_BE_URL}?roomId=${encodeURIComponent(roomId)}&slug=${slug}&token=${encodeURIComponent(token)}`,
     );
     wsRef.current = ws;
     ws.onopen = () => {
@@ -30,7 +31,8 @@ export function useCanvasSocket(
       ws.send(
         JSON.stringify({
           type: "JOIN_ROOM",
-        })
+          payload: {},
+        }),
       );
     };
     ws.onmessage = (event) => {
@@ -43,7 +45,8 @@ export function useCanvasSocket(
       ws.send(
         JSON.stringify({
           type: "LEAVE_ROOM",
-        })
+          payload: {},
+        }),
       );
     };
     return () => ws.close();
