@@ -5,7 +5,8 @@
     "baseUrl": ".",
     "paths": {
       "@repo/common/*": ["../../packages/common/src/*"],
-      "@repo/backend-common/*": ["../../packages/backend-common/src/*"]
+      "@repo/backend-common/*": ["../../packages/backend-common/src/*"],
+      "@repo/db/pg": ["../../packages/db/src/pg.ts"]
     }
   },
   "include": ["src"]

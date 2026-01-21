@@ -1,10 +1,15 @@
 {
   "name": "@repo/db",
   "version": "1.0.0",
-  "main": "index.js",
   "exports": {
-    "./db": "./dist/index.js",
-    "./redis": "./dist/redis.js"
+    "./pg": {
+      "import": "./dist/pg.js",
+      "types": "./dist/pg.d.ts"
+    },
+    "./redis": {
+      "import": "./dist/redis.js",
+      "types": "./dist/redis.d.ts"
+    }
   },
   "scripts": {
     "build": "tsc -b"
