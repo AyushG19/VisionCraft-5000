@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { prismaClient } from "@repo/db/db.js";
+import { prismaClient } from "@repo/db/pg";
 import bcrypt from "bcrypt";
 import { authConfig, rfTokenExpiry } from "../config/index.js";
 import { AppError } from "../error/index.js";
