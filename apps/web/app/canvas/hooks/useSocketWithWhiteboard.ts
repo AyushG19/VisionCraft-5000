@@ -1,8 +1,14 @@
+"use client";
 import React, { useReducer, useRef, useState } from "react";
 import useCanvasInteraction from "./useCanvasInteraction";
 import canvasReducer from "../utils/canvasReducer";
-import { Action, CanvasState, Message } from "../types";
-import { ShapeType } from "@repo/common/types";
+import { Action, CanvasState, MessageReceivedType } from "../types";
+import {
+  MessageType,
+  ShapeType,
+  WebSocketData,
+  WebSocketDataType,
+} from "@repo/common/types";
 import { useCanvasSocket } from "./useCanvasSocket";
 import { ToolState } from "@repo/common/toolState";
 
@@ -32,18 +38,37 @@ export const useSocketWithWhiteboard = (
   const [selectedShape, setSelectedShape] = useState<ShapeType | undefined>(
     undefined,
   );
-  const [messages, setMessages] = useState<Message[] | []>([]);
-  const handleMessage = (event: any) => {
+  const [messages, setMessages] = useState<MessageReceivedType[] | []>([]);
+  const handleMessage = (event: WebSocketDataType) => {
     switch (event.type) {
-      case "ADD":
-        canvasDispatch({ type: "ADD_SHAPE", payload: event.shape });
+      case "ADD_SHAPE": {
+        const shape = event.payload.shape;
+        if (shape) {
+          canvasDispatch({ type: "ADD_SHAPE", payload: shape });
+        }
         break;
-      case "DEL":
-        canvasDispatch({ type: "DEL_SHAPE", payload: event.shape });
+      }
+      case "UPD_SHAPE": {
+        const shape = event.payload.shape;
+        if (shape) {
+          canvasDispatch({ type: "UPD_SHAPE", payload: shape });
+        }
         break;
-      case "CHAT":
-        setMessages((prev) => [...prev, event.message]);
+      }
+      case "DEL_SHAPE": {
+        const shape = event.payload.shape;
+        if (shape) {
+          canvasDispatch({ type: "DEL_SHAPE", payload: shape });
+        }
         break;
+      }
+      case "CHAT": {
+        const message = event.payload.message;
+        if (message?.status === "TO_FRONTEND") {
+          setMessages((prev) => [...prev, message]);
+        }
+        break;
+      }
     }
   };
   const onMessage = (event: any) => {
@@ -55,18 +80,14 @@ export const useSocketWithWhiteboard = (
     canvasDispatch(action);
     if (!send) return;
     if (action.type === "ADD_SHAPE") {
-      let messagePayload: EventType = {
-        type: "ADD",
-        shape: action.payload,
-      };
-      send({ type: "ADD_SHAPE", payload: messagePayload });
+      console.log(action.payload);
+      send("ADD_SHAPE", { shape: action.payload });
+    }
+    if (action.type === "UPD_SHAPE") {
+      send("UPD_SHAPE", { shape: action.payload });
     }
     if (action.type === "DEL_SHAPE") {
-      let messagePayload = {
-        type: "DEL",
-        shape: action.payload,
-      };
-      send({ type: "DEL_SHAPE", payload: messagePayload });
+      send("DEL_SHAPE", { shape: action.payload });
     }
   };
 

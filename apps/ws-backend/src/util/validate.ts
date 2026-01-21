@@ -39,9 +39,14 @@ export const validateToken = (token: string) => {
 };
 
 export const validateSocketData = (data: any): WebSocketDataType => {
+  console.log(parseData(data));
   const validatedData = WebSocketData.safeParse(parseData(data));
   if (!validatedData.success || !validatedData.data.type) {
-    console.log(validatedData.data, validatedData.success);
+    console.error("!ENVIRONMENT VALIDATION FAILED!");
+    if (!validatedData.error) throw new Error("MALFORMED_PAYLOAD");
+    for (const issue of validatedData.error.issues) {
+      console.error(`-> ${issue.path.join(".")} : ${issue.message}`);
+    }
     throw new Error("MALFORMED_PAYLOAD");
   }
   console.log(validatedData);

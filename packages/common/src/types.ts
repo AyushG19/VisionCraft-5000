@@ -1,4 +1,5 @@
-import { z } from "zod";
+import { timeStamp } from "console";
+import { number, string, z } from "zod";
 
 export const CreateUserSchema = z
   .object({
@@ -79,8 +80,25 @@ export const JoinRoomSchema = z.object({
 });
 
 export const UuidSchema = z.string().uuid({ message: "Invalid RoomID" });
+
+const IncomingMessage = z.object({
+  status: z.literal("TO_BACKEND"),
+  name: z.string(),
+  content: z.string(),
+});
+const OutgoinMessage = z.object({
+  status: z.literal("TO_FRONTEND"),
+  name: z.string(),
+  content: z.string(),
+  sender_id: z.string(),
+  timeStamp_ms: z.number(),
+});
+const Message = z.discriminatedUnion("status", [
+  IncomingMessage,
+  OutgoinMessage,
+]);
 export const WebSocketDataPayload = z.object({
-  message: z.string().optional(),
+  message: Message.optional(),
   shape: ShapeSchema.optional(),
 });
 export const WebSocketData = z.object({
@@ -197,3 +215,4 @@ export type WsEnvType = z.infer<typeof wsEnv>;
 export type DbEnvType = z.infer<typeof dbEnvSchema>;
 export type JwtVerifyResponseType = z.infer<typeof JwtVerifyResponseSchema>;
 export type WebSocketDataPayloadType = z.infer<typeof WebSocketDataPayload>;
+export type MessageType = z.infer<typeof Message>;

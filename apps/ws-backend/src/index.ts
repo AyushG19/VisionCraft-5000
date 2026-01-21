@@ -9,16 +9,12 @@ import {
   validateToken,
 } from "./util/validate";
 import env from "./env";
+import { convertToSocketData } from "./util/convertToSocketData";
+import { RedisData } from "./types";
 
 const wss = new WebSocketServer({ port: env.PORT });
 console.log("ready");
 
-type EventType = {
-  userId: string;
-  type: "ADD" | "DEL" | "UPD" | "CHAT";
-  shape?: ShapeType;
-  message?: string;
-};
 const roomSocket: Map<string, Map<string, WebSocket>> = new Map();
 
 wss.on("connection", function connection(ws, req) {
@@ -52,19 +48,15 @@ wss.on("connection", function connection(ws, req) {
             // }
             try {
               if (roomSocket.get(roomId)?.has(mainUserId)) {
-                ws.send(
-                  JSON.stringify({
-                    type: "INFO",
-                    message: "Already subscribed",
-                  }),
-                );
-                return;
+                roomSocket.get(roomId)?.delete(mainUserId);
               }
               if (!roomSocket.has(roomId)) {
                 roomSocket.set(roomId, new Map());
                 await redisSub.subscribe(`room:${roomId}:events`, (message) => {
                   //probably add validation for mesage type ig
-                  const parsedMessage: EventType = JSON.parse(message);
+                  const parsedMessage: RedisData = JSON.parse(message);
+                  const socketMessage = convertToSocketData(parsedMessage);
+                  if (!socketMessage) return;
                   const roomUsers = roomSocket.get(roomId);
                   if (!roomUsers) {
                     console.log("returning from callback no roomUsers");
@@ -72,7 +64,7 @@ wss.on("connection", function connection(ws, req) {
                   }
                   for (const [userId, userSocket] of roomUsers) {
                     if (parsedMessage.userId === userId) continue;
-                    userSocket.send(JSON.stringify(parsedMessage));
+                    userSocket.send(JSON.stringify(socketMessage));
                   }
                 });
               }
@@ -127,10 +119,16 @@ wss.on("connection", function connection(ws, req) {
                 mainUserId,
                 JSON.stringify(cleanData.payload.message),
               );
-              const event: EventType = {
+              const event: RedisData = {
                 type: "CHAT",
                 userId: mainUserId,
-                message: cleanData.payload.message,
+                message: {
+                  content: cleanData.payload.message!.content,
+                  name: cleanData.payload.message!.name,
+                  sender_id: mainUserId,
+                  status: "TO_FRONTEND",
+                  timeStamp_ms: Date.now(),
+                },
               };
               await redisPub.publish(
                 `room:${roomId}:events`,
@@ -165,7 +163,7 @@ wss.on("connection", function connection(ws, req) {
                 `room:${roomId}:order`,
                 cleanData.payload.shape.id,
               );
-              const event: EventType = {
+              const event: RedisData = {
                 type: "ADD",
                 userId: mainUserId,
                 shape: cleanData.payload.shape,
@@ -207,7 +205,7 @@ wss.on("connection", function connection(ws, req) {
                 cleanData.payload.shape.id,
                 JSON.stringify(cleanData.payload.shape),
               );
-              const event: EventType = {
+              const event: RedisData = {
                 type: "UPD",
                 userId: mainUserId,
                 shape: cleanData.payload.shape,
@@ -245,7 +243,7 @@ wss.on("connection", function connection(ws, req) {
                 `room:${roomId}:shapes`,
                 cleanData.payload.shape.id,
               );
-              const event: EventType = {
+              const event: RedisData = {
                 type: "DEL",
                 userId: mainUserId,
                 shape: cleanData.payload.shape,

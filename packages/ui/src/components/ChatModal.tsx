@@ -5,11 +5,15 @@ import {
   IconSend2,
   IconSlash,
 } from "@tabler/icons-react";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { Button } from "./ui/button";
 import { Virtuoso } from "react-virtuoso";
 import MessageBubble from "./ui/MessageBubble";
-import { ChatModalProps, Message } from "./types";
+import {
+  ChatModalProps,
+  MessageReceivedType,
+  MessageToSendType,
+} from "./types";
 import { drawWithAi } from "@repo/common/api";
 import { useUser } from "@repo/hooks";
 
@@ -280,8 +284,8 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
     // const colotAttachedParticipants: Record<string, ParticipantColor> =
     //   attachColorsToParticipants(participants);
 
+    const { currentUser } = useUser();
     const handleMessageSend = async (content: string) => {
-      const { currentUser } = useUser();
       const userId = currentUser?.userId;
       if (!userId) {
         console.log("no userID");
@@ -298,19 +302,20 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
       const name = currentUser?.name;
       if (!name) return;
       console.log("sending mess");
-      const userMessage: Message = {
+      const userMessage: MessageReceivedType = {
         sender_id: userId,
         name: name,
-        timestamp_ms: Date.now(),
+        status: "TO_FRONTEND",
+        timeStamp_ms: 2355,
+        content: content,
+      };
+      const messageToBackend: MessageToSendType = {
+        name: name,
+        status: "TO_BACKEND",
         content: content,
       };
       setMessages((prev) => [...prev, userMessage]);
-      send(
-        JSON.stringify({
-          type: "CHAT",
-          payload: { message: inputText, userId },
-        })
-      );
+      send("CHAT", { message: messageToBackend });
     };
     return (
       <div
@@ -414,7 +419,7 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
         </div>
       </div>
     );
-  }
+  },
 );
 
 export default ChatModal;

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import {
   RoomOptions,
   JoinRoomModal,
@@ -7,18 +7,14 @@ import {
   toolkitProps,
   ChatModal,
 } from "@repo/ui";
-import { useWhiteboardWithSocket } from "./hooks/useWhiteboardWithSocket";
-import { createRoom, joinRoom, login } from "./api";
-import { Button } from "@repo/ui/button";
 import { AxiosResponse } from "axios";
 import { drawShape } from "./utils/drawing";
 import { ShapeType } from "@repo/common/types";
-import { createContext } from "vm";
-import { useWhiteBoard } from "./hooks/useWhiteboard";
 import { useSocketWithWhiteboard } from "./hooks/useSocketWithWhiteboard";
 import { joinRoomService } from "app/services/canvas.service";
 import redrawPreviousShapes from "./utils/redrawPreviousShapes";
 import { useSocketContext } from "@repo/hooks";
+import { createRoom } from "app/api/canvas.api";
 
 let token = "";
 const page = () => {

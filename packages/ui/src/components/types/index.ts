@@ -1,16 +1,17 @@
-import { ShapeType } from "@repo/common/types";
-import { Dispatch, RefObject } from "react";
+import { MessageType, ShapeType, WebSocketDataType } from "@repo/common/types";
 
-export interface Message {
-  sender_id: string;
-  name: string;
-  timestamp_ms: number;
-  content: string;
-}
 export interface ChatModalProps {
   boardState: ShapeType[];
-  send: (action: any) => void;
-  messages: Message[];
-  setMessages: React.Dispatch<React.SetStateAction<Message[] | []>>;
+  send: (
+    type: WebSocketDataType["type"],
+    payload: WebSocketDataType["payload"],
+  ) => void;
+  messages: MessageReceivedType[];
+  setMessages: React.Dispatch<React.SetStateAction<MessageReceivedType[] | []>>;
   drawShapeFromAi: (shapes: ShapeType[]) => void;
 }
+export type MessageReceivedType = Extract<
+  MessageType,
+  { status: "TO_FRONTEND" }
+>;
+export type MessageToSendType = Extract<MessageType, { status: "TO_BACKEND" }>;

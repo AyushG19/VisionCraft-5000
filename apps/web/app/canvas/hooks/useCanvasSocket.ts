@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+"use client";
+import { useEffect, useRef } from "react";
 import { WS_BE_URL } from "config";
-import { Action } from "../types";
+import { WebSocketDataType } from "@repo/common/types";
 
 export function useCanvasSocket(
   enabled: boolean,
@@ -10,9 +11,13 @@ export function useCanvasSocket(
   token: string,
 ) {
   const wsRef = useRef<WebSocket | null>(null);
-  const send = (message: any) => {
+  const send = (
+    type: WebSocketDataType["type"],
+    paylaod: WebSocketDataType["payload"],
+  ): void => {
     if (!wsRef.current) return;
-    wsRef.current.send(JSON.stringify(message));
+    console.log("insend: ", { type: type, payload: paylaod });
+    wsRef.current.send(JSON.stringify({ type: type, payload: paylaod }));
   };
 
   useEffect(() => {

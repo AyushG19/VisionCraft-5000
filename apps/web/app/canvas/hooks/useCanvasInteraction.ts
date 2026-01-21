@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useRef } from "react";
 import pencilIcon from "../utils/pencilIcon";
 import { ShapeType } from "@repo/common/types";
@@ -19,7 +20,11 @@ import {
   ResizeStateType,
 } from "../types";
 import oklchToCSS from "../utils/oklchToCss";
-import createNewShape from "../utils/createNewShape";
+import {
+  createNewShape,
+  finishPencil,
+  updatePencil,
+} from "../utils/createNewShape";
 import {
   createDraggedShape,
   createResizedShape,
@@ -48,6 +53,7 @@ const useCanvasInteraction = (
   const crosshairTools = ["SQUARE", "CIRCLE", "ARROW", "TRIANGLE"];
   const selectedShapeRef = useRef(selectedShape);
   const canvasStateRef = useRef(canvasState);
+  const tempShape = useRef<ShapeType | null>(null);
   const interactionRef = useRef<InteractionState>({
     isDrawing: false,
     isDragging: false,
@@ -233,16 +239,13 @@ const useCanvasInteraction = (
       };
       if (tool === "PENCIL") {
         console.log(interactionRef.current.startPos);
-        canvasDispatch({
-          type: "ADD_SHAPE",
-          payload: createNewShape(
-            currentState.toolState,
-            interactionRef.current.startPos,
-            { x: 0, y: 0 },
-          ),
-        });
-        return;
+        tempShape.current = createNewShape(
+          currentState.toolState,
+          interactionRef.current.startPos,
+          { x: 0, y: 0 },
+        );
       }
+      return;
     };
 
     const onMouseMove = (e: MouseEvent) => {
@@ -266,6 +269,7 @@ const useCanvasInteraction = (
           );
           return;
         }
+        //--------------RESIZE HELPER--------------//
         if (
           currentSelected &&
           interactionRef.current.isResizing &&
@@ -331,11 +335,15 @@ const useCanvasInteraction = (
       if (tool === "TEXT") {
         return;
       } else if (tool === "PENCIL") {
+        if (!tempShape.current) return;
         console.log("updating pencil");
-        canvasDispatch({
-          type: "UPDATE_PENCIL",
-          payload: currPos,
-        });
+        tempShape.current = updatePencil(currPos, tempShape.current);
+        redrawPreviousShapes(
+          ctx,
+          [...currentState.drawnShapes, tempShape.current],
+          undefined,
+          currentSelected?.id,
+        );
       } else {
         redrawPreviousShapes(
           ctx,
@@ -360,24 +368,21 @@ const useCanvasInteraction = (
       if (tool === "PENCIL") {
         console.log("up");
         interactionRef.current.isDrawing = false;
-        canvasDispatch({
-          type: "FINISH_SHAPE",
-          payload: createNewShape(
-            currentState.toolState,
-            interactionRef.current.startPos,
-            currPos,
-          ),
-        });
+        if (tempShape.current) {
+          dispatchWithSocket({
+            type: "ADD_SHAPE",
+            payload: finishPencil(tempShape.current),
+          });
+        }
         return;
       }
       if (tool === "SELECT" && currentSelected) {
-        const dragState = createDragState();
+        // while in selection state and hava a selected item
         if (interactionRef.current.isDragging) {
-          canvasDispatch({
-            type: "UPDATE",
-            payload: {
-              shape: createDraggedShape(dragState, currPos, currentSelected),
-            },
+          const dragState = createDragState();
+          dispatchWithSocket({
+            type: "UPD_SHAPE",
+            payload: createDraggedShape(dragState, currPos, currentSelected),
           });
           setSelectedShape(
             createDraggedShape(dragState, currPos, currentSelected),
@@ -388,23 +393,23 @@ const useCanvasInteraction = (
           );
         } else if (interactionRef.current.isResizing) {
           const resizeState = createResizeState();
-          canvasDispatch({
-            type: "UPDATE",
-            payload: {
-              shape: createResizedShape(resizeState, currPos, currentSelected),
-            },
+          dispatchWithSocket({
+            type: "UPD_SHAPE",
+            payload: createResizedShape(resizeState, currPos, currentSelected),
           });
           setSelectedShape(
             createResizedShape(resizeState, currPos, currentSelected),
           );
         }
       }
+
+      // defualt
       interactionRef.current.isDragging = false;
       interactionRef.current.isResizing = false;
-
       if (!interactionRef.current.isDrawing) return;
 
       console.log("adding a shape");
+
       dispatchWithSocket({
         type: "ADD_SHAPE",
         payload: createNewShape(
@@ -413,6 +418,7 @@ const useCanvasInteraction = (
           currPos,
         ),
       });
+
       interactionRef.current.isDrawing = false;
       redrawPreviousShapes(
         ctx,

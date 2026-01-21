@@ -1,6 +1,5 @@
-import { ShapeSchema, ShapeType } from "@repo/common/types";
 import { Action, CanvasState } from "../types/index";
-import { act } from "react";
+
 export default function canvasReducer(
   state: CanvasState,
   action: Action,
@@ -83,54 +82,22 @@ export default function canvasReducer(
       ],
     };
   }
-  if (action.type === "FINISH_SHAPE") {
-    const shapeIndex = state.drawnShapes.length - 1;
-    const shape = state.drawnShapes[shapeIndex];
+  // if (action.type === "FINISH_SHAPE") {
+  //   const shapeIndex = state.drawnShapes.length - 1;
+  //   const shape = state.drawnShapes[shapeIndex];
+  //   if (!shape || !Array.isArray(shape.points) || shape.type !== "PENCIL")
+  //     return state;
 
-    if (!shape || !Array.isArray(shape.points) || shape.type !== "PENCIL")
-      return state;
+  //   const updatedShape = createNormalizedShape(shape);
 
-    // 1. FIND THE TRUE BOUNDS from the points array
-    // We cannot trust shape.startX/endX because the user might have scribbled outside that line.
-    let minX = Infinity;
-    let minY = Infinity;
-    let maxX = -Infinity;
-    let maxY = -Infinity;
+  //   const newDrawnShapes = [...state.drawnShapes];
+  //   newDrawnShapes[shapeIndex] = updatedShape;
 
-    shape.points.forEach((p) => {
-      if (p.x < minX) minX = p.x;
-      if (p.y < minY) minY = p.y;
-      if (p.x > maxX) maxX = p.x;
-      if (p.y > maxY) maxY = p.y;
-    });
-
-    const width = maxX - minX;
-    const height = maxY - minY;
-
-    const safeW = width === 0 ? 1 : width;
-    const safeH = height === 0 ? 1 : height;
-
-    // 2. Normalize based on the TRUE bounds
-    const normalizedPoints = shape.points.map((p) => ({
-      x: (p.x - minX) / safeW, // This will guaranteed be 0.0 to 1.0
-      y: (p.y - minY) / safeH,
-    }));
-
-    // 3. Update the shape with the NEW bounds and normalized points
-    const updatedShape = {
-      ...shape,
-      points: normalizedPoints,
-      isNormalized: true,
-    };
-
-    const newDrawnShapes = [...state.drawnShapes];
-    newDrawnShapes[shapeIndex] = updatedShape;
-
-    return {
-      ...state,
-      drawnShapes: newDrawnShapes,
-    };
-  }
+  //   return {
+  //     ...state,
+  //     drawnShapes: newDrawnShapes,
+  //   };
+  // }
   if (action.type === "REDO") {
     if (state.historyIndex < state.history.length - 1) {
       const newIndex = state.historyIndex + 1;
@@ -173,17 +140,18 @@ export default function canvasReducer(
       toolState: { ...state.toolState, brushSize: action.payload },
     };
   }
-  if (action.type === "UPDATE") {
+  if (action.type === "UPD_SHAPE") {
     return {
       ...state,
       drawnShapes: state.drawnShapes.map((s) => {
-        if (s.id === action.payload.shape.id)
+        if (s.id === action.payload.id)
           return {
             ...s,
-            startX: action.payload.shape.startX,
-            startY: action.payload.shape.startY,
-            endX: action.payload.shape.endX,
-            endY: action.payload.shape.endY,
+            startX: action.payload.startX,
+            startY: action.payload.startY,
+            endX: action.payload.endX,
+            endY: action.payload.endY,
+            points: action.payload.points,
           };
         return s;
       }),
