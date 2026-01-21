@@ -143,6 +143,7 @@ const checkCodeResponse = z.object({
   canvasState: ShapeSchema,
   slug: z.string(),
 });
+
 export const HttpEnv = z.object({
   NODE_ENV: z.enum(["production", "development"]),
   PORT: z.number(),
@@ -152,6 +153,7 @@ export const HttpEnv = z.object({
   GROQ_API_KEY: z.string(),
   RF_TOKEN_EXPIRY: z.number(),
   AC_TOKEN_EXPIRY: z.number(),
+  FRONTEND_URL: z.string(),
 });
 export const wsEnv = z.object({
   NODE_ENV: z.enum(["production", "development"]),

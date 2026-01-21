@@ -1,20 +1,8 @@
 {
   "name": "@repo/common",
   "version": "1.0.0",
-  "exports": {
-    "./types": {
-      "import": "./dist/types.js",
-      "require": "./dist/types.js",
-      "types": "./dist/types.d.ts"
-    },
-    "./toolState": "./dist/toolState.js",
-    "./jwt-payload": "./dist/jwt.js",
-    "./api": {
-      "import": "./dist/api/index.js",
-      "types": "./dist/api/index.d.ts"
-    }
-  },
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -b"
   },

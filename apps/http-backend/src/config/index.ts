@@ -25,7 +25,7 @@ export const authConfig: {
   },
 };
 export const corsConfig = {
-  origin: isDev ? "http://localhost:3000" : "",
+  origin: isDev ? "http://localhost:3000" : env.FRONTEND_URL,
   credentials: true,
 };
 export const rfTokenExpiry = env.RF_TOKEN_EXPIRY;

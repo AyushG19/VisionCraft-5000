@@ -1,4 +1,4 @@
-import { HttpEnv } from "@repo/common/types";
+import { HttpEnv } from "@repo/common/types.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -16,6 +16,7 @@ const envSchema = {
   GROQ_API_KEY: process.env.GROQ_API_KEY,
   RF_TOKEN_EXPIRY: Number(process.env.RF_TOKEN_EXPIRY),
   AC_TOKEN_EXPIRY: Number(process.env.AC_TOKEN_EXPIRY),
+  FRONTEND_URL: process.env.FRONTEND_URL,
 };
 console.log(process.env.PORT);
 const parsedEnv = HttpEnv.safeParse(envSchema);

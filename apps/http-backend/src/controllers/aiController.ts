@@ -1,12 +1,12 @@
-import { GROQ_API_KEY, MODEL } from "@repo/backend-common/config";
-import { ShapeType } from "@repo/common/types";
+import { GROQ_API_KEY, MODEL } from "@repo/backend-common/config.js";
+import { ShapeType } from "@repo/common/types.js";
 import { Request, Response } from "express";
 import Groq from "groq-sdk";
 const groq = new Groq({ apiKey: GROQ_API_KEY });
 
 export async function getGroqChatCompletion(
   userCommand: string,
-  context: ShapeType[]
+  context: ShapeType[],
 ) {
   const shapeSchema = {
     type: "object",

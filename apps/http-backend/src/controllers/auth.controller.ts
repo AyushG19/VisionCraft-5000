@@ -1,11 +1,10 @@
 import { Request, Response } from "express";
 import { prismaClient } from "@repo/db/db";
 import bcrypt from "bcrypt";
-import jwtService from "@repo/backend-common/jwt.service";
 import { authConfig, rfTokenExpiry } from "../config/index.js";
 import { AppError } from "../error/index.js";
 import { accessJwtService, refreshJwtService } from "../utils/jwtInstance.js";
-import { JwtPayloadType, UserType } from "@repo/common/types";
+import { JwtPayloadType } from "@repo/common/types.js";
 
 export const signup = async (req: Request, res: Response) => {
   try {
@@ -31,12 +30,12 @@ export const signup = async (req: Request, res: Response) => {
       .cookie(
         "refreshToken",
         refreshJwtService.sign({ userId: user.id }, rfTokenExpiry),
-        authConfig.refreshCookies
+        authConfig.refreshCookies,
       )
       .cookie(
         "accessToken",
         accessJwtService.sign({ userId: user.id }, rfTokenExpiry),
-        authConfig.accessCookies
+        authConfig.accessCookies,
       )
       .json({
         userId: user.id,
@@ -61,12 +60,12 @@ export const login = async (req: Request, res: Response) => {
       .cookie(
         "refreshToken",
         refreshJwtService.sign({ userId: user.id }, rfTokenExpiry),
-        authConfig.refreshCookies
+        authConfig.refreshCookies,
       )
       .cookie(
         "accessToken",
         accessJwtService.sign({ userId: user.id }, rfTokenExpiry),
-        authConfig.accessCookies
+        authConfig.accessCookies,
       )
       .json({
         userId: user.id,
@@ -94,12 +93,12 @@ export const refreshToken = async (req: Request, res: Response) => {
       .cookie(
         "refreshToken",
         refreshJwtService.sign({ userId: jwtRes.userId }, rfTokenExpiry),
-        authConfig.refreshCookies
+        authConfig.refreshCookies,
       )
       .cookie(
         "accessToken",
         accessJwtService.sign({ userId: jwtRes.userId }, rfTokenExpiry),
-        authConfig.accessCookies
+        authConfig.accessCookies,
       )
       .json({
         message: "Token refresh Sucessful",

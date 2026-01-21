@@ -1,19 +1,18 @@
 {
   "name": "@repo/backend-common",
   "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
-    "./config": "./dist/config.js",
-    "./jwt.service": "./dist/jwt.service.js",
-    "./AuthPayload": "./dist/jwt-payload.js"
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
   },
-  "main": "config.js",
   "scripts": {
     "build": "tsc -b"
   },
-  "keywords": [],
-  "author": "",
   "license": "ISC",
-  "description": "",
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
     "@repo/common": "workspace:*",

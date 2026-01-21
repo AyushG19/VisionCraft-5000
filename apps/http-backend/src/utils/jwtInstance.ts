@@ -1,4 +1,4 @@
-import { JwtService } from "@repo/backend-common/jwt.service";
+import { JwtService } from "@repo/backend-common/jwt.service.js";
 import env from "../env.js";
 
 export const accessJwtService = new JwtService(env.JWT_SECRET);

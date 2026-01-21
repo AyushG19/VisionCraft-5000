@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { prismaClient } from "@repo/db/db";
-import { CreateRoomSchema } from "@repo/common/types";
 import { generateRandomCode } from "../utils/codeGenerator.js";
 
 const checkCode = async (req: Request, res: Response) => {
