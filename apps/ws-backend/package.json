@@ -10,6 +10,7 @@
   "devDependencies": {
     "@repo/backend-common": "workspace:*",
     "@repo/db": "workspace:*",
+    "@repo/redis": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@repo/common": "workspace:*"
   },

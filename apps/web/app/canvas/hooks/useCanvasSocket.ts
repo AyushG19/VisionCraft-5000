@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
-import { WS_BE_URL } from "config";
-import { WebSocketDataType } from "@repo/common/types";
+import { env } from "../../../config";
+import { WebSocketDataType } from "@repo/common";
 
 export function useCanvasSocket(
   enabled: boolean,
@@ -28,7 +28,7 @@ export function useCanvasSocket(
       return;
     }
     const ws = new WebSocket(
-      `${WS_BE_URL}?roomId=${encodeURIComponent(roomId)}&slug=${slug}&token=${encodeURIComponent(token)}`,
+      `${env.WS_BACKEND_URL}?roomId=${encodeURIComponent(roomId)}&slug=${slug}&token=${encodeURIComponent(token)}`,
     );
     wsRef.current = ws;
     ws.onopen = () => {

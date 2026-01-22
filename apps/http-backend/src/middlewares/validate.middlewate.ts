@@ -1,4 +1,4 @@
-import { ZodTypeAny } from "@repo/common/types.js";
+import { ZodTypeAny } from "@repo/common";
 import { Request, Response } from "express";
 import { NextFunction } from "express-serve-static-core";
 

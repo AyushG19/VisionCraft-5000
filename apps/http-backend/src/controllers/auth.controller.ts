@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import { prismaClient } from "@repo/db/pg";
+import { prismaClient } from "@repo/db";
 import bcrypt from "bcrypt";
 import { authConfig, rfTokenExpiry } from "../config/index.js";
 import { AppError } from "../error/index.js";
 import { accessJwtService, refreshJwtService } from "../utils/jwtInstance.js";
-import { JwtPayloadType } from "@repo/common/types.js";
+import { JwtPayloadType } from "@repo/common";
 
 export const signup = async (req: Request, res: Response) => {
   try {

@@ -1,8 +1,8 @@
 import { WebSocketServer, WebSocket } from "ws";
 import dotenv from "dotenv";
-import { ShapeType, JwtPayloadType } from "@repo/common/types";
+import {  JwtPayloadType } from "@repo/common";
 dotenv.config();
-import { redisPub, redisSub } from "@repo/db/redis";
+import { redisPub, redisSub } from "@repo/redis";
 import {
   validateConnection,
   validateSocketData,

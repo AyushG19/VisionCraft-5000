@@ -18,9 +18,7 @@ import {
   IconTrendingUp,
   IconTriangle,
 } from "@tabler/icons-react";
-import type { ToolState } from "@repo/common/toolState";
-import ColorBoxes from "./ui/ColorBoxes";
-import { type ShapeType } from "@repo/common/types";
+import type { ToolState,ShapeType } from "@repo/common";
 
 interface Shape {
   type: ToolState["currentTool"];

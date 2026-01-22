@@ -14,7 +14,6 @@ import {
   MessageReceivedType,
   MessageToSendType,
 } from "./types";
-import { drawWithAi } from "@repo/common/api";
 import { useUser } from "@repo/hooks";
 
 const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
@@ -296,8 +295,8 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
         const command = content.replace("/draw", "");
         console.log("content 2: ", content);
 
-        const shapes = await drawWithAi(command, boardState);
-        drawShapeFromAi(shapes);
+        // const shapes = await drawWithAi(command, boardState);
+        // drawShapeFromAi(shapes);
       }
       const name = currentUser?.name;
       if (!name) return;

@@ -1,10 +1,8 @@
 import {
   JwtPayloadSchema,
-  JwtVerifyResponseType,
   WebSocketData,
-  WebSocketDataPayloadType,
   WebSocketDataType,
-} from "@repo/common/types";
+} from "@repo/common";
 import { jwtInstance } from "./jwtInstance";
 
 const parseData = (data: any) => {

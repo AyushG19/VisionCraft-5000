@@ -144,6 +144,11 @@ const checkCodeResponse = z.object({
   slug: z.string(),
 });
 
+export const WebEnv = z.object({
+  NODE_ENV: z.enum(["production", "development", "test"]),
+  HTTP_BACKEND_URL: z.string(),
+  WS_BACKEND_URL: z.string(),
+});
 export const HttpEnv = z.object({
   NODE_ENV: z.enum(["production", "development"]),
   PORT: z.number(),
@@ -190,7 +195,7 @@ export const JwtVerifyResponseSchema = z.object({
   error: z.any().optional(),
 });
 // app/errors/AppError.ts
-export const AppErrorCode = z.enum([
+const AppErrorCode = z.enum([
   "UNAUTHORIZED",
   "INVALID_CREDENTIALS",
   "VALIDATION_ERROR",
@@ -213,6 +218,7 @@ export type JwtPayloadType = z.infer<typeof JwtPayloadSchema>;
 export type { ZodTypeAny } from "zod";
 export type JwtExpiryType = z.infer<typeof JwtExpiry>;
 export type AppErrorCodeType = z.infer<typeof AppErrorCode>;
+export type WebEnvType = z.infer<typeof WebEnv>;
 export type WsEnvType = z.infer<typeof wsEnv>;
 export type DbEnvType = z.infer<typeof dbEnvSchema>;
 export type JwtVerifyResponseType = z.infer<typeof JwtVerifyResponseSchema>;

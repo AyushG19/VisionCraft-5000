@@ -1,6 +1,5 @@
-import { ShapeType } from "@repo/common/types";
-import {} from "../types";
-import { ToolState } from "@repo/common/toolState";
+import { ShapeType,ToolState } from "@repo/common";
+
 export function createNewShape(
   toolState: ToolState,
   startPos: { x: number; y: number },

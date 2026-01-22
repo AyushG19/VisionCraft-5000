@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 
 import { Tooltip, TooltipTrigger, TooltipContent } from "./ToolTip";
-import { ToolState } from "@repo/common/toolState";
+import { ToolState } from "@repo/common";
 import ColorSelector from "./ColorSelector";
 
 const oklchToCssHsl = (l: number, c: number, h: number) => {

@@ -1,4 +1,4 @@
-import { MessageType, ShapeType, WebSocketDataType } from "@repo/common/types";
+import { MessageType, ShapeType, WebSocketDataType } from "@repo/common";
 
 export interface ChatModalProps {
   boardState: ShapeType[];

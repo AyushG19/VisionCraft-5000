@@ -9,7 +9,7 @@ import {
 } from "@repo/ui";
 import { AxiosResponse } from "axios";
 import { drawShape } from "./utils/drawing";
-import { ShapeType } from "@repo/common/types";
+import { ShapeType } from "@repo/common";
 import { useSocketWithWhiteboard } from "./hooks/useSocketWithWhiteboard";
 import { joinRoomService } from "app/services/canvas.service";
 import redrawPreviousShapes from "./utils/redrawPreviousShapes";

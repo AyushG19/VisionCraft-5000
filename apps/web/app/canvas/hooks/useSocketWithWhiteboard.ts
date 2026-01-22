@@ -8,9 +8,9 @@ import {
   ShapeType,
   WebSocketData,
   WebSocketDataType,
-} from "@repo/common/types";
+} from "@repo/common";
 import { useCanvasSocket } from "./useCanvasSocket";
-import { ToolState } from "@repo/common/toolState";
+import { ToolState } from "@repo/common";
 
 type EventType = {
   type: "ADD" | "DEL" | "UPD";

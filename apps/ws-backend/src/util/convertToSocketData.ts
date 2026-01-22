@@ -1,4 +1,4 @@
-import { WebSocketDataType } from "@repo/common/types";
+import { WebSocketDataType } from "@repo/common";
 import { RedisData } from "../types";
 
 export function convertToSocketData(

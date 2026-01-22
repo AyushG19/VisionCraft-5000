@@ -1,6 +1,6 @@
 import { RefObject } from "react";
-import { ToolState } from "@repo/common/toolState";
-import { MessageType, ShapeType } from "@repo/common/types";
+import { ToolState } from "@repo/common";
+import { MessageType, ShapeType } from "@repo/common";
 import { HandleName } from "../utils/getHandles";
 
 export type CanvasState = {

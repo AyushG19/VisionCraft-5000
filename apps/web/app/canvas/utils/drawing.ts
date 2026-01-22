@@ -1,8 +1,6 @@
-import { createContext } from "vm";
 import oklchToCSS from "./oklchToCss";
-import { ShapeSchema, type ShapeType } from "@repo/common/types";
+import { type ShapeType } from "@repo/common";
 import { Bounds, getHandles, Handle } from "./getHandles";
-import { start } from "repl";
 
 // Type definitions for better type safety
 interface Point {

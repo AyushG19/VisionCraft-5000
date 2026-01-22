@@ -1,6 +1,5 @@
-import { ShapeType } from "@repo/common/types";
+import { ShapeType } from "@repo/common";
 import { drawShape } from "./drawing";
-import canvasReducer from "./canvasReducer";
 import { createDotPattern } from "./createPatterns";
 
 const patternRef: { current: CanvasPattern | null } = { current: null };

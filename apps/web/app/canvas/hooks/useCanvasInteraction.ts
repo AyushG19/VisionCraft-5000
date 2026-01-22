@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef } from "react";
 import pencilIcon from "../utils/pencilIcon";
-import { ShapeType } from "@repo/common/types";
+import { ShapeType } from "@repo/common";
 import isClickOnShape, {
   isInsideSelectBound,
   isPointInHandle,

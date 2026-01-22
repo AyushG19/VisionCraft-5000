@@ -1,4 +1,4 @@
-import { ToolState } from "@repo/common/toolState";
+import { ToolState } from "@repo/common";
 
 export default function resizeCanvas(
   canvas: HTMLCanvasElement,

@@ -1,4 +1,4 @@
-import { ShapeType } from "@repo/common/types";
+import { ShapeType } from "@repo/common";
 
 export const getOutlineBounds = (shape: ShapeType) => {
   return {

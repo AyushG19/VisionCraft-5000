@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { prismaClient } from "@repo/db/pg";
+import { prismaClient } from "@repo/db";
 import { generateRandomCode } from "../utils/codeGenerator.js";
 
 const checkCode = async (req: Request, res: Response) => {

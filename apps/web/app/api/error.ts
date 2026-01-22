@@ -1,5 +1,5 @@
 "use client";
-import { AppErrorCodeType } from "@repo/common/types";
+import { AppErrorCodeType } from "@repo/common";
 
 export class AppError extends Error {
   code: AppErrorCodeType;

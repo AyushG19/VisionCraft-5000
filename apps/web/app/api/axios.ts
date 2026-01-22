@@ -1,8 +1,8 @@
 import axios from "axios";
-import { HTTP_BE_URL } from "../../config/index";
+import { env } from "../../config";
 
 export const axiosInstance = axios.create({
-  baseURL: HTTP_BE_URL,
+  baseURL: env.HTTP_BACKEND_URL,
   timeout: 8000,
   headers: {
     "Content-Type": "application/json",
@@ -10,7 +10,7 @@ export const axiosInstance = axios.create({
   withCredentials: true,
 });
 export const refreshInstance = axios.create({
-  baseURL: HTTP_BE_URL,
+  baseURL: env.HTTP_BACKEND_URL,
   timeout: 8000,
   withCredentials: true,
 });

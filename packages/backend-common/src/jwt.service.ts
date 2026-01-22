@@ -1,7 +1,6 @@
 import jwt, { JwtHeader } from "jsonwebtoken";
 import { aTokenExpiry, rTokenExpiry, JWT_SECRET } from "./config";
 import CustomUserPayload from "./jwt-payload";
-import { JwtPayloadType, type JwtVerifyResponseType } from "@repo/common/types";
 export class JwtService {
   constructor(private secret: string) {}
   sign(payload: CustomUserPayload, expiresIn: number) {

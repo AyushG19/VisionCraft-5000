@@ -1,5 +1,5 @@
 "use client";
-import { UuidSchema, UuidType } from "@repo/common/types";
+import { UuidSchema, UuidType } from "@repo/common";
 
 export const useRoomID = (): UuidType => {
   const roomID = localStorage.getItem("roomId");

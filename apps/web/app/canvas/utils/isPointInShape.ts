@@ -1,7 +1,5 @@
-import { ShapeType } from "@repo/common/types";
-import { recordTraceEvents } from "next/dist/trace";
+import { ShapeType } from "@repo/common";
 import { Bounds, getHandles, HandleName } from "./getHandles";
-import { setEngine } from "crypto";
 
 export type HandlePosition =
   | "TOP_LEFT"

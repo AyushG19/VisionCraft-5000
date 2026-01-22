@@ -1,8 +1,8 @@
-import { GROQ_API_KEY, MODEL } from "@repo/backend-common/config.js";
-import { ShapeType } from "@repo/common/types.js";
+import { ShapeType } from "@repo/common";
 import { Request, Response } from "express";
+import env from "../env.js"
 import Groq from "groq-sdk";
-const groq = new Groq({ apiKey: GROQ_API_KEY });
+const groq = new Groq({ apiKey: env.GROQ_API_KEY });
 
 export async function getGroqChatCompletion(
   userCommand: string,
@@ -91,7 +91,7 @@ export async function getGroqChatCompletion(
 Generate ONLY a valid JSON array of ShapeType objects for the command "${userCommand}". Base it on the current board: ${JSON.stringify(context)}. Match the schema exactly—include fillColor sparingly and differently from lineColor where appropriate. No explanations, text, or wrappers.`,
       },
     ],
-    model: MODEL,
+    model: env.MODEL,
     response_format: {
       type: "json_schema",
       json_schema: {

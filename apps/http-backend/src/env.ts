@@ -1,4 +1,4 @@
-import { HttpEnv } from "@repo/common/types.js";
+import { HttpEnv } from "@repo/common";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -8,8 +8,8 @@ function shutdown(code: number): never {
 }
 
 const envSchema = {
-  PORT: Number(process.env.PORT) ?? 4000,
-  NODE_ENV: process.env.NODE_ENV ?? "development",
+  PORT: Number(process.env.PORT) || 4000,
+  NODE_ENV: process.env.NODE_ENV || "development",
   JWT_SECRET: process.env.JWT_SECRET,
   BCRYPT_SALT: process.env.BCRYPT_SALT,
   MODEL: process.env.MODEL,
@@ -18,7 +18,7 @@ const envSchema = {
   AC_TOKEN_EXPIRY: Number(process.env.AC_TOKEN_EXPIRY),
   FRONTEND_URL: process.env.FRONTEND_URL,
 };
-console.log(process.env.PORT);
+
 const parsedEnv = HttpEnv.safeParse(envSchema);
 if (!parsedEnv.success) {
   console.error("!ENVIRONMENT VALIDATION FAILED!");

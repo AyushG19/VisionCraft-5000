@@ -1,5 +1,3 @@
-import dotenv from "dotenv";
-dotenv.config();
 import express from "express";
 import authRouter from "./routes/auth.router.js";
 import roomRouter from "./routes/roomRouter.js";

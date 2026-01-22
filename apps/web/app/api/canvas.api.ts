@@ -1,16 +1,16 @@
-import { ShapeType } from "@repo/common/types";
+import { ShapeType } from "@repo/common";
 import { axiosInstance } from "./axios";
 import { JoinRoomResponseType } from "app/canvas/types";
 
 export const joinRoom = async (
-  roomCode: string
+  roomCode: string,
 ): Promise<JoinRoomResponseType> => {
-  let data = {
+  const data = {
     slug: roomCode,
   };
   const res = await axiosInstance.post<JoinRoomResponseType>(
     `/api/rooms/check-code`,
-    data
+    data,
   );
   return res.data;
 };

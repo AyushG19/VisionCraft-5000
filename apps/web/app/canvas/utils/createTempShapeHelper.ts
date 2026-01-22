@@ -1,4 +1,4 @@
-import { ShapeType } from "@repo/common/types";
+import { ShapeType } from "@repo/common";
 import { DragStateType, ResizeStateType } from "../types";
 
 export const createDraggedShape = (

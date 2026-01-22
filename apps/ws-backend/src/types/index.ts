@@ -1,4 +1,4 @@
-import { MessageType, ShapeType } from "@repo/common/types";
+import { MessageType, ShapeType } from "@repo/common";
 
 export type RedisData = {
   userId: string;

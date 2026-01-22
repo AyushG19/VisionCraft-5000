@@ -3,7 +3,7 @@ import {
   SignupFormValues,
   User,
   UserType,
-} from "@repo/common/types";
+} from "@repo/common";
 import { loginApi, signupApi } from "app/api/auth.api";
 import { AppError } from "app/api/error";
 

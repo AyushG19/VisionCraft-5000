@@ -1,17 +1,12 @@
 import {
-  IconArrowNarrowRight,
-  IconBrandGithubFilled,
-  IconBrandGoogleFilled,
   IconCursorText,
 } from "@tabler/icons-react";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
 import EmailModal from "./ui/EmailModal";
 import {
   LoginFormValues,
   SignupFormValues,
   UserType,
-} from "@repo/common/types";
+} from "@repo/common";
 
 // Dots pattern component
 export function DotsPattern() {
