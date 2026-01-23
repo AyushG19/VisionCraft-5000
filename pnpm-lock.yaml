@@ -12,7 +12,7 @@ importers:
         specifier: ^3.5.3
         version: 3.5.3
       turbo:
-        specifier: ^2.5.0
+        specifier: ^2.5.2
         version: 2.5.2
       typescript:
         specifier: 5.8.2
@@ -191,9 +191,6 @@ importers:
       '@repo/common':
         specifier: workspace:*
         version: link:../../packages/common
-      '@repo/db':
-        specifier: workspace:*
-        version: link:../../packages/db
       '@repo/redis':
         specifier: workspace:*
         version: link:../../packages/redis
