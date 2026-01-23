@@ -1,7 +1,8 @@
 import { WebSocketServer, WebSocket } from "ws";
 import dotenv from "dotenv";
-import {  JwtPayloadType } from "@repo/common";
-dotenv.config();
+import path from "path";
+import { JwtPayloadType } from "@repo/common";
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
 import { redisPub, redisSub } from "@repo/redis";
 import {
   validateConnection,

@@ -1,10 +1,12 @@
 {
   "name": "@repo/db",
   "version": "1.0.0",
-  "main": "./dist/pg.js",
-  "types": "./dist/pg.d.ts",
+  "main": "dist/pg.js",
+  "types": "dist/pg.d.ts",
   "scripts": {
-    "build": "tsc -b"
+    "generate": "prisma generate",
+    "build": "tsc",
+    "postinstall": "prisma generate"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*"

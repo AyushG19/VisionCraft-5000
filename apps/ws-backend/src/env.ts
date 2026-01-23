@@ -1,4 +1,4 @@
-import { wsEnv, WsEnvType } from "@repo/common";
+import { wsEnv } from "@repo/common";
 
 function shutdown(code: number): never {
   console.log("error in env");

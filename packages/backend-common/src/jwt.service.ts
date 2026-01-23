@@ -1,5 +1,4 @@
-import jwt, { JwtHeader } from "jsonwebtoken";
-import { aTokenExpiry, rTokenExpiry, JWT_SECRET } from "./config";
+import jwt from "jsonwebtoken";
 import CustomUserPayload from "./jwt-payload";
 export class JwtService {
   constructor(private secret: string) {}
@@ -39,10 +38,10 @@ export class JwtService {
 //   } catch (err) {
 //     return { valid: false, decoded: null, error: err };
 //   }
+// // };
+// export const createTokens = (payload: CustomUserPayload): object => {
+//   return {
+//     accessToken: jwt.sign(payload, JWT_SECRET, { expiresIn: aTokenExpiry }),
+//     refreshToken: jwt.sign(payload, JWT_SECRET, { expiresIn: rTokenExpiry }),
+//   };
 // };
-export const createTokens = (payload: CustomUserPayload): object => {
-  return {
-    accessToken: jwt.sign(payload, JWT_SECRET, { expiresIn: aTokenExpiry }),
-    refreshToken: jwt.sign(payload, JWT_SECRET, { expiresIn: rTokenExpiry }),
-  };
-};

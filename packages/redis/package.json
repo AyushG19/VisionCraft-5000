@@ -1,8 +1,8 @@
 {
   "name": "@repo/redis",
   "version": "1.0.0",
-  "main": "./dist/redis.js",
-  "types": "./dist/redis.d.ts",
+  "main": "dist/redis.js",
+  "types": "dist/redis.d.ts",
   "scripts": {
     "build": "tsc -b"
   },

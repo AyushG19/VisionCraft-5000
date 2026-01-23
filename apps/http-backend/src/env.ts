@@ -1,7 +1,8 @@
 import { HttpEnv } from "@repo/common";
 import dotenv from "dotenv";
+import path from "path";
 
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 function shutdown(code: number): never {
   process.exit(code);

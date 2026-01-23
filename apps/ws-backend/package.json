@@ -9,17 +9,16 @@
   },
   "devDependencies": {
     "@repo/backend-common": "workspace:*",
-    "@repo/db": "workspace:*",
     "@repo/redis": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@repo/common": "workspace:*"
+    "@repo/common": "workspace:*",
+    "@types/ws": "^8.18.1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@types/ws": "^8.18.1",
     "dotenv": "^16.5.0",
     "ws": "^8.18.1"
   }
