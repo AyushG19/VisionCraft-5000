@@ -7,13 +7,14 @@ settings:
 importers:
 
   .:
+    dependencies:
+      turbo:
+        specifier: ^2.5.2
+        version: 2.5.2
     devDependencies:
       prettier:
         specifier: ^3.5.3
         version: 3.5.3
-      turbo:
-        specifier: ^2.5.2
-        version: 2.5.2
       typescript:
         specifier: 5.8.2
         version: 5.8.2
