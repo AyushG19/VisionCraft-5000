@@ -14,13 +14,13 @@ export const authConfig: {
   refreshCookies: {
     httpOnly: true,
     secure: !isDev,
-    sameSite: isDev ? "lax" : "strict",
+    sameSite: isDev ? "lax" : "none",
     maxAge: 60 * 60 * 1000,
   },
   accessCookies: {
     httpOnly: true,
     secure: !isDev,
-    sameSite: isDev ? "lax" : "strict",
+    sameSite: isDev ? "lax" : "none",
     maxAge: 60 * 15 * 1000, //15 min
   },
 };

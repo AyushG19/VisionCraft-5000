@@ -8,18 +8,16 @@ function shutdown(code: number): never {
   process.exit(code);
 }
 
-const isDev = process.env.NODE_ENV === "development";
-
 const envSchema = {
   PORT: Number(process.env.PORT) || 4000,
-  NODE_ENV: isDev ? "development" : process.env.NODE_ENV,
+  NODE_ENV: process.env.NODE_ENV || "development",
   JWT_SECRET: process.env.JWT_SECRET,
   BCRYPT_SALT: process.env.BCRYPT_SALT,
   MODEL: process.env.MODEL,
   GROQ_API_KEY: process.env.GROQ_API_KEY,
   RF_TOKEN_EXPIRY: Number(process.env.RF_TOKEN_EXPIRY),
   AC_TOKEN_EXPIRY: Number(process.env.AC_TOKEN_EXPIRY),
-  FRONTEND_URL: isDev ? "http://localhost:3000" : process.env.FRONTEND_URL,
+  FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:3000",
 };
 
 const parsedEnv = HttpEnv.safeParse(envSchema);
