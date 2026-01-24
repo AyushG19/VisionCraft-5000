@@ -254,9 +254,6 @@ importers:
       prisma:
         specifier: ^6.6.0
         version: 6.6.0(typescript@5.8.2)
-      redis:
-        specifier: ^4.7.0
-        version: 4.7.0
     devDependencies:
       '@repo/typescript-config':
         specifier: workspace:*
