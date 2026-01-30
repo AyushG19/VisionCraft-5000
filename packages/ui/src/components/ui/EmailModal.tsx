@@ -11,7 +11,7 @@ import {
   LoginFormValues,
   SignupFormValues,
   UserType,
-  AppError
+  AppError,
 } from "@repo/common";
 import { useUser } from "@repo/hooks";
 
@@ -36,7 +36,7 @@ const EmailModal = ({
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [stage, setStage] = useState<number>(0);
   const [signupOrLogin, setSignupOrLogin] = useState<"signup" | "login">(
-    "login"
+    "login",
   );
   const { setCurrentUser } = useUser();
 
@@ -93,6 +93,7 @@ const EmailModal = ({
           name: name,
         };
         const res = await signupService(signupData);
+        setCurrentUser({ userId: res.userId, name: res.name, avatar: "" });
         navigate("canvas"); //use just the name "/" is auto
       } else if (signupOrLogin === "login") {
         const loginData: LoginFormValues = {

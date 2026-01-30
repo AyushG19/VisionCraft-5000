@@ -6,18 +6,15 @@ function shutdown(message: string, error?: unknown): never {
   process.exit(1);
 }
 
-const isDev = process.env.NODE_ENV === "development";
-
+console.log("running this in : ", process.env.NODE_ENV, " mode.");
 const envInput = {
   NODE_ENV: process.env.NODE_ENV,
 
-  HTTP_BACKEND_URL: isDev
-    ? "http://localhost:4000"
-    : process.env.NEXT_PUBLIC_HTTP_BACKEND_URL,
+  HTTP_BACKEND_URL:
+    process.env.NEXT_PUBLIC_HTTP_BACKEND_URL ?? "http://localhost:4000",
 
-  WS_BACKEND_URL: isDev
-    ? "ws://localhost:3001"
-    : process.env.NEXT_PUBLIC_WS_BACKEND_URL,
+  WS_BACKEND_URL:
+    process.env.NEXT_PUBLIC_WS_BACKEND_URL ?? "ws://localhost:3001",
 };
 
 const parsed = WebEnv.safeParse(envInput);

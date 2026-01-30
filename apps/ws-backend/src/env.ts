@@ -6,7 +6,7 @@ function shutdown(code: number): never {
 }
 const envSchema = {
   NODE_ENV: process.env.NODE_ENV ?? "development",
-  PORT: Number(process.env.PORT) ?? 3001,
+  PORT: process.env.PORT ? Number(process.env.PORT) : 3001,
   JWT_SECRET: process.env.JWT_SECRET,
   BCRYPT_SALT: process.env.BCRYPT_SALT,
   HOST: process.env.HOST,
@@ -14,7 +14,7 @@ const envSchema = {
   MODEL: process.env.MODEL,
   GROQ_API_KEY: process.env.GROQ_API_KEY,
   RS_HOST: process.env.RS_HOST,
-  RS_PORT: Number(process.env.PORT),
+  RS_PORT: Number(process.env.RS_PORT),
   RS_USERNAME: process.env.RS_USERNAME,
   RS_PASSWORD: process.env.RS_PASSWORD,
 };

@@ -1,13 +1,8 @@
 {
   "name": "@repo/hooks",
   "version": "0.1.0",
-  "main": "src/index.ts",
-  "exports": {
-    ".": {
-      "import": "./src/index.ts",
-      "types": "./dist/index.d.ts"
-    }
-  },
+  "main": "./src/index.ts",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc -b"
   },

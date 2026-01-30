@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { prismaClient } from "@repo/db";
+import { prismaClient, Prisma } from "@repo/db";
 import bcrypt from "bcrypt";
 import { authConfig, rfTokenExpiry } from "../config/index.js";
 import { AppError } from "../error/index.js";
@@ -42,7 +42,14 @@ export const signup = async (req: Request, res: Response) => {
         name: user.name,
       });
   } catch (error) {
-    throw new AppError(500, "Controller error");
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      throw new AppError(409, "User Already Exists");
+    }
+    //@ts-ignore
+    throw new AppError(500, error.message ? error.message : "Controller error");
   }
 };
 
@@ -73,6 +80,9 @@ export const login = async (req: Request, res: Response) => {
       });
   } catch (error) {
     console.log(error);
+    if (error instanceof Prisma.PrismaClientUnknownRequestError) {
+      throw new AppError(401, "Invalid Email");
+    }
     throw new AppError(500, "some internal error");
   }
 };

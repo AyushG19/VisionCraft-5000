@@ -8,7 +8,7 @@ import { loginApi, signupApi } from "app/api/auth.api";
 import { AppError } from "app/api/error";
 
 export const loginService = async (
-  loginData: LoginFormValues
+  loginData: LoginFormValues,
 ): Promise<UserType> => {
   const data = await loginApi(loginData);
   console.log(data);
@@ -21,9 +21,9 @@ export const loginService = async (
 };
 
 export const signupService = async (
-  signupData: SignupFormValues
+  signupData: SignupFormValues,
 ): Promise<UserType> => {
-  const data = signupApi(signupData);
+  const data = await signupApi(signupData);
   const parsedData = User.safeParse(data);
   if (!parsedData.success) {
     console.error(parsedData.error);
