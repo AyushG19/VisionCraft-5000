@@ -1,17 +1,30 @@
-import { ToolState } from "@repo/common";
+import { ToolKitType } from "@repo/common";
 
 export default function resizeCanvas(
   canvas: HTMLCanvasElement,
   ctx: CanvasRenderingContext2D,
   redraw: () => void,
-  toolState: ToolState
+  toolState: ToolKitType,
 ) {
   const rect = canvas.getBoundingClientRect();
   const dpr = window.devicePixelRatio || 1;
+
+  // Set display size (CSS pixels)
+  canvas.style.width = rect.width + "px";
+  canvas.style.height = rect.height + "px";
+
+  // Set backing store size (scaled for HiDPI)
   canvas.width = rect.width * dpr;
   canvas.height = rect.height * dpr;
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+  // Scale context to account for DPR
   ctx.scale(dpr, dpr);
-  ctx.lineWidth = toolState.brushSize;
+
+  // Set drawing properties
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.lineWidth = toolState.strokeSize;
+
+  // Redraw everything
   redraw();
 }

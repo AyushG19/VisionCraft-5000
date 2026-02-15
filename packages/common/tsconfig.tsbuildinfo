@@ -1,1 +1,1 @@
-{"root":["./src/index.ts","./src/jwt.ts","./src/toolstate.ts","./src/types.ts","./src/api/error.ts","./src/api/index.ts"],"version":"5.8.2"}
+{"root":["./src/index.ts","./src/api/error.ts","./src/api/index.ts","./src/types/api.ts","./src/types/canvas.ts","./src/types/environment.ts","./src/types/error.ts","./src/types/jwt.ts","./src/types/message.ts","./src/types/toolstate.ts","./src/types/user.ts","./src/types/websocket.ts"],"version":"5.8.2"}

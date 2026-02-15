@@ -1,4 +1,4 @@
-import { ShapeType } from "@repo/common";
+import { DrawElement, Room } from "@repo/common";
 import { axiosInstance } from "./axios";
 import { JoinRoomResponseType } from "app/canvas/types";
 
@@ -15,14 +15,21 @@ export const joinRoom = async (
   return res.data;
 };
 
-export const createRoom = async (canvas: ShapeType[]): Promise<any> => {
-  try {
-    const data = {
-      canvas: canvas,
-    };
-    const res = await axiosInstance.post("/api/rooms/create", data);
-    return res;
-  } catch (error) {
-    return error;
-  }
+export const createRoom = async (): Promise<Room> => {
+  const res = await axiosInstance.post("/api/rooms/create");
+  return res.data;
+};
+
+export const leaveRoom = async (roomId: string): Promise<any> => {
+  const res = await axiosInstance.post("/api/rooms/leave", { roomId: roomId });
+  return res.data;
+};
+
+export const fetchChart = async (command: string): Promise<{ res: string }> => {
+  const data = {
+    userCommand: command,
+  };
+  const res = await axiosInstance.post("/api/ai/draw", data);
+  console.log(typeof res.data);
+  return res.data;
 };

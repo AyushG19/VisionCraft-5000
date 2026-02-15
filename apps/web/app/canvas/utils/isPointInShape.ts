@@ -1,5 +1,5 @@
-import { ShapeType } from "@repo/common";
-import { Bounds, getHandles, HandleName } from "./getHandles";
+import { DrawElement, PointType, ShapeType } from "@repo/common";
+import { Bounds, getHandles, HandleName } from "../../lib/getHandles";
 
 export type HandlePosition =
   | "TOP_LEFT"
@@ -26,7 +26,7 @@ export const isPointInHandle = (
   const maxX = Math.max(selectedShape.startX - 5, selectedShape.endX + 5);
   const minY = Math.min(selectedShape.startY - 5, selectedShape.endY + 5);
   const maxY = Math.max(selectedShape.startY - 5, selectedShape.endY + 5);
-  const tol = selectedShape.lineWidth; // tolerance = half thickness of border
+  const tol = selectedShape.strokeWidth; // tolerance = half thickness of border
   if (Math.abs(px - minX) <= tol && py >= minY && py <= maxY) return "LEFT";
   if (Math.abs(px - maxX) <= tol && py >= minY && py <= maxY) return "RIGHT";
   if (Math.abs(py - minY) <= tol && px >= minX && px <= maxX) return "TOP";
@@ -233,18 +233,18 @@ const isPointNearCornerArc = (
   return Math.abs(dist - radius) <= tolerance;
 };
 export default function isClickOnShape(
-  points: { x: number; y: number },
-  shape: ShapeType,
+  points: PointType,
+  shape: DrawElement,
 ): boolean {
   switch (shape.type) {
-    case "SQUARE": {
+    case "rectangle": {
       const minX = Math.min(shape.startX, shape.endX);
       const maxX = Math.max(shape.startX, shape.endX);
       const minY = Math.min(shape.startY, shape.endY);
       const maxY = Math.max(shape.startY, shape.endY);
 
       if (!shape.fillColor) {
-        const tol = shape.lineWidth / 2; // tolerance = half thickness of border
+        const tol = shape.strokeWidth / 2; // tolerance = half thickness of border
         const onLeft =
           Math.abs(points.x - minX) <= tol &&
           points.y >= minY &&
@@ -271,7 +271,7 @@ export default function isClickOnShape(
         points.y <= maxY
       );
     }
-    case "CIRCLE": {
+    case "ellipse": {
       const centerX = (shape.startX + shape.endX) / 2;
       const centerY = (shape.startY + shape.endY) / 2;
 
@@ -290,7 +290,7 @@ export default function isClickOnShape(
       }
       return distance <= 1;
     }
-    case "TRIANGLE": {
+    case "triangle": {
       const width = Math.abs(shape.endX - shape.startX);
       const height = Math.abs(shape.endY - shape.startY);
 
@@ -403,7 +403,7 @@ export default function isClickOnShape(
       }
 
       // For stroked shapes, check distance to edges
-      const tolerance = shape.lineWidth;
+      const tolerance = shape.strokeWidth;
 
       // Helper function to check if point is near a line segment
 
@@ -457,9 +457,11 @@ export default function isClickOnShape(
 
     // Helper function to check if point is near a corner arc
 
-    case "ARROW": {
-      const width = shape.endX - shape.startX;
-      const height = shape.endY - shape.startY;
+    case "arrow": {
+      const endX = shape.points.at(-1)!.x;
+      const endY = shape.points.at(-1)!.y;
+      const width = endX - shape.startX;
+      const height = endY - shape.startY;
       const angle = Math.atan2(height, width);
 
       // --- Shaft hit-test (line) ---
@@ -499,22 +501,22 @@ export default function isClickOnShape(
         return dx * dx + dy * dy <= tol * tol;
       };
 
-      const shaftTolerance = shape.lineWidth;
+      const shaftTolerance = shape.strokeWidth;
 
       const shaftHit = isPointNearLine(
         points.x,
         points.y,
         shape.startX,
         shape.startY,
-        shape.endX,
-        shape.endY,
+        endX,
+        endY,
         shaftTolerance,
       );
 
       // --- Arrowhead hit-test (triangle) ---
       const headLength = 15;
-      const arrowX = shape.endX;
-      const arrowY = shape.endY;
+      const arrowX = endX;
+      const arrowY = endY;
 
       const leftX = arrowX - headLength * Math.cos(angle - Math.PI / 7);
       const leftY = arrowY - headLength * Math.sin(angle - Math.PI / 7);
@@ -541,18 +543,18 @@ export default function isClickOnShape(
 
       return shaftHit || headHit;
     }
-    case "PENCIL": {
+    case "pencil": {
       if (!shape.points || shape.points.length < 2) return false;
 
-      const tol = shape.lineWidth;
+      const tol = shape.strokeWidth + 2;
       const getScreenPoint = (p: { x: number; y: number }) => {
-        if (shape.isNormalized) {
-          console.log("it works ig");
-          return {
-            x: shape.startX + p.x * (shape.endX - shape.startX),
-            y: shape.startY + p.y * (shape.endY - shape.startY),
-          };
-        }
+        // if (shape.isNormalized) {
+        //   // console.log("it works ig");
+        //   return {
+        //     x: shape.startX + p.x * (shape.endX - shape.startX),
+        //     y: shape.startY + p.y * (shape.endY - shape.startY),
+        //   };
+        // }
         return { x: p.x, y: p.y };
       };
 
@@ -584,6 +586,18 @@ export default function isClickOnShape(
       }
 
       return false;
+    }
+    case "text": {
+      const minX = Math.min(shape.startX, shape.startX + shape.width);
+      const maxX = Math.max(shape.startX, shape.startX + shape.width);
+      const minY = Math.min(shape.startY, shape.startX + shape.height);
+      const maxY = Math.max(shape.startY, shape.startX + shape.height);
+      return (
+        points.x >= minX &&
+        points.x <= maxX &&
+        points.y >= minY &&
+        points.y <= maxY
+      );
     }
   }
   return false;

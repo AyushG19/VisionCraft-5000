@@ -1,8 +1,12 @@
 import { ShapeType } from "@repo/common";
+import { AppError } from "../error/index.js";
 import { Request, Response } from "express";
-import env from "../env.js"
+import env from "../env.js";
 import Groq from "groq-sdk";
+import { GoogleGenAI, GoogleTypeDate } from "@google/genai";
+import { getMermaidPrompt } from "../utils/getMermaidPrompt.js";
 const groq = new Groq({ apiKey: env.GROQ_API_KEY });
+const gemini = new GoogleGenAI({});
 
 export async function getGroqChatCompletion(
   userCommand: string,
@@ -101,7 +105,7 @@ Generate ONLY a valid JSON array of ShapeType objects for the command "${userCom
     },
   });
 }
-export const drawWithAi = async (req: Request, res: Response) => {
+export const drawWithGroq = async (req: Request, res: Response) => {
   try {
     const { userCommand, context } = req.body;
     const groqRes = await getGroqChatCompletion(userCommand, context);
@@ -121,3 +125,43 @@ export const drawWithAi = async (req: Request, res: Response) => {
       .json({ error: "Internal server error", details: error.message });
   }
 };
+
+// Extract the first ```mermaid fenced block; return content inside or null
+function extractMermaidBlock(text: string) {
+  // match ```mermaid\n ... \n```
+  const re = /```mermaid\s*([\s\S]*?)\s*```/i;
+  const m = text.match(re);
+  if (!m) return null;
+  return m[1]?.trim();
+}
+
+// Simple validation: check typical mermaid starts
+function isValidMermaid(src: any) {
+  if (!src) return false;
+  return /^(graph|sequenceDiagram|stateDiagram|classDiagram|gantt|flowchart|pie)/i.test(
+    src.trim(),
+  );
+}
+export async function fetchMermaidSyntax(req: Request, res: Response) {
+  try {
+    const { userCommand } = req.body;
+    const MERMAID_PROMPT = getMermaidPrompt(userCommand);
+
+    const result = await gemini.models.generateContent({
+      model: env.MODEL, // Ensure you use a supported model
+      contents: [{ role: "user", parts: [{ text: MERMAID_PROMPT }] }],
+    });
+    if (!result.text) throw new AppError(500, "No syntax found");
+    console.log(result);
+    const mermaid = extractMermaidBlock(result.text);
+    if (!isValidMermaid(mermaid)) {
+      throw new AppError(500, "Invalid Syntax");
+    }
+    res.status(200).json({ res: mermaid });
+  } catch (error: any) {
+    console.error("Error:", error.response?.data || error.message);
+    res
+      .status(500)
+      .json({ error: "Internal server error", details: error.message });
+  }
+}

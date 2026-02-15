@@ -1,7 +1,7 @@
 import express, { Router } from "express";
-import { drawWithAi } from "../controllers/aiController.js";
+import { fetchMermaidSyntax } from "../controllers/aiController.js";
 const aiRouter: Router = express.Router();
 
-aiRouter.post("/draw", drawWithAi);
+aiRouter.post("/draw", fetchMermaidSyntax);
 
 export default aiRouter;

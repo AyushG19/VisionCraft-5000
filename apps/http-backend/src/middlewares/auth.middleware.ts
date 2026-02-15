@@ -12,7 +12,7 @@ export const checkAuth = (req: Request, res: Response, next: NextFunction) => {
     const JwtPayload = accessJwtService.verify<JwtPayloadType>(accessToken);
     const parsedJwtPayload = JwtPayloadSchema.safeParse(JwtPayload);
     if (!parsedJwtPayload.success) throw new AppError(401, "Invalid token");
-    req.user = parsedJwtPayload.data.userId;
+    req.user = parsedJwtPayload.data;
     next();
   } catch (error) {
     throw new AppError(401, "Invalid token.");

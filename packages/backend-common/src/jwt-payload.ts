@@ -1,5 +1,5 @@
 export default interface CustomUserPayload {
-  userId?: string;
+  userId: string;
   role?: string;
   roomId?: string;
   canvas?: JSON;

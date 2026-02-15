@@ -10,10 +10,11 @@ const checkCode = async (req: Request, res: Response) => {
     //   res.status(400).json("Undefined or Invalid room ID");
     //   return;
     // }
+    const { userId } = req.user;
     const { accessToken } = req.cookies;
     const slug = req.body.slug;
-    if (!slug) {
-      res.status(400).json("Invalid room Id");
+    if (!slug || !userId) {
+      res.status(400).json("Invalid room ID/User ID");
       return;
     }
     const room = await prismaClient.room.findFirst({
@@ -22,22 +23,32 @@ const checkCode = async (req: Request, res: Response) => {
       },
     });
     if (room && slug === room.slug) {
+      await prismaClient.roomUser.create({
+        data: {
+          user: {
+            connect: { id: userId },
+          },
+          room: {
+            connect: { id: room.id },
+          },
+        },
+      });
+
       res.status(200).json({
         roomId: room.id,
-        canvasState: room.canvas,
         token: accessToken,
       });
       return;
     }
     res.status(400).json("Bad Request");
   } catch (error) {
+    console.log(error);
     res.status(505).json("Internam Server Error");
   }
 };
 const createRoom = async (req: Request, res: Response) => {
   try {
     const userId = req.user.userId;
-    const canvas = req.body.canvas;
     if (!userId) {
       res.status(401).json("UserId undefined");
       return;
@@ -53,7 +64,12 @@ const createRoom = async (req: Request, res: Response) => {
             id: userId,
           },
         },
-        canvas: canvas,
+      },
+    });
+    await prismaClient.roomUser.create({
+      data: {
+        userId: newRoom.adminId,
+        roomId: newRoom.id,
       },
     });
     res.status(200).json(newRoom);
@@ -63,36 +79,70 @@ const createRoom = async (req: Request, res: Response) => {
   }
 };
 
-const saveCanvas = async (req: Request, res: Response) => {
+const leaveRoom = async (req: Request, res: Response) => {
   try {
-    const { roomId } = req.query;
-    console.log(roomId, typeof roomId);
-    if (!roomId || typeof roomId !== "string") {
-      res.status(400).json("Undefined or Invalid room ID");
-      return;
+    const { userId } = req.user;
+    const { roomId } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
     }
-    const { boardState: newCanvas } = req.body;
-    if (!newCanvas) {
-      res.status(400).json("Error saving canvas");
-      return;
+
+    if (!roomId) {
+      return res.status(400).json({ message: "Room ID missing" });
     }
-    const room = await prismaClient.room.update({
-      where: { id: roomId },
-      data: { canvas: newCanvas, updatedAt: new Date() },
+
+    await prismaClient.roomUser.delete({
+      where: {
+        roomId_userId: {
+          userId,
+          roomId,
+        },
+      },
     });
-    if (!room) {
-      res.status(400).json("Room not found");
-      return;
+
+    res.status(200).json({ message: "User left room successfully" });
+  } catch (error: any) {
+    // Handle "record not found"
+    if (error.code === "P2025") {
+      return res.status(404).json({ message: "User not in this room" });
     }
-    const updatedRoom = await prismaClient.room.update({
-      where: { id: roomId },
-      data: { canvas: newCanvas, updatedAt: new Date() },
-    });
-    res.status(200).json(updatedRoom);
-  } catch (error) {
-    console.log("error in create room");
-    res.status(505).json(error);
+
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
-export { checkCode, createRoom, saveCanvas };
+// const saveCanvas = async (req: Request, res: Response) => {
+//   try {
+//     const { roomId } = req.query;
+//     console.log(roomId, typeof roomId);
+//     if (!roomId || typeof roomId !== "string") {
+//       res.status(400).json("Undefined or Invalid room ID");
+//       return;
+//     }
+//     const { boardState: newCanvas } = req.body;
+//     if (!newCanvas) {
+//       res.status(400).json("Error saving canvas");
+//       return;
+//     }
+//     const room = await prismaClient.room.update({
+//       where: { id: roomId },
+//       data: { canvas: newCanvas, updatedAt: new Date() },
+//     });
+//     if (!room) {
+//       res.status(400).json("Room not found");
+//       return;
+//     }
+//     const updatedRoom = await prismaClient.room.update({
+//       where: { id: roomId },
+//       data: { canvas: newCanvas, updatedAt: new Date() },
+//     });
+//     res.status(200).json(updatedRoom);
+//   } catch (error) {
+//     console.log("error in create room");
+//     res.status(505).json(error);
+//   }
+// };
+
+export { checkCode, createRoom, leaveRoom };

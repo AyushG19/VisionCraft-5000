@@ -1,12 +1,6 @@
-import {
-  IconCursorText,
-} from "@tabler/icons-react";
+import { IconCursorText } from "@tabler/icons-react";
 import EmailModal from "./ui/EmailModal";
-import {
-  LoginFormValues,
-  SignupFormValues,
-  UserType,
-} from "@repo/common";
+import { LoginFormType, SignupFormType, UserType } from "@repo/common";
 
 // Dots pattern component
 export function DotsPattern() {
@@ -148,8 +142,8 @@ export function MainContent({
   loginService,
   navigate,
 }: {
-  signupService: (signupData: SignupFormValues) => Promise<UserType>;
-  loginService: (loginData: LoginFormValues) => Promise<UserType>;
+  signupService: (signupData: SignupFormType) => Promise<UserType>;
+  loginService: (loginData: LoginFormType) => Promise<UserType>;
   navigate: (route: string) => void;
 }) {
   return (

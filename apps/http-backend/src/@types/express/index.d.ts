@@ -1,10 +1,10 @@
-import { type UserPayload } from "@repo/backend-common/AuthPayload";
+import { type JwtPayloadType } from "@repo/common";
 import * as express from "express";
 
 declare global {
   namespace Express {
     interface Request {
-      user: UserPayload;
+      user: JwtPayloadType;
     }
   }
 }

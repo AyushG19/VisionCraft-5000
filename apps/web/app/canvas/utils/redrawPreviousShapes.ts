@@ -1,12 +1,12 @@
-import { ShapeType } from "@repo/common";
+import { DrawElement } from "@repo/common";
 import { drawShape } from "./drawing";
 import { createDotPattern } from "./createPatterns";
 
 const patternRef: { current: CanvasPattern | null } = { current: null };
 export default function redrawPreviousShapes(
   ctx: CanvasRenderingContext2D,
-  drawnShapes: ShapeType[],
-  currentShape?: ShapeType,
+  drawnShapes: DrawElement[],
+  currentShape?: DrawElement,
   selectedShapeId?: string,
 ) {
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);

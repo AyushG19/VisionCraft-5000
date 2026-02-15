@@ -1,18 +1,47 @@
-import { ShapeType } from "@repo/common";
+import { DrawElement, ShapeType } from "@repo/common";
+import { Bounds } from "../../lib/getHandles";
 
-export const getOutlineBounds = (shape: ShapeType) => {
+export const getOutlineBounds = (shape: DrawElement): Bounds => {
+  if (
+    shape.type === "rectangle" ||
+    shape.type === "ellipse" ||
+    shape.type === "triangle"
+  ) {
+    return {
+      x: shape.startX,
+      y: shape.startY,
+      width: shape.endX - shape.startX,
+      height: shape.endY - shape.startY,
+    };
+  } else if (shape.type === "line") {
+  } else if (shape.type === "image") {
+  } else if (shape.type === "text") {
+  } else {
+  }
   return {
-    x: shape.startX,
-    y: shape.startY,
-    width: shape.endX - shape.startX,
-    height: shape.endY - shape.startY,
+    x: 0,
+    y: 0,
+    width: 100,
+    height: 100,
   };
 };
-export const getBoundsForHandles = (shape: ShapeType) => {
+export const getBoundsForHandles = (shape: DrawElement): Bounds => {
+  if (
+    shape.type === "rectangle" ||
+    shape.type === "ellipse" ||
+    shape.type === "triangle"
+  ) {
+    return {
+      x: shape.startX,
+      y: shape.startY,
+      width: shape.endX - shape.startX,
+      height: shape.endY - shape.startY,
+    };
+  }
   return {
-    x: shape.startX - 5,
-    y: shape.startY - 5,
-    height: shape.endY - shape.startY + 10,
-    width: shape.endX - shape.startX + 10,
+    x: 0,
+    y: 0,
+    width: 100,
+    height: 100,
   };
 };

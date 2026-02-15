@@ -1,44 +1,38 @@
 "use client";
-import React from "react";
+import React, { useRef } from "react";
 import {
   RoomOptions,
   JoinRoomModal,
   Toolkit,
   toolkitProps,
-  ChatModal,
+  SideCollapseChat,
+  Button,
+  mermaidToExcalidraw,
 } from "@repo/ui";
-import { AxiosResponse } from "axios";
 import { drawShape } from "./utils/drawing";
-import { ShapeType } from "@repo/common";
+import { DrawElement } from "@repo/common";
 import { useSocketWithWhiteboard } from "./hooks/useSocketWithWhiteboard";
-import { joinRoomService } from "app/services/canvas.service";
-import redrawPreviousShapes from "./utils/redrawPreviousShapes";
-import { useSocketContext } from "@repo/hooks";
-import { createRoom } from "app/api/canvas.api";
+import {
+  createRoomService,
+  fetchChartService,
+} from "app/services/canvas.service";
+import oklchToCSS from "./utils/oklchToCss";
+import useJoinRoom from "./hooks/useRoom";
 
-let token = "";
 const page = () => {
-  const { inRoom, slug, roomId, setInRoom, setSlug, setRoomId } =
-    useSocketContext();
-  // const { send, messages } = useCanvasSocket(inRoom);
+  const {
+    inRoom,
+    roomId,
+    slug,
+    token,
+    isOpen,
+    handleChatToggle,
+    handleJoinRoom,
+  } = useJoinRoom();
+  const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  // const {
-  //   handleColorSelect,
-  //   handleStrokeSelect,
-  //   handleToolSelect,
-  //   handleRedo,
-  //   handleUndo,
-  //   canvasRef,
-  //   canvasState,
-  //   isDrawing,
-  //   canvasDispatch,
-  //   wsRef,
-  //   messages,
-  //   setMessages,
-  // } = useWhiteboardWithSocket(inRoom);
   const {
     canvasRef,
-    canvasDispatch,
     canvasState,
     handleColorSelect,
     handleRedo,
@@ -48,117 +42,107 @@ const page = () => {
     send,
     messages,
     setMessages,
-  } = useSocketWithWhiteboard(inRoom, roomId, slug, token);
+    textEdit,
+    setTextEdit,
+    finishText,
+    cancelText,
+  } = useSocketWithWhiteboard(roomId, slug, token, isOpen);
 
-  const verifyJoin = async (code: string) => {
-    try {
-      if (canvasRef.current) {
-        const ctx = canvasRef.current.getContext("2d");
-        if (ctx == null) {
-          console.error("canvas element not available");
-          return;
-        }
-        const data = await joinRoomService(code);
-        setInRoom(true);
-        setRoomId(data.roomId);
-        setSlug(code);
-        token = data.token;
-
-        if (data.canvasState) {
-          redrawPreviousShapes(ctx, data.canvasState);
-          canvasDispatch({
-            type: "INITIALIZE_BOARD",
-            payload: data.canvasState,
-          });
-        }
-        console.log("From page verifyJoin: ", data);
-      }
-    } catch (error) {
-      console.error("error in join room");
-    }
-  };
-  const makeNewRoom = async () => {
-    const res: AxiosResponse = await createRoom(canvasState.drawnShapes);
-    setInRoom(true);
-  };
-
-  const drawShapeFromAi = (shapes: ShapeType[]) => {
+  const drawShapeFromAi = (shapes: DrawElement[]) => {
     if (!canvasRef.current) return;
     const ctx = canvasRef.current.getContext("2d");
     if (ctx == null) {
       console.error("canvas element not available");
       return;
     }
-    shapes.forEach((shape: ShapeType) => {
+    console.log(typeof shapes);
+    shapes.forEach((shape: DrawElement) => {
       drawShape(ctx, shape);
     });
   };
+
+  async function fetchChartFromAi(userCommand: string) {
+    try {
+      const diagramDefination = await fetchChartService(userCommand);
+      console.log(diagramDefination);
+      const res = await mermaidToExcalidraw(diagramDefination.res);
+      console.log(res);
+      drawShapeFromAi(res);
+    } catch (error) {}
+  }
+
   const toolkitProps: toolkitProps = {
     canvasRef,
     handleColorSelect,
     handleStrokeSelect,
     handleToolSelect,
-    toolState: canvasState.toolState,
+    toolKitState: canvasState.toolState,
     handleRedo,
     handleUndo,
   };
 
   return (
-    <div className="relative w-screen h-screen ">
+    <div className={`relative h-screen w-screen duration-300`}>
       <Toolkit {...toolkitProps} />
+      <Button
+        className="absolute top-0 left-0 z-1000"
+        // onClick={fetchChartFromAi}
+      ></Button>
+      {textEdit && (
+        <textarea
+          autoFocus
+          ref={textAreaRef}
+          onBlur={finishText}
+          value={textEdit.text}
+          onChange={(e) => setTextEdit({ ...textEdit, text: e.target.value })}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") finishText();
+            if (e.key === "Escape") cancelText();
+          }}
+          style={{
+            position: "absolute",
+            left: textEdit.x,
+            top: textEdit.y,
+            width: "auto",
+            height: "auto",
+            fontSize: canvasState.textState.fontSize,
+            background: "transparent",
+            border: "none",
+            outline: "none",
+            resize: "none",
+            color: oklchToCSS(canvasState.toolState.currentColor),
+            textAlign: canvasState.textState.alignment,
+            overflow: "hidden",
+            fontFamily: canvasState.textState.fontFamily,
+          }}
+        />
+      )}
       <canvas
         ref={canvasRef}
-        className="w-screen h-screen border bg-canvas "
+        className="w-full h-full block border bg-canvas "
       ></canvas>
-      {/* <Button className="absolute top-0 left-0" onClick={() => send("hii")}>
-        send
-      </Button> */}
 
       {inRoom ? (
-        <>
-          <RoomOptions />
-          <ChatModal
-            drawShapeFromAi={drawShapeFromAi}
-            boardState={canvasState.drawnShapes}
-            setMessages={setMessages}
-            messages={messages}
-            send={send}
-          />
-          {/* <ChatBoxContainer
-            // messages={messages}
-            // setMessage={setMessages}
-            wsRef={wsRef}
-          /> */}
-        </>
-      ) : (
-        <JoinRoomModal verifyJoin={verifyJoin} />
-      )}
-      {/* <div className="absolute top-0 left-0 gap-2 flex">
-        <Button className="" onClick={makeNewRoom}>
-          new room
-        </Button>
-        <Button className=" bg-pink-500" onClick={() => login()}>
-          ayush login
-        </Button>
-        <Button
-          className=" bg-amber-500"
-          onClick={() => {
-            const userId = localStorage.getItem("userId");
-            if (!wsRef.current || !userId) {
-              return;
-            }
-            setInRoom(false);
-            wsRef.current.send(
-              JSON.stringify({
-                type: "LEAVE_ROOM",
-                payload: { userId: userId },
-              })
-            );
-          }}
+        <div
+          className={`h-full flex items-start absolute top-0 right-0 float-right 
+  transform transition-transform duration-300 ease-in-out
+  ${isOpen ? "translate-x-0" : "translate-x-90"}`}
         >
-          leave room
-        </Button>
-      </div> */}
+          <RoomOptions onChatToggle={handleChatToggle} />
+          <SideCollapseChat
+            send={send}
+            messages={messages}
+            setMessages={setMessages}
+            fetchChartFromAi={fetchChartFromAi}
+            isOpen={isOpen}
+          />
+        </div>
+      ) : (
+        <JoinRoomModal
+          makeNewRoom={createRoomService}
+          verifyJoin={handleJoinRoom}
+        />
+      )}
     </div>
   );
 };

@@ -61,7 +61,7 @@ const MessageBubble = ({
         </h3>
       )}
       <p
-        className={`font-[Bricolage_Grotesque] font-light text-sm/snug`}
+        className={`font-[google_sans_code] font-light text-sm/snug`}
         style={{ wordSpacing: "0.1rem" }}
       >
         {message.content}

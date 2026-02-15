@@ -1,12 +1,16 @@
 "use client";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ToolIcon } from "./ui/ToolIcon";
 import {
   Icon,
   IconGripVertical,
-  IconLocation,
-  IconPointer,
+  IconHandStop,
+  IconLine,
+  IconMinusVertical,
+  IconPhoto,
   IconProps,
+  IconSend,
+  IconTextSize,
 } from "@tabler/icons-react";
 import {
   IconArrowBackUp,
@@ -18,52 +22,52 @@ import {
   IconTrendingUp,
   IconTriangle,
 } from "@tabler/icons-react";
-import type { ToolState,ShapeType } from "@repo/common";
+import type {
+  ToolKitType,
+  DrawElement,
+  AllToolTypes,
+  ColorType,
+} from "@repo/common";
+import { Button } from "./ui/button";
 
-interface Shape {
-  type: ToolState["currentTool"];
-  lineWidth: number;
-  lineColor: { l: number; c: number; h: number };
-  fillColor: { l: number; c: number; h: number };
-  startX: number;
-  startY: number;
-  endX: number;
-  endY: number;
-  points?: { x: number; y: number }[];
-}
 type State = {
-  drawnShapes: ShapeType[];
-  history: Shape[][];
+  drawnShapes: DrawElement[];
+  history: DrawElement[][];
   historyIndex: number;
-  toolState: ToolState;
+  toolState: ToolKitType;
 };
+
 const tools: {
-  id: ShapeType["type"];
+  id: AllToolTypes;
   icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<Icon>>;
   label: string;
 }[] = [
-  { id: "SELECT" as const, icon: IconPointer, label: "select" },
-  { id: "CIRCLE" as const, icon: IconCircle, label: "circle" },
-  { id: "SQUARE" as const, icon: IconSquare, label: "square" },
-  { id: "TRIANGLE" as const, icon: IconTriangle, label: "triangle" },
-  { id: "ARROW" as const, icon: IconTrendingUp, label: "arrow" },
-  { id: "PENCIL" as const, icon: IconPencilMinus, label: "pencil" },
-  { id: "COLOR" as const, icon: IconDropletFilled, label: "color" },
-  { id: "UNDO" as const, icon: IconArrowBackUp, label: "undo" },
-  { id: "REDO" as const, icon: IconArrowForwardUp, label: "redo" },
+  { id: "select" as const, icon: IconSend, label: "select" },
+  // { id: "hand" as const, icon: IconHandStop, label: "hand" },
+  { id: "ellipse" as const, icon: IconCircle, label: "circle" },
+  { id: "rectangle" as const, icon: IconSquare, label: "square" },
+  { id: "triangle" as const, icon: IconTriangle, label: "triangle" },
+  { id: "line" as const, icon: IconLine, label: "line" },
+  { id: "arrow" as const, icon: IconTrendingUp, label: "arrow" },
+  { id: "pencil" as const, icon: IconPencilMinus, label: "pencil" },
+  { id: "text" as const, icon: IconTextSize, label: "text" },
+  { id: "image" as const, icon: IconPhoto, label: "image" },
+  { id: "color" as const, icon: IconDropletFilled, label: "color" },
 ];
+
 type toolkitProps = {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
-  toolState: State["toolState"];
-  handleToolSelect: (toolname: ToolState["currentTool"]) => void;
-  handleColorSelect: (color: { l: number; c: number; h: number }) => void;
+  toolKitState: ToolKitType;
+  handleToolSelect: (toolname: AllToolTypes) => void;
+  handleColorSelect: (color: ColorType) => void;
   handleStrokeSelect: (size: number) => void;
   handleUndo: () => void;
   handleRedo: () => void;
 };
+
 const Toolkit = ({
   canvasRef,
-  toolState,
+  toolKitState,
   handleToolSelect,
   handleColorSelect,
   handleStrokeSelect,
@@ -71,27 +75,28 @@ const Toolkit = ({
   handleRedo,
 }: toolkitProps) => {
   const toolkitRef = useRef<HTMLDivElement | null>(null);
+  const toolIconRef = useRef<HTMLDivElement | null>(null);
+  const resizeRef = useRef<any | null>(null);
+
   const [currPos, setCurrPos] = useState({ x: 0, y: 0 });
+  const [currWidth, setCurrWidth] = useState(0);
+  const [maxWidth, setMaxWidth] = useState(0);
+
   const dragState = useRef<{
     isDraging: boolean;
     dragX: number;
     dragY: number;
   }>({ isDraging: false, dragX: 0, dragY: 0 });
 
-  const resizeRef = useRef<any | null>(null);
-  const [currWidth, setCurrWidth] = useState(0);
   const resizeState = useRef<{
     isResizing: boolean;
     initialX: number;
     initialWidth: number;
-    lastWidth: number;
   }>({
     isResizing: false,
     initialX: 0,
-    initialWidth: 362,
-    lastWidth: 362,
+    initialWidth: 0,
   });
-  const toolIconRef = useRef<HTMLDivElement | null>(null);
 
   const getMousePos = (e: MouseEvent) => {
     const rect = canvasRef.current!.getBoundingClientRect();
@@ -100,6 +105,35 @@ const Toolkit = ({
       y: e.clientY - rect.top,
     };
   };
+
+  // Calculate max width on mount
+  useEffect(() => {
+    if (!toolkitRef.current || !toolIconRef.current) return;
+
+    // Let the browser render first to get actual scrollWidth
+    const calculateMaxWidth = () => {
+      if (!toolkitRef.current || !toolIconRef.current) return;
+
+      // Get the natural width when all items are in one row
+      const toolIconContainer = toolIconRef.current;
+      const naturalWidth = toolIconContainer.scrollWidth;
+
+      // Add padding and grip handle width
+      // p-3 = 12px left padding, IconGripVertical width ~16px + ml-1.5 (6px)
+      const totalMaxWidth = naturalWidth + 12 + 16 + 6;
+
+      setMaxWidth(totalMaxWidth);
+      setCurrWidth(totalMaxWidth);
+
+      // Center the toolkit
+      const newX = window.innerWidth / 2 - totalMaxWidth / 2;
+      setCurrPos({ x: Math.max(0, newX), y: 0 });
+    };
+
+    // Use setTimeout to ensure DOM is fully rendered
+    setTimeout(calculateMaxWidth, 0);
+  }, []);
+
   useEffect(() => {
     const toolkit = toolkitRef.current;
     if (!toolkit) return;
@@ -109,7 +143,9 @@ const Toolkit = ({
 
     const onMouseDown = (e: MouseEvent) => {
       if (!toolkitRef.current) return;
+
       const { x, y } = getMousePos(e);
+
       if (e.target !== resizeRef.current) {
         dragState.current.isDraging = true;
         const rect = toolkitRef.current.getBoundingClientRect();
@@ -121,16 +157,16 @@ const Toolkit = ({
       } else if (e.target === resizeRef.current) {
         resizeState.current.isResizing = true;
         resizeState.current.initialX = x;
-        console.log("look", toolkitRef.current.scrollWidth);
-        resizeState.current.initialWidth = toolkitRef.current.scrollWidth;
+        resizeState.current.initialWidth = currWidth;
       }
     };
 
     const onMouseMove = (e: MouseEvent) => {
       if (!toolkitRef.current) return;
       const { x, y } = getMousePos(e);
+
       if (dragState.current.isDraging) {
-        const newX = x - dragState.current.dragX; //dragX ,Y is drag offset
+        const newX = x - dragState.current.dragX;
         const newY = y - dragState.current.dragY;
 
         const width = toolkitRef.current.clientWidth;
@@ -138,11 +174,11 @@ const Toolkit = ({
 
         const adjustedX = Math.max(
           0,
-          Math.min(newX, window.innerWidth - width)
+          Math.min(newX, window.innerWidth - width),
         );
         const adjustedY = Math.max(
           0,
-          Math.min(newY, window.innerHeight - height)
+          Math.min(newY, window.innerHeight - height),
         );
 
         setCurrPos({
@@ -150,16 +186,12 @@ const Toolkit = ({
           y: adjustedY,
         });
       } else if (resizeState.current.isResizing) {
-        if (!toolIconRef.current) return;
-        const toolIconContainer = toolIconRef.current;
-        console.log("resizing");
         const deltaX = x - resizeState.current.initialX;
         const newWidth = resizeState.current.initialWidth + deltaX;
 
-        if (toolIconContainer.offsetHeight <= 40) {
-          if (newWidth > toolIconContainer.clientWidth) return;
-        }
-        setCurrWidth(Math.max(62, newWidth));
+        // Constrain width between minimum (62px) and maximum (one row width)
+        const constrainedWidth = Math.max(62, Math.min(newWidth, maxWidth));
+        setCurrWidth(constrainedWidth);
       }
     };
 
@@ -173,12 +205,8 @@ const Toolkit = ({
         };
       } else if (resizeState.current.isResizing) {
         resizeState.current.isResizing = false;
-        resizeState.current.initialWidth = currWidth;
       }
     };
-
-    const newX = window.innerWidth / 2 - toolkitRef.current!.clientWidth / 2;
-    setCurrPos({ x: newX, y: 0 });
 
     toolkit.addEventListener("mousedown", onMouseDown);
     window.addEventListener("mousemove", onMouseMove);
@@ -189,40 +217,46 @@ const Toolkit = ({
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
     };
-  }, []);
-
-  console.log(tools.length);
+  }, [currWidth, maxWidth]);
 
   return (
     <div
       ref={toolkitRef}
       draggable={false}
-      className="p-3 pb-3.5 pr-0 absolute rounded-lg flex items-center cursor-move  bg-light_sky_blue outline-personal shadow-primary "
+      className="p-3 pb-3.5 pr-0 absolute rounded-lg flex items-center cursor-move bg-light_sky_blue outline-personal shadow-primary"
       style={{
         top: currPos.y,
         left: currPos.x,
-        maxWidth: `${!currWidth ? 31 * tools.length + (tools.length - 1) * 10 + 30 : currWidth}px`,
+        width: currWidth > 0 ? `${currWidth}px` : "auto",
+        maxWidth: maxWidth > 0 ? `${maxWidth}px` : "none",
       }}
     >
       <div ref={toolIconRef} className="flex flex-wrap w-auto gap-2.5 z-50">
         {tools.map((tool) => {
           return (
             <ToolIcon
-              isSelected={toolState.currentTool === tool.id}
+              isSelected={toolKitState.currentTool === tool.id}
               key={tool.id}
               toolInfo={tool}
               onSelectColor={handleColorSelect}
               onSelectStroke={handleStrokeSelect}
-              onSelectTool={
-                tool.id !== "UNDO" && tool.id !== "REDO"
-                  ? handleToolSelect
-                  : tool.id === "REDO"
-                    ? handleRedo
-                    : handleUndo
-              }
+              onSelectTool={handleToolSelect}
             />
           );
         })}
+        <div className="h-8 w-[1px] ml-1 mt-1 bg-black"></div>
+        <Button
+          className="w-9 h-9 p-2.5 flex items-center justify-center cursor-pointer shadow-primary rounded-lg bg-uranian_blue outline-personal hover:scale-[103%] text-black"
+          onClick={handleUndo}
+        >
+          <IconArrowBackUp size={20} />
+        </Button>
+        <Button
+          className="w-9 h-9 p-2.5 flex items-center justify-center cursor-pointer shadow-primary rounded-lg bg-uranian_blue outline-personal hover:scale-[103%] text-black"
+          onClick={handleRedo}
+        >
+          <IconArrowForwardUp size={20} />
+        </Button>
       </div>
 
       <IconGripVertical

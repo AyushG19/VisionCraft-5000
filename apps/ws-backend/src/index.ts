@@ -118,14 +118,14 @@ wss.on("connection", function connection(ws, req) {
               await redisPub.hSet(
                 `room:${roomId}:chats`,
                 mainUserId,
-                JSON.stringify(cleanData.payload.message),
+                JSON.stringify(cleanData.payload),
               );
               const event: RedisData = {
                 type: "CHAT",
                 userId: mainUserId,
                 message: {
-                  content: cleanData.payload.message!.content,
-                  name: cleanData.payload.message!.name,
+                  content: cleanData.payload.content,
+                  name: cleanData.payload.name,
                   sender_id: mainUserId,
                   status: "TO_FRONTEND",
                   timeStamp_ms: Date.now(),
@@ -147,7 +147,7 @@ wss.on("connection", function connection(ws, req) {
             break;
 
           case "ADD_SHAPE":
-            if (!cleanData.payload.shape) {
+            if (!cleanData.payload) {
               ws.send(
                 JSON.stringify({ type: "ERROR", message: "Malformed Payload" }),
               );
@@ -157,17 +157,17 @@ wss.on("connection", function connection(ws, req) {
               //shapes have a seperate data
               await redisPub.hSet(
                 `room:${roomId}:shapes`,
-                cleanData.payload.shape.id,
-                JSON.stringify(cleanData.payload.shape),
+                cleanData.payload.id,
+                JSON.stringify(cleanData.payload),
               );
               await redisPub.rPush(
                 `room:${roomId}:order`,
-                cleanData.payload.shape.id,
+                cleanData.payload.id,
               );
               const event: RedisData = {
                 type: "ADD",
                 userId: mainUserId,
-                shape: cleanData.payload.shape,
+                element: cleanData.payload,
               };
               await redisPub.publish(
                 `room:${roomId}:events`,
@@ -192,7 +192,7 @@ wss.on("connection", function connection(ws, req) {
           case "UPD_SHAPE": {
             // we are currentlty not cahnginorder on shape updates
             try {
-              if (!cleanData.payload.shape) {
+              if (!cleanData.payload) {
                 ws.send(
                   JSON.stringify({
                     type: "ERROR",
@@ -203,13 +203,13 @@ wss.on("connection", function connection(ws, req) {
               }
               await redisPub.hSet(
                 `room:${roomId}:shapes`,
-                cleanData.payload.shape.id,
-                JSON.stringify(cleanData.payload.shape),
+                cleanData.payload.id,
+                JSON.stringify(cleanData.payload),
               );
               const event: RedisData = {
                 type: "UPD",
                 userId: mainUserId,
-                shape: cleanData.payload.shape,
+                element: cleanData.payload,
               };
               await redisPub.publish(
                 `room:${roomId}:events`,
@@ -231,7 +231,7 @@ wss.on("connection", function connection(ws, req) {
           }
           case "DEL_SHAPE": {
             try {
-              if (!cleanData.payload.shape) {
+              if (!cleanData.payload) {
                 ws.send(
                   JSON.stringify({
                     type: "ERROR",
@@ -242,12 +242,12 @@ wss.on("connection", function connection(ws, req) {
               }
               await redisPub.hDel(
                 `room:${roomId}:shapes`,
-                cleanData.payload.shape.id,
+                cleanData.payload.id,
               );
               const event: RedisData = {
                 type: "DEL",
                 userId: mainUserId,
-                shape: cleanData.payload.shape,
+                element: cleanData.payload,
               };
               await redisPub.publish(
                 `room:${roomId}:events`,

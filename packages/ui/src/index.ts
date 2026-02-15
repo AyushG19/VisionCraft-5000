@@ -1,7 +1,5 @@
-export { default as chatModal } from "./components/ChatModal";
 export { default as JoinRoomModal } from "./components/JoinRoomModal";
 export { Toolkit, type toolkitProps } from "./components/Toolkit";
-export { default as ChatModal } from "./components/ChatModal";
 export { default as RoomOptions } from "./components/RoomOptions";
 export { default as ResizableDiv } from "./components/ui/ResizableDiv";
 export {
@@ -18,3 +16,6 @@ export {
   FloatingShapes,
   DecorativeLines,
 } from "./components/LoginForm";
+
+export { default as SideCollapseChat } from "./components/SideCollapseChat";
+export { mermaidToExcalidraw } from "./lib/mermaid";

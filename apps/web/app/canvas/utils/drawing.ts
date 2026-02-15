@@ -1,6 +1,17 @@
 import oklchToCSS from "./oklchToCss";
-import { type ShapeType } from "@repo/common";
-import { Bounds, getHandles, Handle } from "./getHandles";
+import {
+  ActionTool,
+  PointType,
+  TextType,
+  type DrawElement,
+} from "@repo/common";
+import { Bounds, getHandles, Handle } from "../../lib/getHandles";
+import { start } from "repl";
+import {
+  createRoundedRectPath,
+  drawHandles,
+  drawLabel,
+} from "app/lib/drawingHelpers";
 
 // Type definitions for better type safety
 interface Point {
@@ -18,8 +29,8 @@ interface ColorType {
 
 // Type guard to check if shape has points
 const hasPoints = (
-  shape: ShapeType,
-): shape is ShapeType & { points: Point[] } => {
+  shape: DrawElement,
+): shape is DrawElement & { points: Point[] } => {
   return (
     "points" in shape && Array.isArray(shape.points) && shape.points.length > 0
   );
@@ -27,55 +38,34 @@ const hasPoints = (
 
 // Type guard to check if shape has fill color
 const hasFillColor = (
-  shape: ShapeType,
-): shape is ShapeType & { fillColor: ColorType } => {
+  shape: DrawElement,
+): shape is DrawElement & { fillColor: ColorType } => {
   return "fillColor" in shape && shape.fillColor != null;
 };
 
 // Type guard to check if shape has line width
 const hasLineWidth = (
-  shape: ShapeType,
-): shape is ShapeType & { lineWidth: number } => {
+  shape: DrawElement,
+): shape is DrawElement & { lineWidth: number } => {
   return "lineWidth" in shape && typeof shape.lineWidth === "number";
 };
 
 const hasContent = (
-  shape: ShapeType,
-): shape is ShapeType & { content: string } => {
+  shape: DrawElement,
+): shape is DrawElement & { content: string } => {
   return "content" in shape && typeof shape.content === "string";
-};
-
-// Draw all handles
-export const drawHandles = (
-  ctx: CanvasRenderingContext2D,
-  bounds: Bounds,
-  handleSize: number = 6,
-): Handle[] => {
-  const handles = getHandles(bounds, handleSize);
-
-  ctx.strokeStyle = "lch(65% 50 250)";
-  ctx.lineWidth = 1;
-  handles.forEach(({ x, y, size }) => {
-    ctx.beginPath();
-    ctx.rect(x, y, size, size);
-    ctx.fillStyle = "black";
-    ctx.fill();
-    ctx.stroke();
-  });
-
-  return handles;
 };
 
 // Highlight selected shape (outline + handles)
 const highlightShape = (
   ctx: CanvasRenderingContext2D,
-  shape: ShapeType,
+  shape: DrawElement,
   bounds: { x: number; y: number; width: number; height: number },
 ) => {
   ctx.save();
   ctx.beginPath();
   ctx.setLineDash([4, 2]); // dashed outline looks lighter
-  ctx.strokeStyle = "lch(65% 100 250)";
+  ctx.strokeStyle = "#00FFFF";
   ctx.lineWidth = 1;
 
   // Use bounds rectangle instead of redrawing shape path
@@ -96,46 +86,14 @@ const highlightShape = (
     height: bounds.height + 10,
   });
 };
-// Helper function to create rounded rectangle path
-const createRoundedRectPath = (
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  radius: number = 8,
-): void => {
-  // Normalize coordinates to handle drawing in any direction
-  const left = Math.abs(Math.min(x, x + width));
-  const right = Math.abs(Math.max(x, x + width));
-  const top = Math.abs(Math.min(y, y + height));
-  const bottom = Math.abs(Math.max(y, y + height));
-
-  const actualWidth = right - left;
-  const actualHeight = bottom - top;
-
-  const r = Math.min(radius, actualWidth / 2, actualHeight / 2);
-
-  ctx.beginPath();
-  ctx.moveTo(left + r, top);
-  ctx.lineTo(right - r, top);
-  ctx.quadraticCurveTo(right, top, right, top + r);
-  ctx.lineTo(right, bottom - r);
-  ctx.quadraticCurveTo(right, bottom, right - r, bottom);
-  ctx.lineTo(left + r, bottom);
-  ctx.quadraticCurveTo(left, bottom, left, bottom - r);
-  ctx.lineTo(left, top + r);
-  ctx.quadraticCurveTo(left, top, left + r, top);
-  ctx.closePath();
-};
 
 // Helper function for smooth pencil drawing using quadratic curves
 const drawSmoothPencilPath = (
   ctx: CanvasRenderingContext2D,
   points: readonly Point[],
+  startPos: PointType,
   width: number,
   height: number,
-  startPos: { x: number; y: number },
   isNormalized: boolean,
 ): void => {
   if (points.length < 2) return;
@@ -143,7 +101,7 @@ const drawSmoothPencilPath = (
   // 1. Helper to get screen coordinates regardless of mode
   const getScreenPoint = (p: Point) => {
     if (isNormalized) {
-      console.log("it works ig");
+      // console.log("it works ig");
       return {
         x: startPos.x + p.x * width,
         y: startPos.y + p.y * height,
@@ -155,7 +113,6 @@ const drawSmoothPencilPath = (
   const p0 = getScreenPoint(points[0]!);
   const p1 = getScreenPoint(points[1]!);
 
-  ctx.beginPath();
   ctx.moveTo(p0.x, p0.y);
 
   // 2. Handle Simple Line (2 points)
@@ -233,8 +190,8 @@ const drawEnhancedArrow = (
   ctx.closePath();
 
   if (fillColor) {
-    ctx.fillStyle = oklchToCSS(fillColor);
-    ctx.fill();
+    // ctx.fillStyle = oklchToCSS(fillColor);
+    // ctx.fill();
   }
   ctx.stroke();
 };
@@ -420,20 +377,42 @@ const drawRoundedTriangle = (
   ctx.closePath();
 };
 
+function drawText(ctx: CanvasRenderingContext2D, el: TextType) {
+  ctx.save();
+
+  ctx.font = `${el.fontSize}px ${el.fontFamily}`;
+  ctx.fillStyle = oklchToCSS(el.strokeColor);
+  ctx.textAlign = el.textAlign;
+  ctx.textBaseline = "top";
+
+  ctx.fillText(el.text, el.startX, el.startY);
+}
+
+//Draw line function
+function drawLine(ctx: CanvasRenderingContext2D, points: readonly PointType[]) {
+  const startPos = points[0]!;
+  const endPos = points[2]!;
+
+  ctx.beginPath();
+  ctx.moveTo(startPos.x, startPos.y);
+  ctx.lineTo(endPos.x, endPos.y);
+  ctx.stroke();
+  return;
+}
 // Main draw function
 export const drawShape = (
   ctx: CanvasRenderingContext2D,
-  shape: ShapeType,
+  shape: DrawElement,
   selectedShapeId?: string,
 ): void => {
   if (!ctx || !shape) return;
-  const width = shape.endX - shape.startX;
-  const height = shape.endY - shape.startY;
+
+  const type = shape.type;
 
   // convert color safely
-  let strokeColor = "black";
+  let strokeColor = "white";
   try {
-    if (shape.lineColor) strokeColor = oklchToCSS(shape.lineColor);
+    if (shape.strokeColor) strokeColor = oklchToCSS(shape.strokeColor);
   } catch (e) {
     console.warn("Invalid lineColor", e);
   }
@@ -444,122 +423,123 @@ export const drawShape = (
   ctx.lineCap = "round";
 
   // bounding box (for highlight & handles)
-  const bounds = { x: shape.startX, y: shape.startY, width, height };
 
   ctx.save();
   try {
-    switch (shape.type) {
-      case "PENCIL":
-        if (hasPoints(shape)) {
-          // const points = shape.points;
-          // if (points.length < 2) return;
-          ctx.beginPath();
-          drawSmoothPencilPath(
-            ctx,
-            shape.points,
-            width,
-            height,
-            {
-              x: shape.startX,
-              y: shape.startY,
-            },
-            shape.isNormalized,
-          );
-          // ctx.moveTo(points[0]!.x, points[0]!.y);
-          // let currentPoint;
-          // if (points.length === 2) {
-          //   ctx.lineTo(points[1]!.x, points[1]!.y);
-          // } else if (!shape.isNormalized) {
-          //   for (let i = 1; i < points.length - 1; i++) {
-          //     currentPoint = points[i]!;
+    if (shape.type === "pencil") {
+      ctx.beginPath();
+      drawSmoothPencilPath(
+        ctx,
+        shape.points,
+        {
+          x: shape.startX,
+          y: shape.startY,
+        },
+        shape.endX - shape.startX,
+        shape.endY - shape.startY,
+        shape.isNormalized,
+      );
+      ctx.stroke();
+    }
+    if (shape.type === "arrow") {
+      const endX = shape.startX + shape.points[2]!.x;
+      const endY = shape.startY + shape.points[2]!.y;
+      console.log(shape.startX, shape.points.at(2)!.x);
+      drawEnhancedArrow(
+        ctx,
+        shape.startX,
+        shape.startY,
+        endX,
+        endY,
+        shape.strokeColor,
+      );
+    } else if (type === "ellipse") {
+      const width = shape.endX - shape.startX;
+      const height = shape.endY - shape.startY;
+      const centerX = shape.startX + width / 2;
+      const centerY = shape.startY + height / 2;
+      const rx = Math.abs(width / 2);
+      const ry = Math.abs(height / 2);
 
-          //     ctx.lineTo(currentPoint.x, currentPoint.y);
-
-          //     ctx.stroke();
-          //   }
-          // } else {
-          //   for (let i = 1; i < points.length - 1; i++) {
-          //     currentPoint = points[i]!;
-          //     const realCurrPos = {
-          //       x: currentPoint.x * width + shape.startX,
-          //       y: currentPoint.y * height + shape.startY,
-          //     };
-          //     ctx.lineTo(realCurrPos.x, realCurrPos.y);
-          //   }
-          // }
-          ctx.stroke();
-        }
-        break;
-      case "ARROW":
-        drawEnhancedArrow(
-          ctx,
-          shape.startX,
-          shape.startY,
-          shape.endX,
-          shape.endY,
-          shape.lineColor,
-        );
-        break;
-
-      case "CIRCLE": {
-        const centerX = shape.startX + width / 2;
+      ctx.beginPath();
+      ctx.ellipse(centerX, centerY, rx, ry, 0, 0, Math.PI * 2);
+      if (shape.label) {
+        ctx.fillStyle = oklchToCSS(shape.strokeColor);
+        drawLabel(ctx, { x: centerX, y: centerY }, shape.label, width);
+      }
+      if (hasFillColor(shape))
+        (ctx.fillStyle = oklchToCSS(shape.fillColor)), ctx.fill();
+      ctx.stroke();
+    } else if (type === "rectangle") {
+      const width = shape.endX - shape.startX;
+      const height = shape.endY - shape.startY;
+      const radius = Math.min(8, Math.abs(width) / 8, Math.abs(height) / 8);
+      createRoundedRectPath(
+        ctx,
+        shape.startX,
+        shape.startY,
+        width,
+        height,
+        radius,
+      );
+      if (shape.label) {
         const centerY = shape.startY + height / 2;
-        const rx = Math.abs(width / 2);
-        const ry = Math.abs(height / 2);
-
-        ctx.beginPath();
-        ctx.ellipse(centerX, centerY, rx, ry, 0, 0, Math.PI * 2);
-        if (hasFillColor(shape))
-          (ctx.fillStyle = oklchToCSS(shape.fillColor)), ctx.fill();
-        ctx.stroke();
-        break;
+        const centerX = shape.startX + width / 2;
+        ctx.fillStyle = oklchToCSS(shape.strokeColor);
+        drawLabel(ctx, { x: centerX, y: centerY }, shape.label, width);
       }
-
-      case "SQUARE": {
-        const radius = Math.min(8, Math.abs(width) / 8, Math.abs(height) / 8);
-        createRoundedRectPath(
-          ctx,
-          shape.startX,
-          shape.startY,
-          width,
-          height,
-          radius,
-        );
-        if (hasFillColor(shape))
-          (ctx.fillStyle = oklchToCSS(shape.fillColor)), ctx.fill();
-        ctx.stroke();
-        break;
-      }
-
-      case "TRIANGLE": {
-        const radius = Math.min(6, Math.abs(width) / 10, Math.abs(height) / 10);
-        drawRoundedTriangle(
-          ctx,
-          shape.startX,
-          shape.startY,
-          width,
-          height,
-          radius,
-        );
-        if (hasFillColor(shape))
-          (ctx.fillStyle = oklchToCSS(shape.fillColor)), ctx.fill();
-        ctx.stroke();
-        break;
-      }
-
-      case "TEXT":
-        if (hasContent(shape)) {
-          ctx.textAlign = "center";
-          ctx.fillText(shape.content, shape.startX, shape.startY);
-        }
-        break;
+      if (hasFillColor(shape))
+        (ctx.fillStyle = oklchToCSS(shape.fillColor)), ctx.fill();
+      ctx.stroke();
+    } else if (type === "triangle") {
+      const width = shape.endX - shape.startX;
+      const height = shape.endY - shape.startY;
+      const radius = Math.min(6, Math.abs(width) / 10, Math.abs(height) / 10);
+      drawRoundedTriangle(
+        ctx,
+        shape.startX,
+        shape.startY,
+        width,
+        height,
+        radius,
+      );
+      if (hasFillColor(shape))
+        (ctx.fillStyle = oklchToCSS(shape.fillColor)), ctx.fill();
+      ctx.stroke();
+    } else if (type === "text") {
+      drawText(ctx, shape);
+    } else if (type === "line") {
+      drawLine(ctx, shape.points);
     }
   } finally {
     ctx.restore();
   }
 
   // Selected → draw highlight (outline + resize handles)
-  if (shape.id === selectedShapeId && shape.type !== "ARROW") {
-    highlightShape(ctx, shape, bounds);
+  if (shape.id === selectedShapeId) {
+    if (shape.type === "text") {
+      const bounds = {
+        x: shape.startX,
+        y: shape.startY,
+        width: shape.width,
+        height: shape.height,
+      };
+      highlightShape(ctx, shape, bounds);
+      return;
+    }
+    if (
+      shape.type === "line" ||
+      shape.type === "arrow" ||
+      shape.type === "pencil" ||
+      shape.type === "image"
+    )
+      return;
+
+    if ("endX" in shape && "endY" in shape) {
+      const width = shape.endX - shape.startX;
+      const height = shape.endY - shape.startY;
+      const bounds = { x: shape.startX, y: shape.startY, width, height };
+      highlightShape(ctx, shape, bounds);
+    }
   }
 };

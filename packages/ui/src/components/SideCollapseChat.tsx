@@ -1,24 +1,18 @@
 "use client";
-import {
-  IconChevronsDown,
-  IconChevronsUp,
-  IconSend2,
-  IconSlash,
-} from "@tabler/icons-react";
+import { IconSend2, IconSlash } from "@tabler/icons-react";
 import React, { useState } from "react";
 import { Button } from "./ui/button";
 import { Virtuoso } from "react-virtuoso";
 import MessageBubble from "./ui/MessageBubble";
 import {
-  ChatModalProps,
   MessageReceivedType,
   MessageToSendType,
+  SideChatPropsType,
 } from "./types";
 import { useUser } from "@repo/hooks";
 
-const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
-  ({ send, messages, setMessages, boardState, drawShapeFromAi }, ref) => {
-    const [isChatUp, setIsChatUp] = useState(false);
+const SideCollapseChat = React.forwardRef<HTMLDivElement, SideChatPropsType>(
+  ({ send, messages, setMessages, isOpen, fetchChartFromAi }, ref) => {
     const [placeholder, setPlaceholder] =
       useState<string>("Say hello to chat!");
     const [inputText, setInputText] = useState<string>("");
@@ -294,9 +288,7 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
       if (content.startsWith("/draw")) {
         const command = content.replace("/draw", "");
         console.log("content 2: ", content);
-
-        // const shapes = await drawWithAi(command, boardState);
-        // drawShapeFromAi(shapes);
+        fetchChartFromAi(command);
       }
       const name = currentUser?.name;
       if (!name) return;
@@ -314,14 +306,22 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
         content: content,
       };
       setMessages((prev) => [...prev, userMessage]);
-      send("CHAT", { message: messageToBackend });
+      send("CHAT", messageToBackend);
     };
     return (
       <div
         ref={ref}
-        className={`-translate-x-5 absolute bottom-0 right-0 m-8 flex flex-col min-h-7 w-80 ${isChatUp ? "-translate-y-5 h-120" : " h-fit"} items-center justify-center rounded-xl z-30 bg-light_sky_blue shadow-primary border border-personal overflow-hidden transition-transform ease-in-out duration-300`}
+        className={`
+  flex flex-col items-center justify-center
+  h-full w-[360px]
+  bg-light_sky_blue shadow-primary overflow-hidden
+  z-[1000]
+
+`}
+
+        // style={{ gridArea: "right" }}
       >
-        <div
+        {/* <div
           onClick={() => setIsChatUp((prev) => !prev)}
           className={`flex items-center justify-center w-7 h-5 rounded-b-full top-0 left-1/2 -translate-x-1/2 absolute bg-light_sky_blue opacity-60 hover:opacity-100 group transition-all ease-in ${isChatUp ? "rounded-xl border-t-0 border border-black" : undefined} z-30 cursor-pointer `}
         >
@@ -338,16 +338,26 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
               stroke={2}
             />
           )}
-        </div>
+        </div> */}
 
-        {isChatUp && (
+        {isOpen && (
           <div
-            className={`w-full relative !h-full rounded-md z-10 bg-light_sky_blue-700 border-personal overflow-hidden`}
+            className={`w-full relative !h-full  bg-light_sky_blue-700 overflow-hidden`}
           >
-            <svg className=" absolute top-0 left-0 w-full h-full bg-[url('/pattern-2.svg')] bg-center opacity-20 scale-150"></svg>
+            <div
+              className="
+    absolute inset-0
+    bg-[url('/pattern-2.svg')]
+    bg-repeat
+    bg-top-left
+    opacity-20
+    pointer-events-none
+  "
+            />
+
             <Virtuoso
               data={messages}
-              skipAnimationFrameInResizeObserver={true}
+              //   skipAnimationFrameInResizeObserver={true}
               initialTopMostItemIndex={messages.length - 1}
               itemContent={(index, message) => {
                 const prev = index > 0 ? messages[index - 1] : null;
@@ -370,7 +380,7 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
                 } else if (isSameAsPrev && !isSameAsNext) {
                   position = "last"; // last in a group
                 }
-                const userId = localStorage.getItem("userId");
+                const userId = currentUser?.userId;
                 if (!userId) return;
                 const isOwn = message.sender_id === userId;
 
@@ -389,29 +399,28 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
 
         <div
           draggable={false}
-          className="p-2 reltative flex w-full gap-1.5 mt-auto items-center justify-center overflow-visible"
+          className="p-2 flex w-full h-14 gap-1.5 mt-auto items-center justify-center overflow-visible border-t"
         >
           <div
             onMouseEnter={() => setPlaceholder("Ask AI for help!")}
             onMouseLeave={() => setPlaceholder("Say hello to chat!")}
-            className="absolute left-3 outline-personal w-6 h-6 rounded-full cursor-pointer p-1 bg-light_sky_blue-700 hover:bg-light_sky_blue"
+            className="outline-personal h-full aspect-square rounded-md cursor-pointer p-1 bg-light_sky_blue-700 hover:bg-light_sky_blue flex items-center justify-center"
           >
-            <IconSlash size={15} />
+            <IconSlash />
           </div>
           <input
             value={inputText}
             onInput={(e) => setInputText(e.currentTarget.value)}
-            disabled={!isChatUp}
+            disabled={!isOpen}
             placeholder={placeholder}
-            className="font-[google_sans_code] placeholder:text-xs text-sm min-w-40 max-w-200 h-8 flex-1 rounded-2xl bg-white mr-0 py-4 pr-1.5 pl-9 outline-personal "
+            className="font-[google_sans_code] placeholder:text-xs text-sm min-w-40 max-w-200 h-full flex-1 rounded-md bg-white px-2 outline-personal "
           ></input>
           <Button
             onClick={() => {
               handleMessageSend(inputText);
               setInputText("");
             }}
-            className={`translate-x-0 rounded-full aspect-square p-0 w-7 h-7 items-center justify-center flex shadow-pressed ${!isChatUp && " rotate-90 shadow-none"} transition-all ease-in`}
-            size={"sm"}
+            className={`translate-x-0 rounded-full aspect-square p-0 h-full items-center justify-center flex shadow-pressed ${!isOpen && " rotate-90 shadow-none"} transition-all ease-in`}
           >
             <IconSend2 fill="black" size={18} stroke={1} color="" />
           </Button>
@@ -421,4 +430,4 @@ const ChatModal = React.forwardRef<HTMLDivElement, ChatModalProps>(
   },
 );
 
-export default ChatModal;
+export default SideCollapseChat;

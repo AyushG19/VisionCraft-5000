@@ -7,7 +7,8 @@
     "build": "tsc -b"
   },
   "devDependencies": {
-    "@repo/typescript-config": "workspace:*"
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^24.3.3"
   },
   "keywords": [],
   "author": "",
@@ -15,8 +16,7 @@
   "description": "",
   "dependencies": {
     "@tanstack/react-query": "^5.90.2",
-    "@types/node": "^24.3.3",
     "axios": "^1.10.0",
-    "zod": "^3.24.2"
+    "zod": "^4.3.6"
   }
 }

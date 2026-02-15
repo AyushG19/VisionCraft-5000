@@ -46,42 +46,7 @@ export default function canvasReducer(
       historyIndex: previousHistory.length,
     };
   }
-  if (action.type === "UPDATE_PENCIL") {
-    const currentPos = action.payload;
-    const lastShapeIndex = state.drawnShapes.length - 1;
-    const lastShape = state.drawnShapes[lastShapeIndex];
-    if (!lastShape) return state;
-    const points = lastShape.points || [];
-    const lastPoint = points[points.length - 1];
 
-    // 1. CHECK DISTANCE
-    if (lastPoint) {
-      const dist = Math.hypot(
-        currentPos.x - lastPoint.x,
-        currentPos.y - lastPoint.y,
-      );
-      // If moved less than 5 pixels, ignore this update!
-      if (dist < 5) {
-        return state;
-      }
-    }
-
-    const updatedPoints = [...(lastShape.points || []), currentPos];
-    return {
-      ...state,
-      drawnShapes: [
-        ...state.drawnShapes.slice(0, lastShapeIndex),
-        {
-          ...lastShape,
-          points: updatedPoints,
-          startX: Math.min(currentPos.x, lastShape.startX),
-          startY: Math.min(currentPos.y, lastShape.startY),
-          endX: Math.max(currentPos.x, lastShape.endX),
-          endY: Math.max(currentPos.y, lastShape.endY),
-        },
-      ],
-    };
-  }
   // if (action.type === "FINISH_SHAPE") {
   //   const shapeIndex = state.drawnShapes.length - 1;
   //   const shape = state.drawnShapes[shapeIndex];
@@ -137,7 +102,7 @@ export default function canvasReducer(
   if (action.type === "CHANGE_BRUSHSIZE") {
     return {
       ...state,
-      toolState: { ...state.toolState, brushSize: action.payload },
+      toolState: { ...state.toolState, strokeSize: action.payload },
     };
   }
   if (action.type === "UPD_SHAPE") {
@@ -146,12 +111,8 @@ export default function canvasReducer(
       drawnShapes: state.drawnShapes.map((s) => {
         if (s.id === action.payload.id)
           return {
-            ...s,
-            startX: action.payload.startX,
-            startY: action.payload.startY,
-            endX: action.payload.endX,
-            endY: action.payload.endY,
-            points: action.payload.points,
+            ...action.payload,
+            id: s.id,
           };
         return s;
       }),

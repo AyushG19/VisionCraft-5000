@@ -8,8 +8,8 @@ import {
   IconBrandGoogleFilled,
 } from "@tabler/icons-react";
 import {
-  LoginFormValues,
-  SignupFormValues,
+  LoginFormType,
+  SignupFormType,
   UserType,
   AppError,
 } from "@repo/common";
@@ -26,8 +26,8 @@ const EmailModal = ({
   loginService,
   navigate,
 }: {
-  signupService: (signupData: SignupFormValues) => Promise<UserType>;
-  loginService: (loginData: LoginFormValues) => Promise<UserType>;
+  signupService: (signupData: SignupFormType) => Promise<UserType>;
+  loginService: (loginData: LoginFormType) => Promise<UserType>;
   navigate: (route: string) => void;
 }) => {
   const [email, setEmail] = useState<string>("");
@@ -86,7 +86,7 @@ const EmailModal = ({
   const handleSubmit = async () => {
     try {
       if (signupOrLogin === "signup") {
-        const signupData: SignupFormValues = {
+        const signupData: SignupFormType = {
           email: email,
           password: password,
           confirmPassword: confirmPassword,
@@ -96,7 +96,7 @@ const EmailModal = ({
         setCurrentUser({ userId: res.userId, name: res.name, avatar: "" });
         navigate("canvas"); //use just the name "/" is auto
       } else if (signupOrLogin === "login") {
-        const loginData: LoginFormValues = {
+        const loginData: LoginFormType = {
           email: email,
           password: password,
         };

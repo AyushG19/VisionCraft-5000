@@ -1,32 +1,40 @@
 import { RefObject } from "react";
-import { ToolState } from "@repo/common";
-import { MessageType, ShapeType } from "@repo/common";
-import { HandleName } from "../utils/getHandles";
+import {
+  MessageType,
+  PointType as currentPos,
+  ToolKitType,
+  ColorType,
+  AllToolTypes,
+  DrawElement,
+  ShapeType,
+  PencilType,
+  ImageType,
+  LinearType,
+  TextStateType,
+  WebSocketChatType,
+  WebSocketShapeType,
+} from "@repo/common";
+import { HandleName } from "../../lib/getHandles";
 
 export type CanvasState = {
-  startPos: { x: number; y: number };
-  drawnShapes: ShapeType[];
-  history: ShapeType[][];
+  drawnShapes: DrawElement[];
+  history: DrawElement[][];
   historyIndex: number;
-  toolState: ToolState;
-};
-export type currentPos = {
-  x: number;
-  y: number;
+  toolState: ToolKitType;
+  textState: TextStateType;
 };
 
 export type Action =
-  | { type: "INITIALIZE_BOARD"; payload: ShapeType[] }
-  | { type: "ADD_SHAPE"; payload: ShapeType }
-  | { type: "DEL_SHAPE"; payload: ShapeType }
-  | { type: "UPDATE_PENCIL"; payload: currentPos }
-  | { type: "FINISH_SHAPE"; payload: ShapeType }
+  | { type: "INITIALIZE_BOARD"; payload: DrawElement[] }
+  | { type: "ADD_SHAPE"; payload: DrawElement }
+  | { type: "DEL_SHAPE"; payload: DrawElement }
+  | { type: "UPD_SHAPE"; payload: DrawElement }
+  | { type: "FINISH_SHAPE"; payload: DrawElement }
   | { type: "REDO" }
   | { type: "UNDO" }
-  | { type: "CHANGE_TOOL"; payload: ToolState["currentTool"] }
-  | { type: "CHANGE_COLOR"; payload: ToolState["currentColor"] }
-  | { type: "CHANGE_BRUSHSIZE"; payload: ToolState["brushSize"] }
-  | { type: "UPD_SHAPE"; payload: ShapeType };
+  | { type: "CHANGE_TOOL"; payload: AllToolTypes }
+  | { type: "CHANGE_COLOR"; payload: ColorType }
+  | { type: "CHANGE_BRUSHSIZE"; payload: number };
 
 export type MessageReceivedType = Extract<
   MessageType,
@@ -60,10 +68,39 @@ export type InteractionState = {
 };
 export type JoinRoomResponseType = {
   roomId: string;
-  canvasState: ShapeType[];
+  canvasState: DrawElement[];
   token: string;
 };
 export type EventType = {
   type: "ADD" | "DEL" | "UPD";
-  shape: ShapeType;
+  shape: DrawElement;
 };
+
+type DrawableTool =
+  | "rectangle"
+  | "ellipse"
+  | "triangle"
+  | "arrow"
+  | "line"
+  | "pencil";
+
+export const DrawableTool: DrawableTool[] = [
+  "rectangle",
+  "ellipse",
+  "triangle",
+  "arrow",
+  "line",
+  "pencil",
+];
+
+export type BoundedDrawElement = ShapeType | PencilType;
+export type UnboundedDrawElement = ImageType | LinearType;
+export type TextEditState = {
+  elementId: string;
+  x: number;
+  y: number;
+  text: string;
+} | null;
+
+//join and leaves are handled automatically
+export type SendPropsType = WebSocketChatType | WebSocketShapeType;
