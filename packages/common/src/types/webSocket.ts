@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { Message } from "./message";
-import { DrawSchema } from "./canvas";
+import { DrawSchema, PointSchema } from "./canvas";
 
 const WebSocketRoomPayload = z.object({
   type: z.enum(["JOIN_ROOM", "LEAVE_ROOM"]),
@@ -22,10 +22,34 @@ const SocketShapePayload = z.object({
 
 export type WebSocketShapeType = z.infer<typeof SocketShapePayload>;
 
-export const WebSocketData = z.discriminatedUnion("type", [
+const ClientCursorSchema = z.object({
+  type: z.literal("CURSOR"),
+  payload: PointSchema,
+});
+
+export type ClientCursorSchemaType = z.infer<typeof ClientCursorSchema>;
+
+const ServerCursorSchema = z.object({
+  type: z.literal("CURSOR"),
+  payload: z.object({ userId: z.string(), coordinates: PointSchema }),
+});
+
+export type ServerCursorSchemaType = z.infer<typeof ServerCursorSchema>;
+
+export const ServerSocketData = z.discriminatedUnion("type", [
   SocketShapePayload,
   SokcetChatPayload,
   WebSocketRoomPayload,
+  ServerCursorSchema,
 ]);
 
-export type WebSocketDataType = z.infer<typeof WebSocketData>;
+export type ServerSocketDataType = z.infer<typeof ServerSocketData>;
+
+export const ClientSocketData = z.discriminatedUnion("type", [
+  SocketShapePayload,
+  SokcetChatPayload,
+  WebSocketRoomPayload,
+  ClientCursorSchema,
+]);
+
+export type ClientSocketDataType = z.infer<typeof ClientSocketData>;

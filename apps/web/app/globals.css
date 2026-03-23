@@ -81,8 +81,8 @@
 @theme {
   --shadow-primary: 5px 5px 0px black;
   --shadow-pressed: 2px 2px 0px black;
-
-  --text-shadow-primary: 4px 4px 0px black;
+  --shadow-shinyshadow: inset 1px 1px 5px white, 3px 3px black;
+  --shadow-shinyshadow-pressed: inset 1px 1px black;
 
   --font-google-sans-code: "Google Sans Code", ui-monospace, monospace;
   --font-krona: "Krona One", sans-serif;
@@ -253,4 +253,59 @@
   .shadow-pressed {
     box-shadow: 2px 2px 0px black;
   }
+  .button-press-active:active {
+    @apply relative overflow-clip
+    transition-all duration-100 ease-in-out
+    shadow-[inset_1px_1px_black]
+    after:content-['']
+    after:absolute
+    after:inset-0
+    after:w-full
+    after:h-full
+    after:rounded-md
+    after:bg-black
+    after:opacity-20;
+  }
+  .button-press {
+    @apply relative overflow-clip
+    transition-all duration-100 ease-in-out
+    shadow-[inset_1px_1px_black]
+    after:content-['']
+    after:absolute
+    after:inset-0
+    after:w-full
+    after:h-full
+    after:rounded-md
+    after:bg-black
+    after:opacity-20;
+  }
+}
+@keyframes fade {
+  0% {
+    opacity: 0.2;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}
+
+.loader-path {
+  animation: fade 1.2s linear infinite;
+}
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.25s ease-out;
 }

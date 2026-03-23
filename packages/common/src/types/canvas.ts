@@ -3,7 +3,7 @@ import { number, z } from "zod";
 export const ModeSchema = z.enum(["select", "hand"]);
 export type Mode = z.infer<typeof ModeSchema>;
 
-export const ShapeToolSchema = z.enum(["rectangle", "ellipse", "triangle"]);
+export const ShapeToolSchema = z.enum(["rectangle", "ellipse", "diamond"]);
 export type ShapeTool = z.infer<typeof ShapeToolSchema>;
 
 export const LineToolSchema = z.enum(["arrow", "line"]);
@@ -21,6 +21,7 @@ export type ModifierTool = z.infer<typeof ModifierToolSchema>;
 export const LabelSchema = z.object({
   text: z.string(),
   FontSize: z.number(),
+  fontFamily: z.string(),
 });
 
 export type Labeltype = z.infer<typeof LabelSchema>;

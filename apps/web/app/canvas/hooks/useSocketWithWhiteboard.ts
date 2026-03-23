@@ -1,14 +1,9 @@
-/**
- * useSocketWithWhiteboard - NO PAN/ZOOM VERSION
- *
- * Top-level hook without pan/zoom functionality.
- */
-
+//it should return functions not values
 "use client";
 
 import React, { useEffect, useReducer, useRef, useState } from "react";
 import useCanvasInteraction from "./useCanvasInteraction";
-import canvasReducer from "../utils/canvasReducer";
+import canvasReducer, { initialCanvasState } from "../utils/canvasReducer";
 import {
   Action,
   CanvasState,
@@ -16,17 +11,22 @@ import {
   SendPropsType,
   TextEditState,
 } from "../types";
-import { AllToolTypes, DrawElement, WebSocketDataType } from "@repo/common";
+import {
+  AllToolTypes,
+  DrawElement,
+  PointType,
+  ServerSocketDataType,
+} from "@repo/common";
 import { useCanvasSocket } from "./useCanvasSocket";
 import { createNewText } from "../utils/createNewShape";
-import { text } from "stream/consumers";
+import { joinRoomService, leaveRoomService } from "app/services/canvas.service";
+import { useSocketContext } from "@repo/hooks";
+import { measureText } from "app/lib/canvasHelper";
+import { getUserColor } from "app/lib/color.helper";
+import useMousePosition from "./useMousePosition";
+import { getMousePos } from "app/lib/coordinateHelper";
 
-export const useSocketWithWhiteboard = (
-  roomId: string,
-  slug: string,
-  token: string,
-  isOpen: boolean,
-): {
+export const useSocketWithWhiteboard = (): {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
   canvasState: CanvasState;
   selectedShape: DrawElement | undefined;
@@ -49,29 +49,34 @@ export const useSocketWithWhiteboard = (
   finalizeText: () => void;
   finishText: () => void;
   cancelText: () => void;
+  inRoom: boolean;
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  handleLeaveRoom: () => void;
+  handleJoinRoom: (code: string) => void;
+  slug: string;
 } => {
-  const initState: CanvasState = {
-    drawnShapes: [],
-    history: [[]],
-    historyIndex: 0,
-    toolState: {
-      currentTool: "select",
-      currentColor: { l: 0.7, c: 0.1, h: 0 },
-      strokeSize: 2,
-    },
-    textState: {
-      fontFamily: "google sans code",
-      alignment: "left",
-      fontSize: 20,
-    },
-  };
-
-  const [canvasState, canvasDispatch] = useReducer(canvasReducer, initState);
+  const [canvasState, canvasDispatch] = useReducer(
+    canvasReducer,
+    initialCanvasState,
+  );
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [messages, setMessages] = useState<MessageReceivedType[]>([]);
   const [textEdit, setTextEdit] = useState<TextEditState>(null);
 
-  const handleOutgoingEvent = (event: WebSocketDataType) => {
+  const {
+    inRoom,
+    setToken,
+    isOpen,
+    setIsOpen,
+    setRoomInfo,
+    roomInfo,
+    memberCursor,
+  } = useSocketContext();
+
+  const { getScreenCoordinates } = useMousePosition(canvasRef);
+
+  const handleIncomingMessage = (event: ServerSocketDataType) => {
     switch (event.type) {
       case "ADD_SHAPE": {
         const shape = event.payload;
@@ -104,19 +109,71 @@ export const useSocketWithWhiteboard = (
         }
         break;
       }
+      case "CURSOR": {
+        console.log("cursor running");
+        const { userId, coordinates } = event.payload;
+        memberCursor.current.set(userId, coordinates);
+        break;
+      }
+      default: {
+        console.log("mess");
+      }
     }
   };
 
   const onMessage = (event: MessageEvent) => {
     try {
       const data = JSON.parse(event.data);
-      handleOutgoingEvent(data);
+      console.log(data);
+      handleIncomingMessage(data);
     } catch (error) {
       console.error("Failed to parse WebSocket message:", error);
     }
   };
 
-  const { send } = useCanvasSocket(onMessage, roomId, slug, token);
+  const { send, connect, disconnect } = useCanvasSocket(onMessage);
+
+  const sendCursorState = (pos: PointType) => {
+    send("CURSOR", pos);
+  };
+  const handleJoinRoom = async (code: string) => {
+    try {
+      const data = await joinRoomService(code);
+      const roomUsers = data.users.map((user) => ({
+        ...user,
+        color: getUserColor(user.userId),
+        cursor: null,
+      }));
+      setRoomInfo({
+        ...roomInfo,
+        roomId: data.roomId,
+        slug: code,
+        users: roomUsers,
+      });
+      // setRoomId(data.roomId);
+      // setSlug(code);
+      setToken(data.token);
+      connect(data.roomId, code, data.token);
+
+      console.log("From page handleJoinRoom: ", data);
+    } catch (error) {
+      //@ts-ignore
+      console.error("error in join room : ", error.message);
+    }
+  };
+
+  const handleLeaveRoom = async () => {
+    try {
+      const data = await leaveRoomService(roomInfo.roomId);
+      setRoomInfo({ ...roomInfo, roomId: "", slug: "" });
+      setToken("");
+      disconnect();
+
+      console.log("From page handleLeaveRoom: ", data);
+    } catch (error) {
+      console.error("error in join room");
+    }
+  };
 
   const dispatchWithSocket = (action: Action) => {
     canvasDispatch(action);
@@ -143,6 +200,7 @@ export const useSocketWithWhiteboard = (
     canvasState,
     canvasDispatch,
     dispatchWithSocket,
+    sendCursorState,
     isOpen,
     setTextEdit,
   );
@@ -155,25 +213,6 @@ export const useSocketWithWhiteboard = (
     if (toolName !== "select" && selectedShape) {
       setSelectedShape(undefined);
     }
-  };
-
-  const measureText = (
-    ctx: CanvasRenderingContext2D,
-    text: string,
-    fontSize: number,
-    fontFamily: string,
-  ): { width: number; height: number } => {
-    const lines = text.split("\n");
-
-    let maxWidth = 0;
-    ctx.font = `${fontSize}px ${fontFamily}`;
-    for (const line of lines) {
-      maxWidth = Math.max(maxWidth, ctx.measureText(line).width);
-    }
-
-    const lineHeight = fontSize * 1.2; // Excalidraw-style
-    const height = lines.length * lineHeight;
-    return { width: maxWidth, height: height };
   };
 
   const finalizeText = () => {
@@ -244,5 +283,11 @@ export const useSocketWithWhiteboard = (
     finalizeText,
     finishText,
     cancelText,
+    inRoom,
+    isOpen,
+    setIsOpen,
+    handleLeaveRoom,
+    handleJoinRoom,
+    slug: roomInfo.slug,
   };
 };

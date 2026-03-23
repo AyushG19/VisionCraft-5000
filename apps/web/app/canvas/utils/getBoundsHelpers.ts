@@ -5,7 +5,7 @@ export const getOutlineBounds = (shape: DrawElement): Bounds => {
   if (
     shape.type === "rectangle" ||
     shape.type === "ellipse" ||
-    shape.type === "triangle"
+    shape.type === "diamond"
   ) {
     return {
       x: shape.startX,
@@ -29,7 +29,7 @@ export const getBoundsForHandles = (shape: DrawElement): Bounds => {
   if (
     shape.type === "rectangle" ||
     shape.type === "ellipse" ||
-    shape.type === "triangle"
+    shape.type === "diamond"
   ) {
     return {
       x: shape.startX,

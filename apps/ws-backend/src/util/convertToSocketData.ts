@@ -1,6 +1,7 @@
-import { RedisData, SendPropsType } from "../types";
+import { ServerSocketDataType } from "@repo/common";
+import { RedisData } from "../types";
 
-export function convertToSocketData(data: RedisData): SendPropsType {
+export function convertToSocketData(data: RedisData): ServerSocketDataType {
   switch (data.type) {
     case "ADD":
       return {
@@ -22,5 +23,11 @@ export function convertToSocketData(data: RedisData): SendPropsType {
         type: "CHAT",
         payload: data.message,
       };
+    case "CURSOR": {
+      return {
+        type: "CURSOR",
+        payload: { userId: data.userId, coordinates: data.coordinates },
+      };
+    }
   }
 }

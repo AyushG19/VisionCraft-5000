@@ -1,25 +1,40 @@
 import { Button } from "./ui/button";
-import { IconLogout, IconMessagePlus } from "@tabler/icons-react";
+import { IconDoorExit, IconLogout, IconMessagePlus } from "@tabler/icons-react";
 import { Tooltip, TooltipTrigger, TooltipContent } from "./ui/ToolTip";
+import ChatButton from "./ui/ChatButton";
+import { motion } from "motion/react";
 
-const RoomOptions = ({ onChatToggle }: { onChatToggle: () => void }) => {
+const RoomOptions = ({
+  onChatToggle,
+  isChatOpen,
+  handleLeaveRoom,
+}: {
+  onChatToggle: () => void;
+  isChatOpen: boolean;
+  handleLeaveRoom: () => void;
+}) => {
   return (
-    <div className="flex flex-col items-center justify-center gap-2  mt-2 ">
+    <motion.div
+      animate={{ x: isChatOpen ? -360 : 0 }}
+      transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+      className="fixed right-0 top-6 flex flex-col gap-2"
+    >
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            className="shadow-primary opacity-60 hover:opacity-100 mr-2"
+            className="w-18 h-8 rounded-r-none opacity-80 hover:opacity-100 flex p-0 shadow-shinyshadow button-press"
             variant={"destructive"}
-            size={"sm"}
+            onClick={() => handleLeaveRoom()}
           >
-            <IconLogout color={"black"} stroke={1.5} size={18} />
+            <span className="text-xs mr-1 font-google-sans-code">Exit</span>
+            <IconDoorExit color={"black"} stroke={1} size={15} />
           </Button>
         </TooltipTrigger>
         <TooltipContent>
           <p>Leave Room</p>
         </TooltipContent>
       </Tooltip>
-      <Tooltip>
+      {/* <Tooltip>
         <TooltipTrigger asChild>
           <Button
             size={"sm"}
@@ -32,8 +47,9 @@ const RoomOptions = ({ onChatToggle }: { onChatToggle: () => void }) => {
         <TooltipContent>
           <p>Join Chat</p>
         </TooltipContent>
-      </Tooltip>
-    </div>
+      </Tooltip> */}
+      <ChatButton onChatToggle={onChatToggle} isChatOpen={isChatOpen} />
+    </motion.div>
   );
 };
 

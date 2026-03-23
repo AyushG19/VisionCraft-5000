@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { prismaClient, Prisma } from "@repo/db";
+import { createUser, findUserByEmail } from "@repo/db";
 import bcrypt from "bcrypt";
-import { authConfig, rfTokenExpiry } from "../config/index.js";
+import { acTokenExpiry, authConfig, rfTokenExpiry } from "../config/index.js";
 import { AppError } from "../error/index.js";
 import { accessJwtService, refreshJwtService } from "../utils/jwtInstance.js";
 import { JwtPayloadType } from "@repo/common";
@@ -11,42 +11,32 @@ export const signup = async (req: Request, res: Response) => {
     console.log("hasing");
     const hashedPass = await bcrypt.hash(req.body.password, 10);
 
-    const user = await prismaClient.user.create({
-      data: {
-        email: req.body.email,
-        name: req.body.name,
-        password: hashedPass,
-      },
-      select: {
-        id: true,
-        name: true,
-        photo: true,
-      },
-    });
+    const data = {
+      email: req.body.email,
+      name: req.body.name,
+      password: hashedPass,
+      confirmPassword: hashedPass,
+    };
+    const user = await createUser(data);
+    if (!user) throw new AppError(409, "[warn] User Already exists!");
 
     console.log("user generated");
     res
       .status(201)
       .cookie(
         "refreshToken",
-        refreshJwtService.sign({ userId: user.id }, rfTokenExpiry),
+        refreshJwtService.sign({ userId: user.userId }, rfTokenExpiry),
         authConfig.refreshCookies,
       )
       .cookie(
         "accessToken",
-        accessJwtService.sign({ userId: user.id }, rfTokenExpiry),
+        accessJwtService.sign({ userId: user.userId }, acTokenExpiry),
         authConfig.accessCookies,
       )
-      .json({
-        userId: user.id,
-        name: user.name,
-      });
+      .json(user);
   } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2002"
-    ) {
-      throw new AppError(409, "User Already Exists");
+    if (error instanceof AppError) {
+      throw error;
     }
     //@ts-ignore
     throw new AppError(500, error.message ? error.message : "Controller error");
@@ -55,48 +45,43 @@ export const signup = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response) => {
   try {
-    const user = await prismaClient.user.findUnique({
-      where: { email: req.body.email },
-    });
+    const user = await findUserByEmail(req.body.email);
+
     console.log("in login");
+
     if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
-      throw new AppError(401, "password did not match");
+      throw new AppError(401, "password did not match / User not registered");
     }
     res
       .status(201)
       .cookie(
         "refreshToken",
-        refreshJwtService.sign({ userId: user.id }, rfTokenExpiry),
+        refreshJwtService.sign({ userId: user.userId }, rfTokenExpiry),
         authConfig.refreshCookies,
       )
       .cookie(
         "accessToken",
-        accessJwtService.sign({ userId: user.id }, rfTokenExpiry),
+        accessJwtService.sign({ userId: user.userId }, acTokenExpiry),
         authConfig.accessCookies,
       )
       .json({
-        userId: user.id,
+        userId: user.userId,
         name: user.name,
       });
   } catch (error) {
     console.log(error);
-    if (error instanceof Prisma.PrismaClientUnknownRequestError) {
-      throw new AppError(401, "Invalid Email");
-    }
-    throw new AppError(500, "some internal error");
+    throw new AppError(500, "Some internal error while loggin in!");
   }
 };
 
 export const refreshToken = async (req: Request, res: Response) => {
   try {
-    const cookies = req.cookies;
-    if (!cookies) {
-      throw new AppError(401, "No cookies found!");
-    }
-    const refreshToken = cookies.refreshToken;
+    console.log("now");
+    const { refreshToken } = req.cookies;
     if (!refreshToken) {
       throw new AppError(401, "No Refresh token found!");
     }
+    console.log("here");
     const jwtRes = accessJwtService.verify<JwtPayloadType>(refreshToken);
     res
       .status(201)
@@ -107,13 +92,17 @@ export const refreshToken = async (req: Request, res: Response) => {
       )
       .cookie(
         "accessToken",
-        accessJwtService.sign({ userId: jwtRes.userId }, rfTokenExpiry),
+        accessJwtService.sign({ userId: jwtRes.userId }, acTokenExpiry),
         authConfig.accessCookies,
       )
       .json({
         message: "Token refresh Sucessful",
       });
   } catch (error) {
+    if (error instanceof AppError) {
+      throw error;
+    }
+
     throw new AppError(500, "Internal server error");
   }
 };

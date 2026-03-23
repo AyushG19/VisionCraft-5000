@@ -7,7 +7,7 @@ export const checkAuth = (req: Request, res: Response, next: NextFunction) => {
   try {
     const { accessToken } = req.cookies;
     if (!accessToken) {
-      throw new AppError(401, "Invalid token.");
+      throw new AppError(401, "No access token.");
     }
     const JwtPayload = accessJwtService.verify<JwtPayloadType>(accessToken);
     const parsedJwtPayload = JwtPayloadSchema.safeParse(JwtPayload);
@@ -15,6 +15,6 @@ export const checkAuth = (req: Request, res: Response, next: NextFunction) => {
     req.user = parsedJwtPayload.data;
     next();
   } catch (error) {
-    throw new AppError(401, "Invalid token.");
+    throw new AppError(401, "Error validating token.");
   }
 };

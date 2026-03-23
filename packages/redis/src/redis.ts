@@ -2,6 +2,8 @@ import { createClient, RedisClientType } from "redis";
 import dotenv from "dotenv";
 dotenv.config();
 
+export type RedisClient = RedisClientType;
+
 export const redisPub: RedisClientType = createClient({
   username: process.env.RS_USERNAME,
   password: process.env.RS_PASSWORD,
@@ -23,8 +25,8 @@ export const redisSub: RedisClientType = createClient({
   },
 });
 
-redisPub.on("error", (err) => console.log("Redis Client Error", err));
-redisSub.on("error", (err) => console.log("Redis Client Error", err));
+redisPub.on("error", (err) => console.log("[Redis] Redis Client Error", err));
+redisSub.on("error", (err) => console.log("[Redis] Redis Client Error", err));
 
 try {
   (async () => {

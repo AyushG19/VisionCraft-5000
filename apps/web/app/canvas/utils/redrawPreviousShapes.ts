@@ -1,6 +1,6 @@
 import { DrawElement } from "@repo/common";
 import { drawShape } from "./drawing";
-import { createDotPattern } from "./createPatterns";
+import { createDotPattern } from "../../lib/createPatterns";
 
 const patternRef: { current: CanvasPattern | null } = { current: null };
 export default function redrawPreviousShapes(

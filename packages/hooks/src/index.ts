@@ -1,2 +1,7 @@
-export { useUser, UserProvider } from "./user.context";
-export { useSocketContext, SocketContextProvider } from "./socket.context";
+export { useUser, UserProvider } from "./context/user.context";
+export {
+  useSocketContext,
+  SocketContextProvider,
+} from "./context/socket.context";
+export { useError, ErrorContextProvider } from "./context/error.context";
+export * from "./types";

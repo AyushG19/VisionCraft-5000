@@ -9,7 +9,7 @@ export const createDraggedShape = (
   if (
     shape.type === "rectangle" ||
     shape.type === "ellipse" ||
-    shape.type === "triangle" ||
+    shape.type === "diamond" ||
     shape.type === "pencil"
   ) {
     const dx = shape.endX - shape.startX;
@@ -32,6 +32,22 @@ export const createDraggedShape = (
   } else if (shape.type === "text") {
     const dx = shape.width;
     const dy = shape.height;
+    const clampedX = Math.max(
+      0,
+      Math.min(window.innerWidth - dx, currMousePos.x - dragState.offsetX),
+    );
+    const clampedY = Math.max(
+      0,
+      Math.min(window.innerHeight - dy, currMousePos.y - dragState.offsetY),
+    );
+    return {
+      ...shape,
+      startX: clampedX,
+      startY: clampedY,
+    };
+  } else if (shape.type === "arrow" || shape.type === "line") {
+    const dx = shape.points[2]!.x;
+    const dy = shape.points[2]!.y;
     const clampedX = Math.max(
       0,
       Math.min(window.innerWidth - dx, currMousePos.x - dragState.offsetX),
@@ -87,7 +103,7 @@ function isResizableShape(shape: DrawElement): shape is ResizableShape {
   return (
     shape.type === "rectangle" ||
     shape.type === "ellipse" ||
-    shape.type === "triangle" ||
+    shape.type === "diamond" ||
     shape.type === "pencil"
   );
 }

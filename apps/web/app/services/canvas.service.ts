@@ -1,12 +1,5 @@
-import { DrawElement, Room } from "@repo/common";
-import { useUser } from "@repo/hooks";
-import {
-  createRoom,
-  fetchChart,
-  joinRoom,
-  leaveRoom,
-} from "app/api/canvas.api";
-import { JoinRoomResponseType } from "app/canvas/types";
+import { Room, JoinRoomResponseType } from "@repo/common";
+import { createRoom, joinRoom, leaveRoom } from "app/api/canvas.api";
 
 export async function joinRoomService(
   roomCode: string,
@@ -20,10 +13,4 @@ export async function createRoomService(): Promise<Room> {
 
 export async function leaveRoomService(roomId: string) {
   return await leaveRoom(roomId);
-}
-
-export async function fetchChartService(
-  command: string,
-): Promise<{ res: string }> {
-  return await fetchChart(command);
 }

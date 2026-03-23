@@ -12,6 +12,8 @@ export type MessageReceivedType = Extract<
 export type MessageToSendType = Extract<MessageType, { status: "TO_BACKEND" }>;
 
 export type SideChatPropsType = {
+  // onChatToggle: () => void;
+  inRoom: boolean;
   send: (
     type: WebSocketChatType["type"] | WebSocketShapeType["type"],
     payload: WebSocketChatType["payload"] | WebSocketShapeType["payload"],
@@ -20,6 +22,8 @@ export type SideChatPropsType = {
   setMessages: React.Dispatch<React.SetStateAction<MessageReceivedType[] | []>>;
   fetchChartFromAi: (userCommand: string) => void;
   isOpen: boolean;
+  isLoading: boolean;
+  slug: string;
 };
 
 // Minimal generic skeleton to get autocomplete. Replace fields with concrete ones after inspecting runtime output.

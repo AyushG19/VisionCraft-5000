@@ -18,4 +18,6 @@ export * from "./types/webSocket";
 
 export * from "./api/index";
 
-export type { ZodTypeAny } from "zod";
+export * from "./types/queue";
+
+export { type ZodTypeAny, ZodError } from "zod";

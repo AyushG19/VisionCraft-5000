@@ -1,15 +1,8 @@
-/**
- * useCanvasRenderer - NO PAN/ZOOM VERSION
- *
- * Simple renderer without camera transforms.
- * Just syncs refs and triggers redraws.
- */
-
 import { useEffect, RefObject, useRef } from "react";
 import { DrawElement, ShapeType } from "@repo/common";
 import { CanvasState } from "../types";
 import redrawPreviousShapes from "../utils/redrawPreviousShapes";
-import oklchToCSS from "../utils/oklchToCss";
+import oklchToCSS from "../../lib/oklchToCss";
 
 const useCanvasRenderer = (
   canvasRef: RefObject<HTMLCanvasElement | null>,

@@ -1,7 +1,6 @@
 import { RefObject } from "react";
 import {
   MessageType,
-  PointType as currentPos,
   ToolKitType,
   ColorType,
   AllToolTypes,
@@ -13,6 +12,7 @@ import {
   TextStateType,
   WebSocketChatType,
   WebSocketShapeType,
+  ClientCursorSchemaType,
 } from "@repo/common";
 import { HandleName } from "../../lib/getHandles";
 
@@ -66,11 +66,7 @@ export type InteractionState = {
   startPos: { x: number; y: number };
   dragOffset: { x: number; y: number };
 };
-export type JoinRoomResponseType = {
-  roomId: string;
-  canvasState: DrawElement[];
-  token: string;
-};
+
 export type EventType = {
   type: "ADD" | "DEL" | "UPD";
   shape: DrawElement;
@@ -79,7 +75,7 @@ export type EventType = {
 type DrawableTool =
   | "rectangle"
   | "ellipse"
-  | "triangle"
+  | "diamond"
   | "arrow"
   | "line"
   | "pencil";
@@ -87,7 +83,7 @@ type DrawableTool =
 export const DrawableTool: DrawableTool[] = [
   "rectangle",
   "ellipse",
-  "triangle",
+  "diamond",
   "arrow",
   "line",
   "pencil",
@@ -103,4 +99,7 @@ export type TextEditState = {
 } | null;
 
 //join and leaves are handled automatically
-export type SendPropsType = WebSocketChatType | WebSocketShapeType;
+export type SendPropsType =
+  | WebSocketChatType
+  | WebSocketShapeType
+  | ClientCursorSchemaType;

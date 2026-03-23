@@ -33,6 +33,9 @@ export const wsEnv = z.object({
   RS_PORT: z.number(),
   RS_USERNAME: z.string(),
   RS_PASSWORD: z.string(),
+  EMPTY_ROOM_TTL_MS: z.number(),
+  ROOM_IDLE_TTL_MS: z.number(),
+  SWEEP_INTERVAL_MS: z.number(),
 });
 
 export type wsEnvType = z.infer<typeof wsEnv>;

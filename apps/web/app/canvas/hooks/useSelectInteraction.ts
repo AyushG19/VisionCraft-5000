@@ -1,16 +1,3 @@
-/**
- * useSelectInteraction
- *
- * Owns all logic for tool === "SELECT":
- * - Click detection (shape body vs resize handle vs empty space)
- * - Drag preview + commit
- * - Resize preview + commit
- * - Click-to-select / deselect
- *
- * This hook is ONLY active when the current tool is SELECT.
- * The orchestrator routes events here based on tool state.
- */
-
 import { useCallback } from "react";
 import { DrawElement, ShapeType } from "@repo/common";
 import isClickOnShape, {

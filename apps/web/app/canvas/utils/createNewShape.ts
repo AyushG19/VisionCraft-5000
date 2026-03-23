@@ -1,10 +1,8 @@
 import {
-  AllToolTypes,
   ColorType,
   DrawElement,
   LinearType,
   LineTool,
-  PencilToolType,
   PencilType,
   PointType,
   ShapeTool,
@@ -42,9 +40,9 @@ export function createNewShape(
       startX: startPos.x,
       startY: startPos.y,
       points: [
-        { x: startPos.x, y: startPos.y },
-        { x: currentPos.x, y: currentPos.y },
-        { x: currentPos.x, y: currentPos.y },
+        { x: 0, y: 0 },
+        { x: currentPos.x - startPos.x, y: currentPos.y - startPos.y },
+        { x: currentPos.x - startPos.x, y: currentPos.y - startPos.y },
       ],
       strokeWidth: toolKitState.strokeSize,
       strokeColor: toolKitState.currentColor,
@@ -59,8 +57,8 @@ export function createNewShape(
       startY: startPos.y,
       points: [
         { x: startPos.x, y: startPos.y },
-        { x: currentPos.x, y: currentPos.y },
-        { x: currentPos.x, y: currentPos.y },
+        { x: currentPos.x - startPos.x, y: currentPos.y - startPos.y },
+        { x: currentPos.x - startPos.x, y: currentPos.y - startPos.y },
       ],
       strokeWidth: toolKitState.strokeSize,
       strokeColor: toolKitState.currentColor,
@@ -68,11 +66,7 @@ export function createNewShape(
       isDeleted: false,
       type: type,
     } as LinearType;
-  } else if (
-    type === "rectangle" ||
-    type === "ellipse" ||
-    type === "triangle"
-  ) {
+  } else if (type === "rectangle" || type === "ellipse" || type === "diamond") {
     return {
       id: crypto.randomUUID(),
       startX: Math.min(startPos.x, currentPos.x),

@@ -54,7 +54,7 @@ const ToolIcon = React.forwardRef<HTMLDivElement, ToolIconProps>(
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             ref={ref}
-            className={`w-9 h-9 p-2.5 flex items-center justify-center cursor-pointer z-10 shadow-primary rounded-lg bg-uranian_blue outline-personal hover:scale-[103%] ${toolInfo.id !== "color" && isSelected && "shadow-pressed ml-0.5 mt-0.5 "} transition-all ease-in`}
+            className={`w-9 h-9 p-2.5 relative flex items-center justify-center cursor-pointer z-10 shadow-[inset_1px_1px_2px_white,3px_3px_black] rounded-lg bg-uranian_blue outline-personal hover:scale-[103%] ${toolInfo.id !== "color" && isSelected && "button-press"} button-press-active transition-all ease-in-out duration-100`}
           >
             {toolInfo.id === "color" && isHovered && (
               <ColorSelector
@@ -68,6 +68,7 @@ const ToolIcon = React.forwardRef<HTMLDivElement, ToolIconProps>(
                   ? `oklch(${pickedColor.l} ${pickedColor.c} ${pickedColor.h}`
                   : "black"
               }
+              stroke={1.5}
             />
           </div>
         </TooltipTrigger>

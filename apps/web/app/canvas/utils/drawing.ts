@@ -1,4 +1,4 @@
-import oklchToCSS from "./oklchToCss";
+import oklchToCSS from "../../lib/oklchToCss";
 import {
   ActionTool,
   PointType,
@@ -12,6 +12,7 @@ import {
   drawHandles,
   drawLabel,
 } from "app/lib/drawingHelpers";
+import { formToJSON } from "axios";
 
 // Type definitions for better type safety
 interface Point {
@@ -146,35 +147,42 @@ const drawSmoothPencilPath = (
 // Helper function for enhanced arrow with rounded arrowhead
 const drawEnhancedArrow = (
   ctx: CanvasRenderingContext2D,
-  startX: number,
-  startY: number,
-  endX: number,
-  endY: number,
+  points: readonly PointType[],
+  startPos: PointType,
   fillColor?: ColorType | null,
 ): void => {
-  const width = endX - startX;
-  const height = endY - startY;
+  const { x: startX, y: startY } = startPos;
+  const secondEndX = points.at(-2)!.x;
+  const secondEndY = points.at(-2)!.y;
+  const endX = points.at(-1)!.x;
+  const endY = points.at(-1)!.y;
+
+  const width = startX + endX - startX + secondEndX;
+  const height = startY + endY - startY + secondEndY;
   const angle = Math.atan2(height, width);
   const length = Math.sqrt(width * width + height * height);
 
   // Don't draw if too short
-  if (length < 10) return;
+  // if (length < 10) return;
 
   // Enhanced arrow shaft with rounded ends
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
   ctx.beginPath();
   ctx.moveTo(startX, startY);
-  ctx.lineTo(endX, endY);
+
+  points.forEach((p) => {
+    ctx.lineTo(startX + p.x, startY + p.y);
+  });
+
   ctx.stroke();
 
   // Dynamic arrowhead size based on arrow length
   const headLength = Math.min(20, length * 0.2);
-  const headWidth = headLength * 0.6;
 
   // Calculate arrowhead points with better proportions
-  const arrowX = endX;
-  const arrowY = endY;
+  const arrowX = startX + endX;
+  const arrowY = startY + endY;
   const leftX = arrowX - headLength * Math.cos(angle - Math.PI / 8);
   const leftY = arrowY - headLength * Math.sin(angle - Math.PI / 8);
   const rightX = arrowX - headLength * Math.cos(angle + Math.PI / 8);
@@ -196,184 +204,104 @@ const drawEnhancedArrow = (
   ctx.stroke();
 };
 
-// Improved rounded triangle drawing with consistent gap application
-const drawRoundedTriangle = (
+const drawRoundedDiamond = (
   ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  radius: number = 6,
-  gap: number = 0, // gap for outline spacing
+  startX: number,
+  startY: number,
+  endX: number,
+  endY: number,
+  radius: number = 4,
 ): void => {
-  // Normalize dimensions to handle negative width/height
-  const normalizedWidth = Math.abs(width);
-  const normalizedHeight = Math.abs(height);
-  const startX = width < 0 ? x + width : x;
-  const startY = height < 0 ? y + height : y;
+  const width = endX - startX;
+  const height = endY - startY;
 
-  // Calculate vertices for upright triangle
-  const topX = startX + normalizedWidth / 2;
-  const topY = startY;
-  const leftX = startX;
-  const leftY = startY + normalizedHeight;
-  const rightX = startX + normalizedWidth;
-  const rightY = startY + normalizedHeight;
+  const centerX = startX + width / 2;
+  const centerY = startY + height / 2;
 
-  // Calculate centroid
-  const centerX = (topX + leftX + rightX) / 3;
-  const centerY = (topY + leftY + rightY) / 3;
+  // Diamond vertices
+  const top = { x: centerX, y: startY };
+  const right = { x: endX, y: centerY };
+  const bottom = { x: centerX, y: endY };
+  const left = { x: startX, y: centerY };
 
-  // Apply gap offset by moving vertices away from centroid
-  let scaledTopX = topX;
-  let scaledTopY = topY;
-  let scaledLeftX = leftX;
-  let scaledLeftY = leftY;
-  let scaledRightX = rightX;
-  let scaledRightY = rightY;
-
-  if (gap !== 0) {
-    // Calculate offset for each vertex
-    const offsetVertex = (vx: number, vy: number) => {
-      const dx = vx - centerX;
-      const dy = vy - centerY;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist === 0) return { x: vx, y: vy };
-
-      // Normalize and apply gap
-      const offsetX = (dx / dist) * gap;
-      const offsetY = (dy / dist) * gap;
-      return { x: vx + offsetX, y: vy + offsetY };
-    };
-
-    const topOffset = offsetVertex(topX, topY);
-    scaledTopX = topOffset.x;
-    scaledTopY = topOffset.y;
-
-    const leftOffset = offsetVertex(leftX, leftY);
-    scaledLeftX = leftOffset.x;
-    scaledLeftY = leftOffset.y;
-
-    const rightOffset = offsetVertex(rightX, rightY);
-    scaledRightX = rightOffset.x;
-    scaledRightY = rightOffset.y;
-  }
-
-  // Calculate side lengths for radius clamping
-  const sideLength1 = Math.sqrt(
-    (scaledRightX - scaledTopX) ** 2 + (scaledRightY - scaledTopY) ** 2,
+  // Calculate edge lengths
+  const topToRight = Math.sqrt(
+    Math.pow(right.x - top.x, 2) + Math.pow(right.y - top.y, 2),
   );
-  const sideLength2 = Math.sqrt(
-    (scaledLeftX - scaledRightX) ** 2 + (scaledLeftY - scaledRightY) ** 2,
+  const rightToBottom = Math.sqrt(
+    Math.pow(bottom.x - right.x, 2) + Math.pow(bottom.y - right.y, 2),
   );
-  const sideLength3 = Math.sqrt(
-    (scaledTopX - scaledLeftX) ** 2 + (scaledTopY - scaledLeftY) ** 2,
+  const bottomToLeft = Math.sqrt(
+    Math.pow(left.x - bottom.x, 2) + Math.pow(left.y - bottom.y, 2),
+  );
+  const leftToTop = Math.sqrt(
+    Math.pow(top.x - left.x, 2) + Math.pow(top.y - left.y, 2),
   );
 
-  const minSide = Math.min(sideLength1, sideLength2, sideLength3);
-  const maxRadius = Math.min(radius, minSide / 3);
+  const minEdge = Math.min(topToRight, rightToBottom, bottomToLeft, leftToTop);
+  const maxRadius = Math.min(radius, minEdge / 3);
 
-  ctx.beginPath();
-
-  if (maxRadius <= 0) {
-    // Fallback to sharp triangle
-    ctx.moveTo(scaledTopX, scaledTopY);
-    ctx.lineTo(scaledRightX, scaledRightY);
-    ctx.lineTo(scaledLeftX, scaledLeftY);
+  if (maxRadius <= 0.5 || minEdge < 10) {
+    // Sharp diamond fallback
+    ctx.beginPath();
+    ctx.moveTo(top.x, top.y);
+    ctx.lineTo(right.x, right.y);
+    ctx.lineTo(bottom.x, bottom.y);
+    ctx.lineTo(left.x, left.y);
     ctx.closePath();
     return;
   }
 
-  // Calculate unit vectors for each edge direction
-  const getUnitVector = (
-    fromX: number,
-    fromY: number,
-    toX: number,
-    toY: number,
+  // Helper function to calculate point along edge
+  const getPointOnEdge = (
+    from: { x: number; y: number },
+    to: { x: number; y: number },
+    distance: number,
   ) => {
-    const dx = toX - fromX;
-    const dy = toY - fromY;
-    const length = Math.sqrt(dx * dx + dy * dy);
-    return { x: dx / length, y: dy / length };
+    const edgeLen = Math.sqrt(
+      Math.pow(to.x - from.x, 2) + Math.pow(to.y - from.y, 2),
+    );
+    const ratio = distance / edgeLen;
+    return {
+      x: from.x + (to.x - from.x) * ratio,
+      y: from.y + (to.y - from.y) * ratio,
+    };
   };
 
-  // Get unit vectors for each direction
-  const topToRight = getUnitVector(
-    scaledTopX,
-    scaledTopY,
-    scaledRightX,
-    scaledRightY,
-  );
-  const topToLeft = getUnitVector(
-    scaledTopX,
-    scaledTopY,
-    scaledLeftX,
-    scaledLeftY,
-  );
-  const rightToLeft = getUnitVector(
-    scaledRightX,
-    scaledRightY,
-    scaledLeftX,
-    scaledLeftY,
-  );
-  const rightToTop = getUnitVector(
-    scaledRightX,
-    scaledRightY,
-    scaledTopX,
-    scaledTopY,
-  );
-  const leftToTop = getUnitVector(
-    scaledLeftX,
-    scaledLeftY,
-    scaledTopX,
-    scaledTopY,
-  );
-  const leftToRight = getUnitVector(
-    scaledLeftX,
-    scaledLeftY,
-    scaledRightX,
-    scaledRightY,
-  );
+  // Calculate arc start/end points for each corner
+  const topRightStart = getPointOnEdge(top, right, maxRadius);
+  const topRightEnd = getPointOnEdge(right, top, maxRadius);
 
-  // Calculate offset points for rounded corners
-  const topRightOffsetX = scaledTopX + maxRadius * topToRight.x;
-  const topRightOffsetY = scaledTopY + maxRadius * topToRight.y;
-  const topLeftOffsetX = scaledTopX + maxRadius * topToLeft.x;
-  const topLeftOffsetY = scaledTopY + maxRadius * topToLeft.y;
+  const rightBottomStart = getPointOnEdge(right, bottom, maxRadius);
+  const rightBottomEnd = getPointOnEdge(bottom, right, maxRadius);
 
-  const rightTopOffsetX = scaledRightX + maxRadius * rightToTop.x;
-  const rightTopOffsetY = scaledRightY + maxRadius * rightToTop.y;
-  const rightLeftOffsetX = scaledRightX + maxRadius * rightToLeft.x;
-  const rightLeftOffsetY = scaledRightY + maxRadius * rightToLeft.y;
+  const bottomLeftStart = getPointOnEdge(bottom, left, maxRadius);
+  const bottomLeftEnd = getPointOnEdge(left, bottom, maxRadius);
 
-  const leftRightOffsetX = scaledLeftX + maxRadius * leftToRight.x;
-  const leftRightOffsetY = scaledLeftY + maxRadius * leftToRight.y;
-  const leftTopOffsetX = scaledLeftX + maxRadius * leftToTop.x;
-  const leftTopOffsetY = scaledLeftY + maxRadius * leftToTop.y;
+  const leftTopStart = getPointOnEdge(left, top, maxRadius);
+  const leftTopEnd = getPointOnEdge(top, left, maxRadius);
 
-  // Draw the path with rounded corners
-  ctx.moveTo(topRightOffsetX, topRightOffsetY);
-  ctx.lineTo(rightTopOffsetX, rightTopOffsetY);
-  ctx.quadraticCurveTo(
-    scaledRightX,
-    scaledRightY,
-    rightLeftOffsetX,
-    rightLeftOffsetY,
-  );
-  ctx.lineTo(leftRightOffsetX, leftRightOffsetY);
-  ctx.quadraticCurveTo(
-    scaledLeftX,
-    scaledLeftY,
-    leftTopOffsetX,
-    leftTopOffsetY,
-  );
-  ctx.lineTo(topLeftOffsetX, topLeftOffsetY);
-  ctx.quadraticCurveTo(
-    scaledTopX,
-    scaledTopY,
-    topRightOffsetX,
-    topRightOffsetY,
-  );
+  ctx.beginPath();
+
+  // Start at first point
+  ctx.moveTo(leftTopEnd.x, leftTopEnd.y);
+
+  // Draw to top corner and arc around it
+  ctx.lineTo(topRightStart.x, topRightStart.y);
+  ctx.quadraticCurveTo(top.x, top.y, topRightEnd.x, topRightEnd.y);
+
+  // Draw to right corner and arc around it
+  ctx.lineTo(rightBottomStart.x, rightBottomStart.y);
+  ctx.quadraticCurveTo(right.x, right.y, rightBottomEnd.x, rightBottomEnd.y);
+
+  // Draw to bottom corner and arc around it
+  ctx.lineTo(bottomLeftStart.x, bottomLeftStart.y);
+  ctx.quadraticCurveTo(bottom.x, bottom.y, bottomLeftEnd.x, bottomLeftEnd.y);
+
+  // Draw to left corner and arc around it
+  ctx.lineTo(leftTopStart.x, leftTopStart.y);
+  ctx.quadraticCurveTo(left.x, left.y, leftTopEnd.x, leftTopEnd.y);
+
   ctx.closePath();
 };
 
@@ -389,13 +317,19 @@ function drawText(ctx: CanvasRenderingContext2D, el: TextType) {
 }
 
 //Draw line function
-function drawLine(ctx: CanvasRenderingContext2D, points: readonly PointType[]) {
-  const startPos = points[0]!;
+function drawLine(
+  ctx: CanvasRenderingContext2D,
+  startPos: PointType,
+  points: readonly PointType[],
+) {
+  const { x: startX, y: startY } = startPos;
   const endPos = points[2]!;
+  const endX = startX + endPos.x;
+  const endY = startY + endPos.y;
 
   ctx.beginPath();
-  ctx.moveTo(startPos.x, startPos.y);
-  ctx.lineTo(endPos.x, endPos.y);
+  ctx.moveTo(startX, startY);
+  ctx.lineTo(endX, endY);
   ctx.stroke();
   return;
 }
@@ -442,15 +376,11 @@ export const drawShape = (
       ctx.stroke();
     }
     if (shape.type === "arrow") {
-      const endX = shape.startX + shape.points[2]!.x;
-      const endY = shape.startY + shape.points[2]!.y;
-      console.log(shape.startX, shape.points.at(2)!.x);
+      console.log(shape.startX, shape.points[2]!.x);
       drawEnhancedArrow(
         ctx,
-        shape.startX,
-        shape.startY,
-        endX,
-        endY,
+        shape.points,
+        { x: shape.startX, y: shape.startY },
         shape.strokeColor,
       );
     } else if (type === "ellipse") {
@@ -491,25 +421,31 @@ export const drawShape = (
       if (hasFillColor(shape))
         (ctx.fillStyle = oklchToCSS(shape.fillColor)), ctx.fill();
       ctx.stroke();
-    } else if (type === "triangle") {
+    } else if (type === "diamond") {
       const width = shape.endX - shape.startX;
       const height = shape.endY - shape.startY;
       const radius = Math.min(6, Math.abs(width) / 10, Math.abs(height) / 10);
-      drawRoundedTriangle(
+      drawRoundedDiamond(
         ctx,
         shape.startX,
         shape.startY,
-        width,
-        height,
+        shape.endX,
+        shape.endY,
         radius,
       );
+      if (shape.label) {
+        const centerY = shape.startY + height / 2;
+        const centerX = shape.startX + width / 2;
+        ctx.fillStyle = oklchToCSS(shape.strokeColor);
+        drawLabel(ctx, { x: centerX, y: centerY }, shape.label, width);
+      }
       if (hasFillColor(shape))
         (ctx.fillStyle = oklchToCSS(shape.fillColor)), ctx.fill();
       ctx.stroke();
     } else if (type === "text") {
       drawText(ctx, shape);
     } else if (type === "line") {
-      drawLine(ctx, shape.points);
+      drawLine(ctx, { x: shape.startX, y: shape.startY }, shape.points);
     }
   } finally {
     ctx.restore();

@@ -1,27 +1,6 @@
-/**
- * useCanvasCursor
- *
- * Manages cursor styles based on the active tool and what's under the cursor.
- * Completely isolated from interaction logic — this just sets canvas.style.cursor.
- *
- * Cursor priority (highest to lowest):
- * 1. Panning mode (space held or middle mouse) → "grab" or "grabbing"
- * 2. Resize handle hover → directional resize cursors
- * 3. Selected shape body hover → "move"
- * 4. Other shape hover → "move"
- * 5. Drawing tools → tool-specific cursors (crosshair, pencil, etc.)
- * 6. Default → "default"
- */
-
 import { useCallback } from "react";
-import { pencilIcon, selectIcon } from "../utils/pencilIcon";
-import {
-  AllToolSchema,
-  AllToolTypes,
-  DrawElement,
-  ShapeType,
-} from "@repo/common";
-import { CanvasState } from "../types";
+import { pencilIcon, selectIcon } from "../../lib/pencilIcon";
+import { AllToolTypes, DrawElement, ShapeType } from "@repo/common";
 import { HandleName } from "../../lib/getHandles";
 import { isInsideSelectBound, isPointInHandle } from "../utils/isPointInShape";
 import isClickOnShape from "../utils/isPointInShape";
@@ -41,7 +20,7 @@ const HANDLE_CURSORS: Record<HandleName, string> = {
   BOTTOM_RIGHT: "se-resize",
 };
 
-const CROSSHAIR_TOOLS = ["arrow", "rectangle", "ellipse", "triangle"];
+const CROSSHAIR_TOOLS = ["arrow", "rectangle", "ellipse", "diamond", "line"];
 
 const useCanvasCursor = (
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
@@ -60,7 +39,7 @@ const useCanvasCursor = (
       const canvas = canvasRef.current;
       if (!canvas) return;
 
-      // ─── 1. Panning mode ──────────────────────────────────────
+      // ─── Panning mode ──────────────────────────────────────
       if (isPanning) {
         canvas.style.cursor = "grabbing";
         return;
@@ -70,7 +49,7 @@ const useCanvasCursor = (
         return;
       }
 
-      // ─── 2. Active interactions ───────────────────────────────
+      // ─── Active interactions ───────────────────────────────
       // During drag/resize, keep the appropriate cursor
       if (isDragging) {
         canvas.style.cursor = "move";
@@ -81,7 +60,7 @@ const useCanvasCursor = (
         return;
       }
 
-      // ─── 3. SELECT mode hover states ──────────────────────────
+      // ─── SELECT mode hover states ──────────────────────────
       if (tool === "select") {
         // Check selected shape first (higher priority)
         if (selectedShape) {

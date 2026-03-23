@@ -1,7 +1,7 @@
 import {
+  ClientSocketData,
+  ClientSocketDataType,
   JwtPayloadSchema,
-  WebSocketData,
-  WebSocketDataType,
 } from "@repo/common";
 import { jwtInstance } from "./jwtInstance";
 
@@ -36,9 +36,9 @@ export const validateToken = (token: string) => {
   return parsedDecoded.data;
 };
 
-export const validateSocketData = (data: any): WebSocketDataType => {
+export const validateSocketData = (data: any): ClientSocketDataType => {
   console.log(parseData(data));
-  const validatedData = WebSocketData.safeParse(parseData(data));
+  const validatedData = ClientSocketData.safeParse(parseData(data));
   if (!validatedData.success || !validatedData.data.type) {
     console.error("!ENVIRONMENT VALIDATION FAILED!");
     if (!validatedData.error) throw new Error("MALFORMED_PAYLOAD");

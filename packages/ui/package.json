@@ -55,7 +55,7 @@
     "tw-animate-css": "^1.2.9"
   },
   "peerDependencies": {
-    "framer-motion": "^12.9.4",
+    "motion": "^12.34.0",
     "@excalidraw/mermaid-to-excalidraw": "^2.0.0"
   }
 }

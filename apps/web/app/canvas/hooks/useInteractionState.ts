@@ -1,15 +1,3 @@
-/**
- * useInteractionState
- *
- * Foundation hook that owns ALL mutable interaction state.
- * Other hooks read/write through this API instead of touching refs directly.
- *
- * Why refs instead of state? Performance. Canvas redraws happen on every
- * mousemove frame. If we used setState, React would re-render the entire
- * component tree 60+ times per second during a drag. Refs let us mutate
- * and read synchronously without triggering renders.
- */
-
 import { useRef, useCallback } from "react";
 import { DrawElement, PointType } from "@repo/common";
 import { DragStateType, InteractionState, ResizeStateType } from "../types";

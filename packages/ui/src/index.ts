@@ -18,4 +18,4 @@ export {
 } from "./components/LoginForm";
 
 export { default as SideCollapseChat } from "./components/SideCollapseChat";
-export { mermaidToExcalidraw } from "./lib/mermaid";
+export { default as userCursor } from "./components/ui/UsersCursor";

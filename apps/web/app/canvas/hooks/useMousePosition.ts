@@ -1,9 +1,4 @@
-/**
- * useMousePosition - NO PAN/ZOOM VERSION
- *
- * Simple mouse position - just canvas coordinates, no transform.
- */
-
+import { PointType } from "@repo/common";
 import { useCallback } from "react";
 
 const useMousePosition = (
@@ -25,7 +20,22 @@ const useMousePosition = (
     [canvasRef],
   );
 
-  return { getMousePos };
+  const getScreenCoordinates = useCallback(
+    (pos: PointType): { x: number; y: number } => {
+      const canvas = canvasRef.current;
+      if (!canvas) {
+        return { x: 0, y: 0 };
+      }
+
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: pos.x - rect.left,
+        y: pos.y - rect.top,
+      };
+    },
+    [canvasRef],
+  );
+  return { getMousePos, getScreenCoordinates };
 };
 
 export default useMousePosition;

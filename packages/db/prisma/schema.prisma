@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,6 +12,7 @@ model User {
   password      String      
   email         String        @unique
   name          String
+  avatarUrl     String?
   photo         String?
   created_at    DateTime      @default(now())
   roomUsers     RoomUser[]
@@ -23,17 +23,35 @@ model User {
 model Room {
   id            String        @id @default(uuid())
   slug          String        @unique
+  name          String?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @default(now())
   admin         User          @relation(fields: [adminId], references: [id])
   adminId       String
   userRooms     RoomUser[]
   chats         Chat[]
+  canvas        CanvasElements[]
+}
+
+model CanvasElements {
+
+  id        String    @id
+  type      String      
+  zIndex    Int       @default(0)
+  data      Json
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  room      Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roomId    String
+
+  @@index([roomId])             // every query filters by roomId
+  @@index([roomId, zIndex])     // order by zIndex within a room
+  @@index([roomId, type])       
 }
 
 model RoomUser{
   user          User        @relation(fields: [userId], references: [id])
-  room          Room        @relation(fields: [roomId], references: [id])
+  room          Room        @relation(fields: [roomId], references: [id] ,onDelete: Cascade)
   roomId        String
   userId        String
   @@id([roomId,userId])
@@ -42,9 +60,11 @@ model RoomUser{
 model Chat {
   id            Int         @id @default(autoincrement())
   message       String
+  sentAt        DateTime
   createdAt     DateTime    @default(now())
   userId        String
   roomId        String
   user          User        @relation(fields: [userId], references: [id])
-  room          Room        @relation(fields: [roomId], references: [id])
+  room          Room        @relation(fields: [roomId], references: [id],onDelete: Cascade)
+  @@index([roomId, sentAt])
 }

@@ -12,7 +12,9 @@
     "@repo/redis": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@repo/common": "workspace:*",
-    "@types/ws": "^8.18.1"
+    "@repo/queue": "workspace:*",
+    "@types/ws": "^8.18.1",
+    "@repo/db": "workspace:*"
   },
   "keywords": [],
   "author": "",

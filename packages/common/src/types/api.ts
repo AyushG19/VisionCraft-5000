@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { DrawSchema } from "./canvas";
+import { User } from "./user";
 
 export const CreateUserSchema = z
   .object({
@@ -35,8 +36,9 @@ export const LoginSchema = z.object({
 export type LoginFormType = z.infer<typeof LoginSchema>;
 
 export const JoinRoomSchema = z.object({
-  slug: z.string(),
-  roomId: z.any(),
+  roomId: z.string(),
+  users: z.array(User),
+  token: z.string(),
 });
 
 export type JoinRoomResponseType = z.infer<typeof JoinRoomSchema>;

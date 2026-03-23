@@ -1,15 +1,3 @@
-/**
- * useDrawInteraction
- *
- * Owns all logic for drawing tools:
- * - SQUARE, CIRCLE, ARROW, TRIANGLE: start→end shapes
- * - PENCIL: streaming point accumulation
- * - TEXT: (stubbed for now)
- *
- * This hook is active when the current tool is anything EXCEPT SELECT.
- * The orchestrator routes events here for all drawing operations.
- */
-
 import { useCallback } from "react";
 import { Action } from "../types";
 import redrawPreviousShapes from "../utils/redrawPreviousShapes";
@@ -19,13 +7,7 @@ import {
   finishPencil,
   updatePencil,
 } from "../utils/createNewShape";
-import {
-  DrawElement,
-  PencilType,
-  PointType,
-  TextStateType,
-  ToolKitType,
-} from "@repo/common";
+import { DrawElement, PencilType, PointType, ToolKitType } from "@repo/common";
 import useInteractionState from "./useInteractionState";
 
 type UseInteractionStateReturn = ReturnType<typeof useInteractionState>;

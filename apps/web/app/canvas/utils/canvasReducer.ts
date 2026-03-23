@@ -1,5 +1,21 @@
 import { Action, CanvasState } from "../types/index";
 
+export const initialCanvasState: CanvasState = {
+  drawnShapes: [],
+  history: [[]],
+  historyIndex: 0,
+  toolState: {
+    currentTool: "select",
+    currentColor: { l: 0.7, c: 0.1, h: 0 },
+    strokeSize: 2,
+  },
+  textState: {
+    fontFamily: "google sans code",
+    alignment: "left",
+    fontSize: 20,
+  },
+};
+
 export default function canvasReducer(
   state: CanvasState,
   action: Action,

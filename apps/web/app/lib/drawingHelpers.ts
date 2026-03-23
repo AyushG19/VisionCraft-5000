@@ -7,6 +7,7 @@ export function drawLabel(
   label: Labeltype,
   maxWidth: number,
 ) {
+  ctx.font = `${label.FontSize}px ${label.fontFamily}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(label.text, startPos.x, startPos.y, maxWidth);

@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import {
   RoomOptions,
   JoinRoomModal,
@@ -7,29 +7,23 @@ import {
   toolkitProps,
   SideCollapseChat,
   Button,
-  mermaidToExcalidraw,
 } from "@repo/ui";
 import { drawShape } from "./utils/drawing";
 import { DrawElement } from "@repo/common";
 import { useSocketWithWhiteboard } from "./hooks/useSocketWithWhiteboard";
-import {
-  createRoomService,
-  fetchChartService,
-} from "app/services/canvas.service";
-import oklchToCSS from "./utils/oklchToCss";
-import useJoinRoom from "./hooks/useRoom";
+import { createRoomService } from "app/services/canvas.service";
+import oklchToCSS from "../lib/oklchToCss";
+import useAi from "./hooks/useAi";
+import { useError, useSocketContext } from "@repo/hooks";
+import { ErrorModal } from "@workspace/ui/components/ErrorModal";
+import UsersCursor from "@workspace/ui/components/ui/UsersCursor";
+import useRafLoop from "./hooks/useRafLoop";
 
 const page = () => {
-  const {
-    inRoom,
-    roomId,
-    slug,
-    token,
-    isOpen,
-    handleChatToggle,
-    handleJoinRoom,
-  } = useJoinRoom();
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
+  const { roomInfo, memberCursor } = useSocketContext();
+
+  useRafLoop({ cursorMap: memberCursor.current });
 
   const {
     canvasRef,
@@ -46,30 +40,32 @@ const page = () => {
     setTextEdit,
     finishText,
     cancelText,
-  } = useSocketWithWhiteboard(roomId, slug, token, isOpen);
+    inRoom,
+    isOpen,
+    setIsOpen,
+    handleLeaveRoom,
+    handleJoinRoom,
+    slug,
+  } = useSocketWithWhiteboard();
 
-  const drawShapeFromAi = (shapes: DrawElement[]) => {
+  const { loading, result, handleDrawRequest } = useAi();
+
+  const handleChatToggle = () => {
+    setIsOpen((prev) => !prev);
+  };
+
+  useEffect(() => {
     if (!canvasRef.current) return;
     const ctx = canvasRef.current.getContext("2d");
-    if (ctx == null) {
+    if (!ctx) {
       console.error("canvas element not available");
       return;
     }
-    console.log(typeof shapes);
-    shapes.forEach((shape: DrawElement) => {
+    console.log(typeof result);
+    result.forEach((shape: DrawElement) => {
       drawShape(ctx, shape);
     });
-  };
-
-  async function fetchChartFromAi(userCommand: string) {
-    try {
-      const diagramDefination = await fetchChartService(userCommand);
-      console.log(diagramDefination);
-      const res = await mermaidToExcalidraw(diagramDefination.res);
-      console.log(res);
-      drawShapeFromAi(res);
-    } catch (error) {}
-  }
+  }, [result]);
 
   const toolkitProps: toolkitProps = {
     canvasRef,
@@ -86,7 +82,7 @@ const page = () => {
       <Toolkit {...toolkitProps} />
       <Button
         className="absolute top-0 left-0 z-1000"
-        // onClick={fetchChartFromAi}
+        onClick={() => handleDrawRequest("any flowchart")}
       ></Button>
       {textEdit && (
         <textarea
@@ -123,26 +119,48 @@ const page = () => {
       ></canvas>
 
       {inRoom ? (
-        <div
-          className={`h-full flex items-start absolute top-0 right-0 float-right 
-  transform transition-transform duration-300 ease-in-out
-  ${isOpen ? "translate-x-0" : "translate-x-90"}`}
-        >
-          <RoomOptions onChatToggle={handleChatToggle} />
+        <>
+          <RoomOptions
+            onChatToggle={handleChatToggle}
+            isChatOpen={isOpen}
+            handleLeaveRoom={handleLeaveRoom}
+          />
+          {roomInfo.users.map((u) => (
+            <UsersCursor key={u.userId} {...u} />
+          ))}
           <SideCollapseChat
+            inRoom={inRoom}
             send={send}
             messages={messages}
             setMessages={setMessages}
-            fetchChartFromAi={fetchChartFromAi}
+            fetchChartFromAi={handleDrawRequest}
             isOpen={isOpen}
+            isLoading={loading}
+            slug={slug}
           />
-        </div>
+        </>
       ) : (
-        <JoinRoomModal
-          makeNewRoom={createRoomService}
-          verifyJoin={handleJoinRoom}
-        />
+        <>
+          <JoinRoomModal
+            makeNewRoom={createRoomService}
+            verifyJoin={handleJoinRoom}
+            onChatToggle={handleChatToggle}
+            isChatOpen={isOpen}
+          />
+
+          <SideCollapseChat
+            inRoom={inRoom}
+            send={send}
+            messages={messages}
+            setMessages={setMessages}
+            fetchChartFromAi={handleDrawRequest}
+            isOpen={isOpen}
+            isLoading={loading}
+            slug={slug}
+          />
+        </>
       )}
+      <ErrorModal />
     </div>
   );
 };

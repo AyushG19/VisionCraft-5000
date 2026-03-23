@@ -152,7 +152,7 @@ export async function fetchMermaidSyntax(req: Request, res: Response) {
       contents: [{ role: "user", parts: [{ text: MERMAID_PROMPT }] }],
     });
     if (!result.text) throw new AppError(500, "No syntax found");
-    console.log(result);
+    console.log(result.text);
     const mermaid = extractMermaidBlock(result.text);
     if (!isValidMermaid(mermaid)) {
       throw new AppError(500, "Invalid Syntax");

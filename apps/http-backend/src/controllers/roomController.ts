@@ -1,6 +1,12 @@
 import { Request, Response } from "express";
-import { prismaClient } from "@repo/db";
+import {
+  createNewRoom,
+  findRoomFromSlug,
+  removeUserFromRoom,
+  insertUserToRoom,
+} from "@repo/db";
 import { generateRandomCode } from "../utils/codeGenerator.js";
+import { JoinRoomResponseType } from "@repo/common";
 
 const checkCode = async (req: Request, res: Response) => {
   try {
@@ -17,27 +23,17 @@ const checkCode = async (req: Request, res: Response) => {
       res.status(400).json("Invalid room ID/User ID");
       return;
     }
-    const room = await prismaClient.room.findFirst({
-      where: {
-        slug: slug,
-      },
-    });
+    const room = await findRoomFromSlug(slug);
     if (room && slug === room.slug) {
-      await prismaClient.roomUser.create({
-        data: {
-          user: {
-            connect: { id: userId },
-          },
-          room: {
-            connect: { id: room.id },
-          },
-        },
-      });
+      const users = await insertUserToRoom(userId, room.id);
+      const processedUsers = users.map((u) => ({ name: u.name, userId: u.id }));
 
-      res.status(200).json({
+      const resData: JoinRoomResponseType = {
         roomId: room.id,
         token: accessToken,
-      });
+        users: processedUsers,
+      };
+      res.status(200).json(resData);
       return;
     }
     res.status(400).json("Bad Request");
@@ -55,23 +51,9 @@ const createRoom = async (req: Request, res: Response) => {
     }
 
     const slug = generateRandomCode(4);
-    console.log("slug genrrate");
-    const newRoom = await prismaClient.room.create({
-      data: {
-        slug: slug,
-        admin: {
-          connect: {
-            id: userId,
-          },
-        },
-      },
-    });
-    await prismaClient.roomUser.create({
-      data: {
-        userId: newRoom.adminId,
-        roomId: newRoom.id,
-      },
-    });
+    console.log("Slug Generated");
+    const newRoom = await createNewRoom(slug, userId);
+
     res.status(200).json(newRoom);
   } catch (error) {
     console.log("error in create room");
@@ -92,14 +74,7 @@ const leaveRoom = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Room ID missing" });
     }
 
-    await prismaClient.roomUser.delete({
-      where: {
-        roomId_userId: {
-          userId,
-          roomId,
-        },
-      },
-    });
+    removeUserFromRoom(userId, roomId);
 
     res.status(200).json({ message: "User left room successfully" });
   } catch (error: any) {

@@ -4,7 +4,6 @@ import {
   ColorSchema,
   LineToolSchema,
   ModeSchema,
-  ModifierToolSchema,
   PencilToolSchema,
   ShapeToolSchema,
 } from "./canvas";
@@ -14,7 +13,7 @@ type ToolState = {
     | "SELECT"
     | "CIRCLE"
     | "SQUARE"
-    | "TRIANGLE"
+    | "DIAMOND"
     | "TEXT"
     | "ARROW"
     | "COLOR"

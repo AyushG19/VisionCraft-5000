@@ -1,14 +1,7 @@
-/**
- * useCanvasInteraction - NO PAN/ZOOM VERSION
- *
- * Simple canvas interaction with direct screen coordinates.
- * No camera transform, no zoom, no panning.
- */
-
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { DrawElement, ShapeType } from "@repo/common";
+import { DrawElement, PointType, ShapeType } from "@repo/common";
 import { Action, CanvasState, TextEditState } from "../types";
 import resizeCanvas from "../utils/canvasResizeHelper";
 import redrawPreviousShapes from "../utils/redrawPreviousShapes";
@@ -18,12 +11,14 @@ import useCanvasCursor from "./useCanvasCursor";
 import useSelectInteraction from "./useSelectInteraction";
 import useDrawInteraction from "./useDrawingInteraction";
 import useCanvasRenderer from "./useCanvasRenderer";
+import { getMousePos } from "app/lib/coordinateHelper";
 
 const useCanvasInteraction = (
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
   canvasState: CanvasState,
   canvasDispatch: (action: Action) => void,
   dispatchWithSocket: (action: Action) => void,
+  sendCursorState: (pos: PointType) => void,
   isOpen: boolean,
   setTextEdit: React.Dispatch<React.SetStateAction<TextEditState>>,
 ) => {
@@ -56,18 +51,6 @@ const useCanvasInteraction = (
     selectedShapeRef,
     isOpen,
   );
-
-  // Simple mouse position - no transform needed
-  const getMousePos = (e: MouseEvent) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return { x: 0, y: 0 };
-
-    const rect = canvas.getBoundingClientRect();
-    return {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    };
-  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -117,7 +100,7 @@ const useCanvasInteraction = (
     };
 
     const handleDoubleClick = (e: MouseEvent) => {
-      const pos = getMousePos(e);
+      const pos = getMousePos(canvasRef, { x: e.clientX, y: e.clientY });
       const currentSelected = selectedShapeRef.current;
       const currentState = canvasStateRef.current;
       const tool = currentState.toolState.currentTool;
@@ -140,7 +123,7 @@ const useCanvasInteraction = (
     };
     const onMouseDown = (e: MouseEvent) => {
       if (e.button !== 0) return;
-      const pos = getMousePos(e);
+      const pos = getMousePos(canvasRef, { x: e.clientX, y: e.clientY });
       const currentState = canvasStateRef.current;
       const currentSelected = selectedShapeRef.current;
       const tool = currentState.toolState.currentTool;
@@ -167,11 +150,14 @@ const useCanvasInteraction = (
     };
 
     const onMouseMove = (e: MouseEvent) => {
-      const pos = getMousePos(e);
+      const pos = getMousePos(canvasRef, { x: e.clientX, y: e.clientY });
       const currentState = canvasStateRef.current;
       const currentSelected = selectedShapeRef.current;
       const tool = currentState.toolState.currentTool;
       console.log("current selected: ", currentSelected);
+
+      sendCursorState(pos);
+
       if (tool === "select") {
         selectInteraction.handleSelectMouseMove(
           pos,
@@ -202,7 +188,7 @@ const useCanvasInteraction = (
     };
 
     const onMouseUp = (e: MouseEvent) => {
-      const pos = getMousePos(e);
+      const pos = getMousePos(canvasRef, { x: e.clientX, y: e.clientY });
       const currentState = canvasStateRef.current;
       const currentSelected = selectedShapeRef.current;
       const tool = currentState.toolState.currentTool;

@@ -4,15 +4,12 @@ import { ToolIcon } from "./ui/ToolIcon";
 import {
   Icon,
   IconGripVertical,
-  IconHandStop,
   IconLine,
-  IconMinusVertical,
   IconPhoto,
   IconProps,
   IconSend,
+  IconSquareRotated,
   IconTextSize,
-} from "@tabler/icons-react";
-import {
   IconArrowBackUp,
   IconArrowForwardUp,
   IconCircle,
@@ -20,7 +17,6 @@ import {
   IconPencilMinus,
   IconSquare,
   IconTrendingUp,
-  IconTriangle,
 } from "@tabler/icons-react";
 import type {
   ToolKitType,
@@ -46,7 +42,7 @@ const tools: {
   // { id: "hand" as const, icon: IconHandStop, label: "hand" },
   { id: "ellipse" as const, icon: IconCircle, label: "circle" },
   { id: "rectangle" as const, icon: IconSquare, label: "square" },
-  { id: "triangle" as const, icon: IconTriangle, label: "triangle" },
+  { id: "diamond" as const, icon: IconSquareRotated, label: "diamond" },
   { id: "line" as const, icon: IconLine, label: "line" },
   { id: "arrow" as const, icon: IconTrendingUp, label: "arrow" },
   { id: "pencil" as const, icon: IconPencilMinus, label: "pencil" },
@@ -223,7 +219,7 @@ const Toolkit = ({
     <div
       ref={toolkitRef}
       draggable={false}
-      className="p-3 pb-3.5 pr-0 absolute rounded-lg flex items-center cursor-move bg-light_sky_blue outline-personal shadow-primary"
+      className="p-3 pb-3.5 pr-0 absolute rounded-lg flex items-center cursor-move bg-light_sky_blue outline-personal shadow-shinyshadow"
       style={{
         top: currPos.y,
         left: currPos.x,
@@ -244,18 +240,18 @@ const Toolkit = ({
             />
           );
         })}
-        <div className="h-8 w-[1px] ml-1 mt-1 bg-black"></div>
+        {/* <div className="h-8 w-[1px] ml-1 mt-1 bg-black"></div> */}
         <Button
-          className="w-9 h-9 p-2.5 flex items-center justify-center cursor-pointer shadow-primary rounded-lg bg-uranian_blue outline-personal hover:scale-[103%] text-black"
+          className="w-9 h-9 p-2.5 flex items-center justify-center cursor-pointer text-black shadow-shinyshadow bg-uranian_blue button-press-active transition-all ease-in-out duration-100 "
           onClick={handleUndo}
         >
-          <IconArrowBackUp size={20} />
+          <IconArrowBackUp size={20} stroke={1.5} />
         </Button>
         <Button
-          className="w-9 h-9 p-2.5 flex items-center justify-center cursor-pointer shadow-primary rounded-lg bg-uranian_blue outline-personal hover:scale-[103%] text-black"
+          className="w-9 h-9 p-2.5 flex items-center justify-center cursor-pointer text-black shadow-shinyshadow bg-uranian_blue button-press-active transition-all ease-in-out duration-100 "
           onClick={handleRedo}
         >
-          <IconArrowForwardUp size={20} />
+          <IconArrowForwardUp size={20} stroke={1.5} />
         </Button>
       </div>
 

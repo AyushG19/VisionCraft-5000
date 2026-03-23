@@ -17,6 +17,9 @@ const envSchema = {
   RS_PORT: Number(process.env.RS_PORT),
   RS_USERNAME: process.env.RS_USERNAME,
   RS_PASSWORD: process.env.RS_PASSWORD,
+  EMPTY_ROOM_TTL_MS: Number(process.env.EMPTY_ROOM_TTL_MS),
+  ROOM_IDLE_TTL_MS: Number(process.env.ROOM_IDLE_TTL_MS),
+  SWEEP_INTERVAL_MS: Number(process.env.SWEEP_INTERVAL_MS),
 };
 const parsedEnv = wsEnv.safeParse(envSchema);
 if (!parsedEnv.success) {

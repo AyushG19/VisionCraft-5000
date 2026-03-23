@@ -58,7 +58,7 @@ const CodeInputBox: React.FC<CodeInputBoxProps> = ({
   };
 
   return (
-    <div className="absolute top-1/2 left-1/2 -translate-1/2 font-[google_sans_code] flex items-center justify-center gap-2 m-4">
+    <div className="fixed top-1/2 left-1/2 -translate-1/2 font-[google_sans_code] flex items-center justify-center gap-2 m-4">
       <Button
         onClick={() => toggleFunction()}
         size={"sm"}
