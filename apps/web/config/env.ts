@@ -1,4 +1,4 @@
-import { WebEnv } from "@repo/common";
+import { WebEnv, WebEnvType } from "@repo/common";
 
 function shutdown(message: string, error?: unknown): never {
   console.error(message);
@@ -7,7 +7,7 @@ function shutdown(message: string, error?: unknown): never {
 }
 
 console.log("running this in : ", process.env.NODE_ENV, " mode.");
-const envInput = {
+const envInput: WebEnvType = {
   NODE_ENV: process.env.NODE_ENV,
 
   HTTP_BACKEND_URL:
@@ -15,6 +15,9 @@ const envInput = {
 
   WS_BACKEND_URL:
     process.env.NEXT_PUBLIC_WS_BACKEND_URL ?? "ws://localhost:3001",
+
+  WORKER_BACKEND_URL:
+    process.env.NEXT_PUBLIC_WORKER_BACKEND_URL ?? "http://localhost:3002",
 };
 
 const parsed = WebEnv.safeParse(envInput);

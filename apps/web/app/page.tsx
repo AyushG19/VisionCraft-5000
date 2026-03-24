@@ -9,12 +9,15 @@ import {
 } from "@workspace/ui/index";
 import { loginService, signupService } from "./services/auth.service";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { pingAllBackend } from "./api/ping";
 
 export default function Page() {
   const router = useRouter();
   const navigate = (route: string) => {
     router.push(`/${route}`);
   };
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-easy-bg">
       {/* Decorative dots pattern on the left */}

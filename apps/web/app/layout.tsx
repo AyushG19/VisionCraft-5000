@@ -1,5 +1,6 @@
 import "./globals.css";
 import { ErrorContextProvider, UserProvider } from "@repo/hooks";
+import { PingProvider } from "./PingProvider";
 
 export default function RootLayout({
   children,
@@ -16,7 +17,10 @@ export default function RootLayout({
       </head>
       <body className={`overflow-hidden`}>
         <UserProvider>
-          <ErrorContextProvider>{children}</ErrorContextProvider>
+          <ErrorContextProvider>
+            <PingProvider />
+            {children}
+          </ErrorContextProvider>
         </UserProvider>
       </body>
     </html>
