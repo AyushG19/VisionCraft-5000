@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
-import { AppError } from "../error/index.js";
+import { AppError } from "../error";
 import { JwtPayloadSchema, JwtPayloadType } from "@repo/common";
-import { accessJwtService } from "../utils/jwtInstance.js";
+import { accessJwtService } from "../utils/jwtInstance";
 
 export const checkAuth = (req: Request, res: Response, next: NextFunction) => {
   try {

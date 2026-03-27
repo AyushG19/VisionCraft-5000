@@ -5,7 +5,7 @@ import type { JwtPayloadType } from "@repo/common";
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
-import { redisPub } from "@repo/redis";
+import { redisPub } from "@repo/redis/dist";
 import {
   validateConnection,
   validateSocketData,

@@ -115,7 +115,7 @@ const page = () => {
       )}
       <canvas
         ref={canvasRef}
-        className="w-full h-full block border bg-canvas "
+        className="w-full h-full block border bg-canvas text-white"
       ></canvas>
 
       {inRoom ? (

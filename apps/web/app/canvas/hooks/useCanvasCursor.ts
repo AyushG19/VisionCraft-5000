@@ -8,6 +8,7 @@ import {
   getBoundsForHandles,
   getOutlineBounds,
 } from "../utils/getBoundsHelpers";
+import { getCursorSvg } from "../utils/getCursor";
 
 const HANDLE_CURSORS: Record<HandleName, string> = {
   TOP: "n-resize",
@@ -98,7 +99,7 @@ const useCanvasCursor = (
         }
 
         // Nothing hovered
-        canvas.style.cursor = `url(${selectIcon}) 20 3, auto`;
+        canvas.style.cursor = `${getCursorSvg("#FFFFFF")} 20 3, auto`;
         return;
       }
 

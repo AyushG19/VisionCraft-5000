@@ -7,7 +7,7 @@ import {
 } from "./room.state";
 import { convertToSocketData } from "../util/convertToSocketData";
 import { RedisData } from "../types";
-import { redisPub, redisSub } from "@repo/redis";
+import { redisPub, redisSub } from "@repo/redis/dist";
 import { broadcastToRoom } from "../helpers/ws.helper";
 
 /** Record activity so the idle sweeper resets the clock. */

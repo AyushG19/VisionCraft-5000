@@ -16,15 +16,17 @@ import {
   DrawElement,
   PointType,
   ServerSocketDataType,
+  UserType,
 } from "@repo/common";
 import { useCanvasSocket } from "./useCanvasSocket";
 import { createNewText } from "../utils/createNewShape";
 import { joinRoomService, leaveRoomService } from "app/services/canvas.service";
-import { useSocketContext } from "@repo/hooks";
+import { UserInfo, useSocketContext } from "@repo/hooks";
 import { measureText } from "app/lib/canvasHelper";
 import { getUserColor } from "app/lib/color.helper";
 import useMousePosition from "./useMousePosition";
 import { getMousePos } from "app/lib/coordinateHelper";
+import { getUserInfo } from "app/services/user.service";
 
 export const useSocketWithWhiteboard = (): {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
@@ -76,7 +78,14 @@ export const useSocketWithWhiteboard = (): {
 
   const { getScreenCoordinates } = useMousePosition(canvasRef);
 
-  const handleIncomingMessage = (event: ServerSocketDataType) => {
+  const generateUserObject = (user: UserType) => {
+    return {
+      ...user,
+      color: getUserColor(user.userId),
+      cursor: null,
+    };
+  };
+  const handleIncomingMessage = async (event: ServerSocketDataType) => {
     switch (event.type) {
       case "ADD_SHAPE": {
         const shape = event.payload;
@@ -110,10 +119,25 @@ export const useSocketWithWhiteboard = (): {
         break;
       }
       case "CURSOR": {
-        console.log("cursor running");
         const { userId, coordinates } = event.payload;
         memberCursor.current.set(userId, coordinates);
         break;
+      }
+      case "USER_LEFT": {
+        const { userId } = event.payload;
+        setRoomInfo({
+          ...roomInfo,
+          users: roomInfo.users.filter((u) => u.userId !== userId),
+        });
+        memberCursor.current.delete(userId);
+      }
+      case "USER_JOINED": {
+        const { userId } = event.payload;
+        const info = await getUserInfo(userId);
+        setRoomInfo({
+          ...roomInfo,
+          users: [...roomInfo.users, generateUserObject(info)],
+        });
       }
       default: {
         console.log("mess");
@@ -124,7 +148,9 @@ export const useSocketWithWhiteboard = (): {
   const onMessage = (event: MessageEvent) => {
     try {
       const data = JSON.parse(event.data);
-      console.log(data);
+      if (data.type !== "CURSOR") {
+        console.log(data);
+      }
       handleIncomingMessage(data);
     } catch (error) {
       console.error("Failed to parse WebSocket message:", error);
@@ -139,19 +165,16 @@ export const useSocketWithWhiteboard = (): {
   const handleJoinRoom = async (code: string) => {
     try {
       const data = await joinRoomService(code);
-      const roomUsers = data.users.map((user) => ({
-        ...user,
-        color: getUserColor(user.userId),
-        cursor: null,
-      }));
+      const roomUsers = data.users.map((user) => generateUserObject(user));
       setRoomInfo({
         ...roomInfo,
         roomId: data.roomId,
         slug: code,
         users: roomUsers,
       });
-      // setRoomId(data.roomId);
-      // setSlug(code);
+
+      canvasDispatch({ type: "INITIALIZE_BOARD", payload: data.canvasState });
+
       setToken(data.token);
       connect(data.roomId, code, data.token);
 
@@ -164,12 +187,11 @@ export const useSocketWithWhiteboard = (): {
 
   const handleLeaveRoom = async () => {
     try {
-      const data = await leaveRoomService(roomInfo.roomId);
+      disconnect();
       setRoomInfo({ ...roomInfo, roomId: "", slug: "" });
       setToken("");
-      disconnect();
 
-      console.log("From page handleLeaveRoom: ", data);
+      console.log("From page handleLeaveRoom: ");
     } catch (error) {
       console.error("error in join room");
     }

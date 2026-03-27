@@ -1,3 +1,4 @@
+import { CanvasElements } from "@prisma/client";
 import { Prisma, prismaClient } from "../pg";
 
 export async function createNewRoom(slug: string, adminId: string) {
@@ -29,11 +30,37 @@ export async function removeUserFromRoom(userId: string, roomId: string) {
   });
 }
 
-export type Room = Prisma.RoomGetPayload<object>;
-export async function findRoomFromSlug(slug: string): Promise<Room | null> {
+export type RoomWithCanvas = Prisma.RoomGetPayload<{
+  select: {
+    id: true;
+    slug: true;
+    name: true;
+    createdAt: true;
+    updatedAt: true;
+    adminId: true;
+    canvas: {
+      select: { data: true };
+    };
+  };
+}>;
+
+export async function findRoomFromSlug(
+  slug: string,
+): Promise<RoomWithCanvas | null> {
   const room = await prismaClient.room.findFirst({
     where: {
       slug: slug,
+    },
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      createdAt: true,
+      updatedAt: true,
+      adminId: true,
+      canvas: {
+        select: { data: true },
+      },
     },
   });
 

@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { createUser, findUserByEmail } from "@repo/db";
 import bcrypt from "bcrypt";
-import { acTokenExpiry, authConfig, rfTokenExpiry } from "../config/index.js";
-import { AppError } from "../error/index.js";
-import { accessJwtService, refreshJwtService } from "../utils/jwtInstance.js";
+import { acTokenExpiry, authConfig, rfTokenExpiry } from "../config/index";
+import { AppError } from "../error";
+import { accessJwtService, refreshJwtService } from "../utils/jwtInstance";
 import { JwtPayloadType } from "@repo/common";
 
 export const signup = async (req: Request, res: Response) => {

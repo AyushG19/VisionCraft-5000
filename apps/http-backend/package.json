@@ -1,11 +1,13 @@
 {
   "name": "http-backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "index.ts",
+  "types": "index.ts",
   "scripts": {
     "build": "tsc -b",
     "start": "node ./dist/index.js",
-    "dev": "npm run build && npm run start "
+    "dev": "tsx watch src/index.ts",
+    "typecheck": "tsc --noEmit --watch"
   },
   "devDependencies": {
     "@repo/backend-common": "workspace:*",
@@ -16,7 +18,8 @@
     "@types/express": "^5.0.1",
     "@types/express-serve-static-core": "^5.0.7",
     "@types/node": "^24.3.0",
-    "@types/serve-static": "^1.15.8"
+    "@types/serve-static": "^1.15.8",
+    "tsx": "^4.21.0"
   },
   "keywords": [],
   "author": "",

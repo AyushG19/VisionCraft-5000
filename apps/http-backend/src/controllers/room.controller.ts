@@ -5,8 +5,8 @@ import {
   removeUserFromRoom,
   insertUserToRoom,
 } from "@repo/db";
-import { generateRandomCode } from "../utils/codeGenerator.js";
-import { JoinRoomResponseType } from "@repo/common";
+import { generateRandomCode } from "../utils/codeGenerator";
+import { DrawElement, JoinRoomResponseType } from "@repo/common";
 
 const checkCode = async (req: Request, res: Response) => {
   try {
@@ -32,6 +32,7 @@ const checkCode = async (req: Request, res: Response) => {
         roomId: room.id,
         token: accessToken,
         users: processedUsers,
+        canvasState: room.canvas.map((d) => d.data as unknown as DrawElement),
       };
       res.status(200).json(resData);
       return;

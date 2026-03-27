@@ -1,12 +1,11 @@
-// src/middleware/errorHandler.ts
 import { Request, Response, NextFunction } from "express";
-import { AppError } from "../error/index.js";
+import { AppError } from "../error/index";
 
 export const errorHandler = (
   err: any,
   _req: Request,
   res: Response,
-  _next: NextFunction
+  _next: NextFunction,
 ) => {
   // Known, expected errors
   if (err instanceof AppError) {

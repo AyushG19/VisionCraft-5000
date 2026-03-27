@@ -1,6 +1,6 @@
 import express, { Router } from "express";
-import { signup, login, refreshToken } from "../controllers/auth.controller.js";
-import { validate } from "../middlewares/validate.middlewate.js";
+import { signup, login, refreshToken } from "../controllers";
+import { validate } from "../middlewares";
 import { CreateUserSchema, LoginSchema } from "@repo/common";
 
 const authRouter: Router = express.Router();

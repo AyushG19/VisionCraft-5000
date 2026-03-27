@@ -38,6 +38,7 @@ export type LoginFormType = z.infer<typeof LoginSchema>;
 export const JoinRoomSchema = z.object({
   roomId: z.string(),
   users: z.array(User),
+  canvasState: z.array(DrawSchema),
   token: z.string(),
 });
 

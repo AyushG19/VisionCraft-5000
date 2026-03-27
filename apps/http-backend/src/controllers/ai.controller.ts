@@ -1,10 +1,10 @@
 import { ShapeType } from "@repo/common";
-import { AppError } from "../error/index.js";
+import { AppError } from "../error";
 import { Request, Response } from "express";
 import env from "../env.js";
 import Groq from "groq-sdk";
 import { GoogleGenAI, GoogleTypeDate } from "@google/genai";
-import { getMermaidPrompt } from "../utils/getMermaidPrompt.js";
+import { getMermaidPrompt } from "../utils/getMermaidPrompt";
 const groq = new Groq({ apiKey: env.GROQ_API_KEY });
 const gemini = new GoogleGenAI({});
 

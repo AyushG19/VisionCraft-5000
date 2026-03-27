@@ -1,8 +1,8 @@
 import express, { Router } from "express";
-import { sendPing } from "../controllers/health.controller.js";
+import { sendPing } from "../controllers";
 
 const healthRouter: Router = express.Router();
 
 healthRouter.get("/ping", sendPing);
 
-export { healthRouter };
+export default healthRouter;

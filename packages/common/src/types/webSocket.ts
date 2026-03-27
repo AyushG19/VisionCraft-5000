@@ -8,6 +8,13 @@ const WebSocketRoomPayload = z.object({
 
 export type WebSocketRoomType = z.infer<typeof WebSocketRoomPayload>;
 
+const ServerRoomSchema = z.object({
+  type: z.enum(["USER_JOINED", "USER_LEFT"]),
+  payload: z.object({ userId: z.string() }),
+});
+
+export type ServerRoomSchemaType = z.infer<typeof ServerRoomSchema>;
+
 const SokcetChatPayload = z.object({
   type: z.literal("CHAT"),
   payload: Message,
@@ -39,7 +46,7 @@ export type ServerCursorSchemaType = z.infer<typeof ServerCursorSchema>;
 export const ServerSocketData = z.discriminatedUnion("type", [
   SocketShapePayload,
   SokcetChatPayload,
-  WebSocketRoomPayload,
+  ServerRoomSchema,
   ServerCursorSchema,
 ]);
 

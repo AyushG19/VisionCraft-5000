@@ -29,5 +29,11 @@ export function convertToSocketData(data: RedisData): ServerSocketDataType {
         payload: { userId: data.userId, coordinates: data.coordinates },
       };
     }
+    case "JOIN": {
+      return { type: "USER_JOINED", payload: { userId: data.userId } };
+    }
+    case "LEAVE": {
+      return { type: "USER_LEFT", payload: { userId: data.userId } };
+    }
   }
 }

@@ -8,6 +8,10 @@
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
       "env": ["JWT_SECRET", "BCRYPT_SALT", "HTTP_BACKEND"]
     },
+    "start": {
+      "cache": false,
+      "persistent": true
+    },
     "lint": {
       "dependsOn": ["^lint"]
     },

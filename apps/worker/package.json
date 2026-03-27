@@ -5,13 +5,15 @@
   "scripts": {
     "build": "tsc -b",
     "start": "node ./dist/index.js",
-    "dev": "npm run build && npm run start "
+    "dev": "tsx watch src/index.ts",
+    "typecheck": "tsc --noEmit --watch"
   },
   "devDependencies": {
-    "@repo/typescript-config": "workspace:*",
     "@repo/common": "workspace:*",
+    "@repo/db": "workspace:*",
     "@repo/queue": "workspace:*",
-    "@repo/db": "workspace:*"
+    "@repo/typescript-config": "workspace:*",
+    "tsx": "^4.21.0"
   },
   "keywords": [],
   "author": "",

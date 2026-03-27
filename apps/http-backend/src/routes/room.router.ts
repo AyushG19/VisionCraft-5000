@@ -1,10 +1,6 @@
 import express, { Router } from "express";
-import { checkAuth } from "../middlewares/auth.middleware.js";
-import {
-  checkCode,
-  createRoom,
-  leaveRoom,
-} from "../controllers/roomController.js";
+import { checkAuth } from "../middlewares";
+import { checkCode, createRoom, leaveRoom } from "../controllers";
 const roomRouter: Router = express.Router();
 
 roomRouter.post("/check-code", checkAuth, checkCode);

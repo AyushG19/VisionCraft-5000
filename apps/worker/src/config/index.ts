@@ -10,3 +10,5 @@ export const corsMap = new Map<string, string>([
   ["Access-Control-Allow-Methods", "GET, POST, OPTIONS"],
   ["Access-Control-Allow-Headers", "Content-Type, Authorization"],
 ]);
+
+export const port = env.PORT;

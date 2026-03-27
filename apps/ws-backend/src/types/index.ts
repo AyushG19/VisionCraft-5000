@@ -24,7 +24,9 @@ export type RedisData =
       type: "CHAT";
       message: Extract<MessageType, { status: "TO_FRONTEND" }>;
     }
-  | { userId: string; type: "CURSOR"; coordinates: PointType };
+  | { userId: string; type: "CURSOR"; coordinates: PointType }
+  | { type: "LEAVE"; userId: string; time: number }
+  | { type: "JOIN"; userId: string; time: number };
 
 export type SendPropsType = WebSocketChatType | WebSocketShapeType;
 

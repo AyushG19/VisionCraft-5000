@@ -42,3 +42,17 @@ export async function findUsersByRoom(
   const userArr = res.map((ru) => ({ userId: ru.user.id, name: ru.user.name }));
   return userArr;
 }
+
+export async function findUserInfoWithId(
+  userId: string,
+): Promise<UserType | null> {
+  const res = await prismaClient.user.findUnique({
+    where: { id: userId },
+  });
+  if (!res) return null;
+  const resData: UserType = {
+    userId: res.id,
+    name: res.name,
+  };
+  return resData;
+}
