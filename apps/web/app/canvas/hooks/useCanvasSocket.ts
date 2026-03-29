@@ -4,8 +4,11 @@ import { useRef } from "react";
 import { env } from "../../../config";
 import { SendPropsType } from "../types";
 import { useError, useSocketContext } from "@repo/hooks";
+import { ServerSocketData, ServerSocketDataType } from "@repo/common";
 
-export function useCanvasSocket(onMessage: (event: MessageEvent) => void) {
+export function useCanvasSocket(
+  onMessage: (event: ServerSocketDataType) => void,
+) {
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
@@ -59,7 +62,17 @@ export function useCanvasSocket(onMessage: (event: MessageEvent) => void) {
     };
 
     ws.onmessage = (event) => {
-      onMessage(event);
+      const data = JSON.parse(event.data);
+      const validatedData = ServerSocketData.safeParse(data);
+
+      if (validatedData.success) {
+        onMessage(validatedData.data);
+      } else {
+        setError({
+          code: "VALIDATION_ERROR",
+          message: "Invalid Data type from socket.",
+        });
+      }
     };
 
     ws.onerror = (error) => {

@@ -57,15 +57,13 @@ export async function evictRoom(roomId: string, reason: string): Promise<void> {
 }
 
 /**
- * Called when the last user leaves.  Starts a grace-period timer; if nobody
- * re-joins within EMPTY_ROOM_TTL_MS the room is fully evicted.
+ * Called when the last user leaves.  Starts a grace-period timer
  */
 export function scheduleEmptyRoomEviction(roomId: string): void {
   const meta = roomMeta.get(roomId);
-  if (!meta || meta.emptyTimer) return; // already scheduled
+  if (!meta || meta.emptyTimer) return;
 
   meta.emptyTimer = setTimeout(async () => {
-    // Double-check no one sneaked in during the grace period
     const room = roomRegistry.get(roomId);
     if (room && room.size > 0) {
       if (meta) meta.emptyTimer = null;
@@ -79,7 +77,7 @@ export function scheduleEmptyRoomEviction(roomId: string): void {
  * Remove one user from the in-memory registry.
  * Triggers the empty-room grace timer when the room becomes empty.
  */
-export async function removeUserFromRoom(
+export async function removeUserFromRoomRegistry(
   roomId: string,
   userId: string,
 ): Promise<void> {
@@ -95,9 +93,7 @@ export async function removeUserFromRoom(
 }
 
 /**
- * Subscribe to a room's Redis channel (idempotent – once per process per
- * room).  Also cancels any pending empty-room eviction timer because a user
- * is (re-)joining.
+ * Subscribe to a room's Redis channel
  */
 export async function ensureRoomSubscription(roomId: string): Promise<void> {
   // Cancel grace-period eviction if someone is joining

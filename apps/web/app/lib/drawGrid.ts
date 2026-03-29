@@ -1,38 +1,35 @@
 import { Camera } from "./math";
 
+const DOT_RADIUS = 1.5; // screen-space pixel radius (constant regardless of zoom)
+const DOT_COLOR = "rgba(2, 0, 7, 1)";
+
 export const drawGrid = (
   ctx: CanvasRenderingContext2D,
   camera: Camera,
   width: number,
   height: number,
 ) => {
-  const gridSize = 50; // Base distance between dots
-  const dotSize = 2; // Size of the dots
+  const screenSpacing = 50;
+  const worldSpacing = screenSpacing / camera.z;
+  const base = 50;
+  const level = Math.pow(2, Math.round(Math.log2(worldSpacing / base)));
+  const adjustedSpacing = base * level;
 
-  // Calculate the visible world bounds
-  const startCol = Math.floor(-camera.x / camera.z / gridSize);
-  const endCol = startCol + width / camera.z / gridSize + 1;
-  const startRow = Math.floor(-camera.y / camera.z / gridSize);
-  const endRow = startRow + height / camera.z / gridSize + 1;
+  const worldLeft = (0 - camera.x) / camera.z;
+  const worldTop = (0 - camera.y) / camera.z;
+  const worldRight = (width - camera.x) / camera.z;
+  const worldBottom = (height - camera.y) / camera.z;
 
-  ctx.save();
-  // We draw the grid in World Space so we apply transform immediately
-  ctx.translate(camera.x, camera.y);
-  ctx.scale(camera.z, camera.z);
+  const startX = Math.floor(worldLeft / adjustedSpacing) * adjustedSpacing;
+  const startY = Math.floor(worldTop / adjustedSpacing) * adjustedSpacing;
 
-  ctx.fillStyle = "#ddd"; // Color of dots
+  ctx.fillStyle = DOT_COLOR;
 
-  for (let i = startCol; i < endCol; i++) {
-    for (let j = startRow; j < endRow; j++) {
-      const x = i * gridSize;
-      const y = j * gridSize;
+  for (let wx = startX; wx <= worldRight; wx += adjustedSpacing) {
+    for (let wy = startY; wy <= worldBottom; wy += adjustedSpacing) {
       ctx.beginPath();
-      // Draw a small circle for dot grid
-      ctx.arc(x, y, dotSize / camera.z, 0, Math.PI * 2);
-
+      ctx.arc(wx, wy, DOT_RADIUS / camera.z, 0, Math.PI * 2);
       ctx.fill();
     }
   }
-
-  ctx.restore();
 };

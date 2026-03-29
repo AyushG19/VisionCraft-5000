@@ -20,7 +20,7 @@ export type ModifierTool = z.infer<typeof ModifierToolSchema>;
 
 export const LabelSchema = z.object({
   text: z.string(),
-  FontSize: z.number(),
+  fontSize: z.number(),
   fontFamily: z.string(),
 });
 

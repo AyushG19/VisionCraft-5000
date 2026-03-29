@@ -1,28 +1,30 @@
 import { Labeltype, PointType } from "@repo/common";
 import { Bounds, getHandles, Handle } from "app/lib/getHandles";
 
+/** helper for label drawing */
 export function drawLabel(
   ctx: CanvasRenderingContext2D,
   startPos: PointType,
   label: Labeltype,
   maxWidth: number,
 ) {
-  ctx.font = `${label.FontSize}px ${label.fontFamily}`;
+  ctx.font = `${label.fontSize}px ${label.fontFamily}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(label.text, startPos.x, startPos.y, maxWidth);
+  ctx.fillText(label.text, startPos.x, startPos.y);
 }
 
-// Draw all handles
+/** Draw all handles */
 export const drawHandles = (
   ctx: CanvasRenderingContext2D,
   bounds: Bounds,
   handleSize: number = 6,
+  zoom: number
 ): Handle[] => {
-  const handles = getHandles(bounds, handleSize);
+  const handles = getHandles(bounds, handleSize / zoom);
 
   ctx.strokeStyle = "#00FFFF";
-  ctx.lineWidth = 1;
+  ctx.lineWidth = 1 / zoom;
   handles.forEach(({ x, y, size }) => {
     ctx.beginPath();
     ctx.rect(x, y, size, size);
@@ -34,7 +36,7 @@ export const drawHandles = (
   return handles;
 };
 
-// Helper function to create rounded rectangle path
+/** Helper function to create rounded rectangle path */
 export const createRoundedRectPath = (
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -43,7 +45,6 @@ export const createRoundedRectPath = (
   height: number,
   radius: number = 8,
 ): void => {
-  // Normalize coordinates to handle drawing in any direction
   const left = Math.abs(Math.min(x, x + width));
   const right = Math.abs(Math.max(x, x + width));
   const top = Math.abs(Math.min(y, y + height));

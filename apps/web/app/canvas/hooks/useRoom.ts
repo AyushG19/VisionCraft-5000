@@ -1,58 +1,70 @@
-import { UserInfo, useSocketContext } from "@repo/hooks";
-import { joinRoomService, leaveRoomService } from "app/services/canvas.service";
-import { useState } from "react";
-import { disconnect } from "process";
-import { getUserColor } from "app/lib/color.helper";
+// import { UserInfo, useSocketContext } from "@repo/hooks";
+// import { joinRoomService, leaveRoomService } from "app/services/canvas.service";
+// import React, { useState } from "react";
+// import { disconnect } from "process";
+// import { getUserColor } from "app/lib/color.helper";
+// import { Action } from "../types";
+// import { UserType } from "@repo/common";
 
-const useRoom = () => {
-  const { inRoom, setInRoom, roomInfo, setRoomInfo } = useSocketContext();
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [token, setToken] = useState<string>("");
+// const useRoom = (canvasDispatch: (action: Action) => void) => {
+//   const { inRoom, setInRoom, roomInfo, setRoomInfo, setToken } =
+//     useSocketContext();
 
-  const handleJoinRoom = async (code: string) => {
-    try {
-      const data = await joinRoomService(code);
-      const UsersInfo: UserInfo[] = data.users.map((u) => ({
-        userId: u.userId,
-        name: u.name,
-        color: getUserColor(u.userId),
-        cursor: null,
-      }));
-      setRoomInfo({ roomId: data.roomId, slug: code, users: UsersInfo });
-      setToken(data.token);
+//   const generateUserObject = (user: UserType) => {
+//     return {
+//       ...user,
+//       color: getUserColor(user.userId),
+//       cursor: null,
+//     };
+//   };
+//   const handleJoinRoom = async (code: string) => {
+//     try {
+//       const data = await joinRoomService(code);
+//       const roomUsers = data.users.map((user) => generateUserObject(user));
+//       setRoomInfo({
+//         ...roomInfo,
+//         roomId: data.roomId,
+//         slug: code,
+//         users: roomUsers,
+//       });
 
-      console.log("From page handleJoinRoom: ", data);
-    } catch (error) {
-      console.error("error in join room");
-    }
-  };
+//       canvasDispatch({ type: "INITIALIZE_BOARD", payload: data.canvasState });
 
-  const handleLeaveRoom = async () => {
-    try {
-      const data = await leaveRoomService(roomInfo.roomId);
-      setRoomInfo({ roomId: "", slug: "", users: [] });
-      setToken("");
-      disconnect();
+//       setToken(data.token);
+//       connect(data.roomId, code, data.token);
 
-      console.log("From page handleLeaveRoom: ", data);
-    } catch (error) {
-      console.error("error in leave room", error);
-    }
-  };
+//       console.log("From page handleJoinRoom: ", data);
+//     } catch (error) {
+//       //@ts-ignore
+//       console.error("error in join room : ", error.message);
+//     }
+//   };
 
-  const handleChatToggle = () => {
-    setIsOpen((prev) => !prev);
-  };
+//   const handleLeaveRoom = async () => {
+//     try {
+//       disconnect();
+//       setRoomInfo({ ...roomInfo, roomId: "", slug: "" });
+//       setToken("");
 
-  return {
-    inRoom,
-    token,
-    isOpen,
-    setIsOpen,
-    handleJoinRoom,
-    handleLeaveRoom,
-    handleChatToggle,
-  };
-};
+//       console.log("From page handleLeaveRoom: ");
+//     } catch (error) {
+//       console.error("error in join room");
+//     }
+//   };
 
-export default useRoom;
+//   const handleChatToggle = () => {
+//     setIsOpen((prev) => !prev);
+//   };
+
+//   return {
+//     inRoom,
+//     token,
+//     isOpen,
+//     setIsOpen,
+//     handleJoinRoom,
+//     handleLeaveRoom,
+//     handleChatToggle,
+//   };
+// };
+
+// export default useRoom;

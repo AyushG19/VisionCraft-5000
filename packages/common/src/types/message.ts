@@ -1,24 +1,21 @@
 import { z } from "zod";
 
-export const IncomingMessage = z.object({
-  status: z.literal("TO_BACKEND"),
+export const ClientMessage = z.object({
   name: z.string(),
   content: z.string(),
 });
 
-export const EnrichedMessage = z.object({
-  status: z.literal("TO_FRONTEND"),
+export type ClientMessageType = z.infer<typeof ClientMessage>;
+
+export const ServerMessage = z.object({
   name: z.string(),
   content: z.string(),
   sender_id: z.string(),
   timeStamp_ms: z.number(),
 });
 
-export type EnrichedMessageType = z.infer<typeof EnrichedMessage>;
+export type ServerMessageType = z.infer<typeof ServerMessage>;
 
-export const Message = z.discriminatedUnion("status", [
-  IncomingMessage,
-  EnrichedMessage,
-]);
+export const Messages = z.union([ClientMessage, ServerMessage]);
 
-export type MessageType = z.infer<typeof Message>;
+export type MessagesType = z.infer<typeof Messages>;

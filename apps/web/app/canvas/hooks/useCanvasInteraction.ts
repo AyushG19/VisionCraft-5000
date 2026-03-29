@@ -11,7 +11,9 @@ import useCanvasCursor from "./useCanvasCursor";
 import useSelectInteraction from "./useSelectInteraction";
 import useDrawInteraction from "./useDrawingInteraction";
 import useCanvasRenderer from "./useCanvasRenderer";
-import { getMousePos } from "app/lib/coordinateHelper";
+import { getMousePos } from "app/lib/coordinate.helper";
+import { useCamera } from "./useCamera";
+import { screenToWorld } from "app/lib/math";
 
 const useCanvasInteraction = (
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
@@ -28,6 +30,8 @@ const useCanvasInteraction = (
 
   const interactionState = useInteractionState();
   const cursor = useCanvasCursor(canvasRef);
+  const { camera, onPanStart, onPanMove, onPanEnd, isPanning, onWheel } =
+    useCamera(canvasRef, canvasState.toolState.currentTool);
 
   const selectInteraction = useSelectInteraction(
     interactionState,
@@ -50,6 +54,7 @@ const useCanvasInteraction = (
     canvasStateRef,
     selectedShapeRef,
     isOpen,
+    camera,
   );
 
   useEffect(() => {
@@ -62,7 +67,8 @@ const useCanvasInteraction = (
     resizeCanvas(
       canvas,
       ctx,
-      () => redrawPreviousShapes(ctx, canvasStateRef.current.drawnShapes),
+      () =>
+        redrawPreviousShapes(ctx, canvasStateRef.current.drawnShapes, camera),
       canvasStateRef.current.toolState,
     );
 
@@ -70,7 +76,8 @@ const useCanvasInteraction = (
       resizeCanvas(
         canvas,
         ctx,
-        () => redrawPreviousShapes(ctx, canvasStateRef.current.drawnShapes),
+        () =>
+          redrawPreviousShapes(ctx, canvasStateRef.current.drawnShapes, camera),
         canvasStateRef.current.toolState,
       );
     };
@@ -109,6 +116,7 @@ const useCanvasInteraction = (
           pos,
           currentSelected,
           currentState,
+          camera,
         );
         if (newSelected?.type === "text") {
           setTextEdit({
@@ -131,9 +139,10 @@ const useCanvasInteraction = (
 
       if (tool === "select") {
         const newSelected = selectInteraction.handleSelectMouseDown(
-          pos,
+          screenToWorld(pos.x, pos.y, camera),
           currentSelected,
           currentState,
+          camera,
         );
         setSelectedShape(newSelected);
       } else if (tool === "text") {
@@ -144,8 +153,13 @@ const useCanvasInteraction = (
           x: pos.x,
           y: pos.y,
         }));
+      } else if (tool === "hand") {
+        onPanStart(e);
       } else {
-        drawInteraction.handleDrawMouseDown(pos, currentState.toolState);
+        drawInteraction.handleDrawMouseDown(
+          screenToWorld(pos.x, pos.y, camera),
+          currentState.toolState,
+        );
       }
     };
 
@@ -154,33 +168,36 @@ const useCanvasInteraction = (
       const currentState = canvasStateRef.current;
       const currentSelected = selectedShapeRef.current;
       const tool = currentState.toolState.currentTool;
-      console.log("current selected: ", currentSelected);
 
       sendCursorState(pos);
 
       if (tool === "select") {
         selectInteraction.handleSelectMouseMove(
-          pos,
+          screenToWorld(pos.x, pos.y, camera),
           ctx,
           currentSelected,
           currentState,
+          camera,
         );
+      } else if (tool === "hand") {
+        onPanMove(e);
       } else {
         drawInteraction.handleDrawMouseMove(
-          pos,
+          screenToWorld(pos.x, pos.y, camera),
           ctx,
           currentState.toolState,
           currentState.drawnShapes,
           currentSelected?.id,
+          camera,
         );
       }
 
       cursor.updateCursor(
         tool,
-        pos,
+        screenToWorld(pos.x, pos.y, camera),
         currentSelected as ShapeType,
         currentState.drawnShapes,
-        false,
+        isPanning.current,
         false,
         interactionState.interaction.current.isDragging,
         interactionState.interaction.current.isResizing,
@@ -195,24 +212,35 @@ const useCanvasInteraction = (
 
       if (tool === "select") {
         selectInteraction.handleSelectMouseUp(
-          pos,
+          screenToWorld(pos.x, pos.y, camera),
           currentSelected as ShapeType,
         );
+      } else if (tool === "hand") {
+        onPanEnd();
       } else {
-        drawInteraction.handleDrawMouseUp(pos, currentState.toolState);
+        drawInteraction.handleDrawMouseUp(
+          screenToWorld(pos.x, pos.y, camera),
+          currentState.toolState,
+        );
       }
 
       redrawPreviousShapes(
         ctx,
         currentState.drawnShapes,
+        camera,
         currentSelected,
         currentSelected?.id,
       );
       canvasDispatch({ type: "CHANGE_TOOL", payload: "select" });
     };
 
+    const handleWheel = (e: WheelEvent) => {
+      onWheel(e);
+    };
+
     canvas.addEventListener("mousedown", onMouseDown);
     canvas.addEventListener("dblclick", handleDoubleClick);
+    canvas.addEventListener("wheel", handleWheel);
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
     window.addEventListener("resize", handleResize);
@@ -221,19 +249,21 @@ const useCanvasInteraction = (
     redrawPreviousShapes(
       ctx,
       canvasStateRef.current.drawnShapes,
+      camera,
       selectedShape,
       selectedShape?.id,
     );
 
     return () => {
       canvas.removeEventListener("mousedown", onMouseDown);
-      canvas.addEventListener("dblclick", handleDoubleClick);
+      canvas.removeEventListener("dblclick", handleDoubleClick);
+      canvas.removeEventListener("wheel", handleWheel);
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [isOpen]);
+  }, [isOpen, camera]);
 
   useEffect(() => {
     selectedShapeRef.current = selectedShape;

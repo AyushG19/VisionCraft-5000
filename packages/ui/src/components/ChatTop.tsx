@@ -1,20 +1,9 @@
 import { IconCheck, IconCopy } from "@tabler/icons-react";
-import { motion } from "motion/react";
 import AvatarGroup from "./ui/AvatarGroup";
 import { useState } from "react";
+import { UserInfo } from "@repo/hooks";
 
-const ChatTop = ({
-  slug,
-  avatars,
-}: {
-  slug: string;
-  avatars: {
-    id: string;
-    name: string;
-    imageUrl: string;
-    color?: string;
-  }[];
-}) => {
+const ChatTop = ({ slug, avatars }: { slug: string; avatars: UserInfo[] }) => {
   const [isCopied, setIsCopied] = useState<boolean>(false);
 
   const showFeedBack = () => {

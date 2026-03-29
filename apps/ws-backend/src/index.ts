@@ -15,7 +15,7 @@ import env from "./env";
 import { ChatService } from "./services/chat.service";
 import { appQueue, initQueue } from "@repo/queue";
 import { ElementService } from "./services/element.service";
-import { removeUserFromRoom } from "./room/room.lifecycle";
+import { removeUserFromRoomRegistry } from "./room/room.lifecycle";
 import { startIdleSweeper } from "./room/room.sweeper";
 import { sendError, sendInfo } from "./helpers/ws.helper";
 import { handlers } from "./handlers";
@@ -81,7 +81,7 @@ wss.on("connection", (ws, req) => {
     console.log(
       `[WS] User ${userId} disconnected (room: ${roomId}) — code: ${code}`,
     );
-    await removeUserFromRoom(roomId, userId);
+    await removeUserFromRoomRegistry(roomId, userId);
   });
 
   ws.on("error", (err) => {

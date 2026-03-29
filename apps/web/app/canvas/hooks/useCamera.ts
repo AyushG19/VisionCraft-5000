@@ -1,96 +1,176 @@
-import { RefObject, useState } from "react";
+import { RefObject, useCallback, useEffect, useRef, useState } from "react";
 
-export function useCamera(canvasRef: RefObject<HTMLCanvasElement>) {
-  const [camera, setCamera] = useState({ x: 0, y: 0, z: 1 });
-  const canvas = canvasRef.current;
-  const screenToWorld = (sX: number, sY: number) => ({
-    x: (sX - camera.x) / camera.z,
-    y: (sY - camera.y) / camera.z,
+export type Camera = { x: number; y: number; z: number };
+
+const WORLD_LIMIT = 5000;
+const PADDING = 150;
+const SNAP_SPEED = 0.15;
+
+export function useCamera(
+  canvasRef: RefObject<HTMLCanvasElement | null>,
+  currentTool: string,
+) {
+  const [camera, setCamera] = useState<Camera>(() => {
+    if (typeof window !== "undefined") {
+      return {
+        x: window.innerWidth / 2 - (WORLD_LIMIT / 2),
+        y: window.innerHeight / 2 - (WORLD_LIMIT / 2),
+        z: 1
+      }
+    }
+    return { x: 0, y: 0, z: 1 };
   });
 
-  const applySnapBack = () => {
-    const WORLD_LIMIT = 5000;
-    const SNAP_SPEED = 0.15; // 0.1 to 0.2 is best for "buttery" feel
+
+  const isPanning = useRef(false);
+  const lastPos = useRef({ x: 0, y: 0 });
+  const snapRafRef = useRef<number | null>(null);
+  const currentToolRef = useRef(currentTool);
+
+  useEffect(() => {
+    currentToolRef.current = currentTool;
+  }, [currentTool]);
+
+  const screenToWorld = useCallback(
+    (sx: number, sy: number, cam: Camera) => ({
+      x: (sx - cam.x) / cam.z,
+      y: (sy - cam.y) / cam.z,
+    }),
+    [],
+  );
+
+  // --- SNAP BACK ---
+  const applySnapBack = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
     setCamera((prev) => {
       const minX = canvas.width - WORLD_LIMIT * prev.z;
-      const maxX = 0;
       const minY = canvas.height - WORLD_LIMIT * prev.z;
-      const maxY = 0;
+      const targetX = Math.min(Math.max(prev.x, minX), 0);
+      const targetY = Math.min(Math.max(prev.y, minY), 0);
 
-      // Target represents the "Legal" closest position
-      const targetX = Math.min(Math.max(prev.x, minX), maxX);
-      const targetY = Math.min(Math.max(prev.y, minY), maxY);
+      const done =
+        Math.abs(prev.x - targetX) < 0.1 && Math.abs(prev.y - targetY) < 0.1;
 
-      // If we are already in bounds, stop animating
-      if (
-        Math.abs(prev.x - targetX) < 0.1 &&
-        Math.abs(prev.y - targetY) < 0.1
-      ) {
-        return prev;
-      }
+      if (done) return prev;
 
-      // Move a small percentage (SNAP_SPEED) toward the target every frame
-      const nextX = prev.x + (targetX - prev.x) * SNAP_SPEED;
-      const nextY = prev.y + (targetY - prev.y) * SNAP_SPEED;
-
-      requestAnimationFrame(applySnapBack);
-      return { ...prev, x: nextX, y: nextY };
-    });
-  };
-
-  const onWheel = (e: WheelEvent) => {
-    e.preventDefault();
-
-    const WORLD_LIMIT = 5000;
-    const PADDING = 150; // How far they can "pull" the elastic
-
-    if (e.ctrlKey || e.metaKey) {
-      // --- FOCAL ZOOM (TO CENTER) ---
-      const zoomSensitivity = 0.001;
-      const delta = -e.deltaY * zoomSensitivity;
-      const newZoom = Math.min(Math.max(camera.z + delta, 0.1), 5);
-
-      const centerX = canvas.width / 2;
-      const centerY = canvas.height / 2;
-
-      // Use the Stay-Put Formula: C = S - (W * Z)
-      const worldPosAtCenter = {
-        x: (centerX - camera.x) / camera.z,
-        y: (centerY - camera.y) / camera.z,
+      return {
+        ...prev,
+        x: prev.x + (targetX - prev.x) * SNAP_SPEED,
+        y: prev.y + (targetY - prev.y) * SNAP_SPEED,
       };
+    });
 
-      setCamera({
-        x: centerX - worldPosAtCenter.x * newZoom,
-        y: centerY - worldPosAtCenter.y * newZoom,
-        z: newZoom,
-      });
-    } else {
-      // --- PANNING WITH SNAP-BACK LOGIC ---
+    snapRafRef.current = requestAnimationFrame(applySnapBack);
+  }, [canvasRef]);
+
+  const startSnapBack = useCallback(() => {
+    if (snapRafRef.current) cancelAnimationFrame(snapRafRef.current);
+    snapRafRef.current = requestAnimationFrame(applySnapBack);
+  }, [applySnapBack]);
+
+  // --- PAN HANDLERS ---
+  const onPanStart = useCallback((e: MouseEvent) => {
+    if (currentToolRef.current !== "hand") return;
+    isPanning.current = true;
+    lastPos.current = { x: e.clientX, y: e.clientY };
+  }, []);
+
+  const onPanMove = useCallback(
+    (e: MouseEvent) => {
+      if (!isPanning.current) return;
+      const dx = e.clientX - lastPos.current.x;
+      const dy = e.clientY - lastPos.current.y;
+      lastPos.current = { x: e.clientX, y: e.clientY };
+
       setCamera((prev) => {
-        // Calculate Bounds
+        const canvas = canvasRef.current;
+        if (!canvas) return prev;
+
+        // elastic resistance at bounds
         const minX = canvas.width - WORLD_LIMIT * prev.z - PADDING;
         const maxX = PADDING;
         const minY = canvas.height - WORLD_LIMIT * prev.z - PADDING;
         const maxY = PADDING;
 
-        // Determine if we are currently out of bounds
-        const isOutX = prev.x < minX || prev.x > maxX;
-        const isOutY = prev.y < minY || prev.y > maxY;
+        const isOut =
+          prev.x < minX || prev.x > maxX || prev.y < minY || prev.y > maxY;
 
-        // Apply Friction (0.3) if out of bounds, otherwise 1:1 movement
-        const friction = isOutX || isOutY ? 0.3 : 1;
+        const friction = isOut ? 0.3 : 1;
 
-        const nextX = prev.x - e.deltaX * friction;
-        const nextY = prev.y - e.deltaY * friction;
-
-        return { ...prev, x: nextX, y: nextY };
+        return {
+          ...prev,
+          x: prev.x + dx * friction,
+          y: prev.y + dy * friction,
+        };
       });
+    },
+    [canvasRef],
+  );
 
-      // Trigger the Snap-Back animation
-      requestAnimationFrame(applySnapBack);
-    }
+  const onPanEnd = useCallback(() => {
+    if (!isPanning.current) return;
+    isPanning.current = false;
+    startSnapBack(); // spring back if dragged past bounds
+  }, [startSnapBack]);
+
+  // --- WHEEL HANDLER ---
+  const onWheel = useCallback(
+    (e: WheelEvent) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      e.preventDefault();
+
+      if (e.ctrlKey || e.metaKey) {
+        // pinch/ctrl+scroll = zoom toward cursor
+        const rect = canvas.getBoundingClientRect();
+        const cursorX = e.clientX - rect.left;
+        const cursorY = e.clientY - rect.top;
+
+        setCamera((prev) => {
+          const delta = -e.deltaY * 0.001;
+          const newZoom = Math.min(Math.max(prev.z + delta, 0.1), 5);
+          return {
+            x: cursorX - ((cursorX - prev.x) / prev.z) * newZoom,
+            y: cursorY - ((cursorY - prev.y) / prev.z) * newZoom,
+            z: newZoom,
+          };
+        });
+      } else {
+        // trackpad scroll = pan
+        setCamera((prev) => {
+          const canvas = canvasRef.current;
+          if (!canvas) return prev;
+
+          const minX = canvas.width - WORLD_LIMIT * prev.z - PADDING;
+          const maxX = PADDING;
+          const minY = canvas.height - WORLD_LIMIT * prev.z - PADDING;
+          const maxY = PADDING;
+          const isOut =
+            prev.x < minX || prev.x > maxX || prev.y < minY || prev.y > maxY;
+
+          const friction = isOut ? 0.3 : 1;
+          return {
+            ...prev,
+            x: prev.x - e.deltaX * friction,
+            y: prev.y - e.deltaY * friction,
+          };
+        });
+
+        startSnapBack();
+      }
+    },
+    [canvasRef, startSnapBack],
+  );
+
+  return {
+    camera,
+    isPanning,
+    onPanStart,
+    onPanMove,
+    onPanEnd,
+    onWheel,
+    screenToWorld,
   };
-
-  return { camera, onWheel, screenToWorld };
 }

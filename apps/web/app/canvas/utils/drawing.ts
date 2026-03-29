@@ -11,8 +11,9 @@ import {
   createRoundedRectPath,
   drawHandles,
   drawLabel,
-} from "app/lib/drawingHelpers";
+} from "app/lib/drawing.helpers";
 import { formToJSON } from "axios";
+import { Camera } from "../hooks/useCamera";
 
 // Type definitions for better type safety
 interface Point {
@@ -62,33 +63,32 @@ const highlightShape = (
   ctx: CanvasRenderingContext2D,
   shape: DrawElement,
   bounds: { x: number; y: number; width: number; height: number },
+  zoom: number,
 ) => {
   ctx.save();
   ctx.beginPath();
-  ctx.setLineDash([4, 2]); // dashed outline looks lighter
+  ctx.setLineDash([4 / zoom, 2 / zoom]);
   ctx.strokeStyle = "#00FFFF";
-  ctx.lineWidth = 1;
+  ctx.lineWidth = 1 / zoom;
 
-  // Use bounds rectangle instead of redrawing shape path
   ctx.strokeRect(
-    bounds.x - 5,
-    bounds.y - 5,
-    bounds.width + 10,
-    bounds.height + 10,
+    bounds.x - 5 / zoom,
+    bounds.y - 5 / zoom,
+    bounds.width + 10 / zoom,
+    bounds.height + 10 / zoom,
   );
 
   ctx.restore();
 
   // Draw resize handles
   drawHandles(ctx, {
-    x: bounds.x - 5,
-    y: bounds.y - 5,
-    width: bounds.width + 10,
-    height: bounds.height + 10,
-  });
+    x: bounds.x - 5 / zoom,
+    y: bounds.y - 5 / zoom,
+    width: bounds.width + 10 / zoom,
+    height: bounds.height + 10 / zoom,
+  }, undefined, zoom);
 };
 
-// Helper function for smooth pencil drawing using quadratic curves
 const drawSmoothPencilPath = (
   ctx: CanvasRenderingContext2D,
   points: readonly Point[],
@@ -99,10 +99,8 @@ const drawSmoothPencilPath = (
 ): void => {
   if (points.length < 2) return;
 
-  // 1. Helper to get screen coordinates regardless of mode
   const getScreenPoint = (p: Point) => {
     if (isNormalized) {
-      // console.log("it works ig");
       return {
         x: startPos.x + p.x * width,
         y: startPos.y + p.y * height,
@@ -116,35 +114,28 @@ const drawSmoothPencilPath = (
 
   ctx.moveTo(p0.x, p0.y);
 
-  // 2. Handle Simple Line (2 points)
   if (points.length === 2) {
     ctx.lineTo(p1.x, p1.y);
-    return; // Don't forget to stroke in the parent function!
+    return;
   }
 
-  // 3. Smooth Curve Loop
-  // We loop from index 1 to length - 2
   for (let i = 1; i < points.length - 1; i++) {
     const currentPoint = getScreenPoint(points[i]!);
     const nextPoint = getScreenPoint(points[i + 1]!);
 
-    // The Control Point is the current point (pulls the curve)
     const controlX = currentPoint.x;
     const controlY = currentPoint.y;
 
-    // The End Point is the midpoint between current and next
     const endX = (currentPoint.x + nextPoint.x) / 2;
     const endY = (currentPoint.y + nextPoint.y) / 2;
 
     ctx.quadraticCurveTo(controlX, controlY, endX, endY);
   }
 
-  // 4. Connect to the very last point explicitly
   const lastPoint = getScreenPoint(points[points.length - 1]!);
   ctx.lineTo(lastPoint.x, lastPoint.y);
 };
 
-// Helper function for enhanced arrow with rounded arrowhead
 const drawEnhancedArrow = (
   ctx: CanvasRenderingContext2D,
   points: readonly PointType[],
@@ -152,20 +143,19 @@ const drawEnhancedArrow = (
   fillColor?: ColorType | null,
 ): void => {
   const { x: startX, y: startY } = startPos;
-  const secondEndX = points.at(-2)!.x;
-  const secondEndY = points.at(-2)!.y;
-  const endX = points.at(-1)!.x;
-  const endY = points.at(-1)!.y;
+  const secondEndX = startX + points[points.length - 2]!.x;
+  const secondEndY = startY + points[points.length - 2]!.y;
+  const endX = startX + points[points.length - 1]!.x;
+  const endY = startY + points[points.length - 1]!.y;
 
-  const width = startX + endX - startX + secondEndX;
-  const height = startY + endY - startY + secondEndY;
-  const angle = Math.atan2(height, width);
+  const width = endX - startX;
+  const height = endY - startY;
   const length = Math.sqrt(width * width + height * height);
 
-  // Don't draw if too short
-  // if (length < 10) return;
+  const dx = endX - secondEndX;
+  const dy = endY - secondEndY;
+  const angle = Math.atan2(dy, dx);
 
-  // Enhanced arrow shaft with rounded ends
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
   ctx.beginPath();
@@ -177,24 +167,19 @@ const drawEnhancedArrow = (
 
   ctx.stroke();
 
-  // Dynamic arrowhead size based on arrow length
   const headLength = Math.min(20, length * 0.2);
 
-  // Calculate arrowhead points with better proportions
-  const arrowX = startX + endX;
-  const arrowY = startY + endY;
-  const leftX = arrowX - headLength * Math.cos(angle - Math.PI / 8);
-  const leftY = arrowY - headLength * Math.sin(angle - Math.PI / 8);
-  const rightX = arrowX - headLength * Math.cos(angle + Math.PI / 8);
-  const rightY = arrowY - headLength * Math.sin(angle + Math.PI / 8);
+  const leftX = endX - headLength * Math.cos(angle - Math.PI / 8);
+  const leftY = endY - headLength * Math.sin(angle - Math.PI / 8);
+  const rightX = endX - headLength * Math.cos(angle + Math.PI / 8);
+  const rightY = endY - headLength * Math.sin(angle + Math.PI / 8);
 
-  // Draw filled arrowhead with rounded joins
   ctx.lineJoin = "round";
   ctx.beginPath();
-  ctx.moveTo(arrowX, arrowY);
+  ctx.moveTo(endX, endY);
   ctx.lineTo(leftX, leftY);
   ctx.moveTo(rightX, rightY);
-  ctx.lineTo(arrowX, arrowY);
+  ctx.lineTo(endX, endY);
   ctx.closePath();
 
   if (fillColor) {
@@ -218,13 +203,13 @@ const drawRoundedDiamond = (
   const centerX = startX + width / 2;
   const centerY = startY + height / 2;
 
-  // Diamond vertices
+  // vertices
   const top = { x: centerX, y: startY };
   const right = { x: endX, y: centerY };
   const bottom = { x: centerX, y: endY };
   const left = { x: startX, y: centerY };
 
-  // Calculate edge lengths
+  // Calculating edge lengths
   const topToRight = Math.sqrt(
     Math.pow(right.x - top.x, 2) + Math.pow(right.y - top.y, 2),
   );
@@ -242,7 +227,6 @@ const drawRoundedDiamond = (
   const maxRadius = Math.min(radius, minEdge / 3);
 
   if (maxRadius <= 0.5 || minEdge < 10) {
-    // Sharp diamond fallback
     ctx.beginPath();
     ctx.moveTo(top.x, top.y);
     ctx.lineTo(right.x, right.y);
@@ -268,7 +252,6 @@ const drawRoundedDiamond = (
     };
   };
 
-  // Calculate arc start/end points for each corner
   const topRightStart = getPointOnEdge(top, right, maxRadius);
   const topRightEnd = getPointOnEdge(right, top, maxRadius);
 
@@ -283,22 +266,16 @@ const drawRoundedDiamond = (
 
   ctx.beginPath();
 
-  // Start at first point
   ctx.moveTo(leftTopEnd.x, leftTopEnd.y);
-
-  // Draw to top corner and arc around it
   ctx.lineTo(topRightStart.x, topRightStart.y);
   ctx.quadraticCurveTo(top.x, top.y, topRightEnd.x, topRightEnd.y);
 
-  // Draw to right corner and arc around it
   ctx.lineTo(rightBottomStart.x, rightBottomStart.y);
   ctx.quadraticCurveTo(right.x, right.y, rightBottomEnd.x, rightBottomEnd.y);
 
-  // Draw to bottom corner and arc around it
   ctx.lineTo(bottomLeftStart.x, bottomLeftStart.y);
   ctx.quadraticCurveTo(bottom.x, bottom.y, bottomLeftEnd.x, bottomLeftEnd.y);
 
-  // Draw to left corner and arc around it
   ctx.lineTo(leftTopStart.x, leftTopStart.y);
   ctx.quadraticCurveTo(left.x, left.y, leftTopEnd.x, leftTopEnd.y);
 
@@ -338,12 +315,15 @@ export const drawShape = (
   ctx: CanvasRenderingContext2D,
   shape: DrawElement,
   selectedShapeId?: string,
+  camera?: Camera,
 ): void => {
   if (!ctx || !shape) return;
+  const zoom = camera?.z ?? 1;
+
 
   const type = shape.type;
 
-  // convert color safely
+  // convert color
   let strokeColor = "white";
   try {
     if (shape.strokeColor) strokeColor = oklchToCSS(shape.strokeColor);
@@ -352,11 +332,9 @@ export const drawShape = (
   }
 
   ctx.strokeStyle = strokeColor;
-  ctx.lineWidth = hasLineWidth(shape) ? shape.lineWidth : 2;
+  ctx.lineWidth = hasLineWidth(shape) ? shape.lineWidth / zoom : 2 / zoom;
   ctx.lineJoin = "round";
   ctx.lineCap = "round";
-
-  // bounding box (for highlight & handles)
 
   ctx.save();
   try {
@@ -451,7 +429,6 @@ export const drawShape = (
     ctx.restore();
   }
 
-  // Selected → draw highlight (outline + resize handles)
   if (shape.id === selectedShapeId) {
     if (shape.type === "text") {
       const bounds = {
@@ -460,7 +437,7 @@ export const drawShape = (
         width: shape.width,
         height: shape.height,
       };
-      highlightShape(ctx, shape, bounds);
+      highlightShape(ctx, shape, bounds, zoom);
       return;
     }
     if (
@@ -475,7 +452,7 @@ export const drawShape = (
       const width = shape.endX - shape.startX;
       const height = shape.endY - shape.startY;
       const bounds = { x: shape.startX, y: shape.startY, width, height };
-      highlightShape(ctx, shape, bounds);
+      highlightShape(ctx, shape, bounds, zoom);
     }
   }
 };

@@ -26,7 +26,6 @@ export async function CHAT({
       content: payload.content,
       name: payload.name,
       sender_id: userId,
-      status: "TO_FRONTEND",
       timeStamp_ms: Date.now(),
     },
   };

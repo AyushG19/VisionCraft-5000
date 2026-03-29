@@ -1,32 +1,26 @@
-//it should return functions not values
 "use client";
 
 import React, { useEffect, useReducer, useRef, useState } from "react";
 import useCanvasInteraction from "./useCanvasInteraction";
 import canvasReducer, { initialCanvasState } from "../utils/canvasReducer";
-import {
-  Action,
-  CanvasState,
-  MessageReceivedType,
-  SendPropsType,
-  TextEditState,
-} from "../types";
+import { Action, CanvasState, SendPropsType, TextEditState } from "../types";
 import {
   AllToolTypes,
   DrawElement,
   PointType,
+  ServerMessageType,
   ServerSocketDataType,
-  UserType,
 } from "@repo/common";
 import { useCanvasSocket } from "./useCanvasSocket";
 import { createNewText } from "../utils/createNewShape";
-import { joinRoomService, leaveRoomService } from "app/services/canvas.service";
-import { UserInfo, useSocketContext } from "@repo/hooks";
-import { measureText } from "app/lib/canvasHelper";
-import { getUserColor } from "app/lib/color.helper";
+import { joinRoomService } from "app/services/canvas.service";
+import { useSocketContext } from "@repo/hooks";
+import { measureText } from "app/lib/canvas.helper";
 import useMousePosition from "./useMousePosition";
-import { getMousePos } from "app/lib/coordinateHelper";
-import { getUserInfo } from "app/services/user.service";
+import {
+  generateUserObject,
+  incomingSocketHandlers,
+} from "app/lib/socket.helper";
 
 export const useSocketWithWhiteboard = (): {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
@@ -40,8 +34,8 @@ export const useSocketWithWhiteboard = (): {
   handleStrokeSelect: (size: number) => void;
   handleRedo: () => void;
   handleUndo: () => void;
-  messages: MessageReceivedType[];
-  setMessages: React.Dispatch<React.SetStateAction<MessageReceivedType[]>>;
+  messages: ServerMessageType[];
+  setMessages: React.Dispatch<React.SetStateAction<ServerMessageType[]>>;
   send: (
     type: SendPropsType["type"],
     payload: SendPropsType["payload"],
@@ -63,7 +57,7 @@ export const useSocketWithWhiteboard = (): {
     initialCanvasState,
   );
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [messages, setMessages] = useState<MessageReceivedType[]>([]);
+  const [messages, setMessages] = useState<ServerMessageType[]>([]);
   const [textEdit, setTextEdit] = useState<TextEditState>(null);
 
   const {
@@ -78,80 +72,79 @@ export const useSocketWithWhiteboard = (): {
 
   const { getScreenCoordinates } = useMousePosition(canvasRef);
 
-  const generateUserObject = (user: UserType) => {
-    return {
-      ...user,
-      color: getUserColor(user.userId),
-      cursor: null,
-    };
-  };
-  const handleIncomingMessage = async (event: ServerSocketDataType) => {
-    switch (event.type) {
-      case "ADD_SHAPE": {
-        const shape = event.payload;
-        if (shape) {
-          canvasDispatch({ type: "ADD_SHAPE", payload: shape });
-        }
-        break;
-      }
+  // const handleIncomingMessage = async (event: ServerSocketDataType) => {
+  //   switch (event.type) {
+  //     case "ADD_SHAPE": {
+  //       const shape = event.payload;
+  //       if (shape) {
+  //         canvasDispatch({ type: "ADD_SHAPE", payload: shape });
+  //       }
+  //       break;
+  //     }
 
-      case "UPD_SHAPE": {
-        const shape = event.payload;
-        if (shape) {
-          canvasDispatch({ type: "UPD_SHAPE", payload: shape });
-        }
-        break;
-      }
+  //     case "UPD_SHAPE": {
+  //       const shape = event.payload;
+  //       if (shape) {
+  //         canvasDispatch({ type: "UPD_SHAPE", payload: shape });
+  //       }
+  //       break;
+  //     }
 
-      case "DEL_SHAPE": {
-        const shape = event.payload;
-        if (shape) {
-          canvasDispatch({ type: "DEL_SHAPE", payload: shape });
-        }
-        break;
-      }
+  //     case "DEL_SHAPE": {
+  //       const shape = event.payload;
+  //       if (shape) {
+  //         canvasDispatch({ type: "DEL_SHAPE", payload: shape });
+  //       }
+  //       break;
+  //     }
 
-      case "CHAT": {
-        const message = event.payload;
-        if (message?.status === "TO_FRONTEND") {
-          setMessages((prev) => [...prev, message]);
-        }
-        break;
-      }
-      case "CURSOR": {
-        const { userId, coordinates } = event.payload;
-        memberCursor.current.set(userId, coordinates);
-        break;
-      }
-      case "USER_LEFT": {
-        const { userId } = event.payload;
-        setRoomInfo({
-          ...roomInfo,
-          users: roomInfo.users.filter((u) => u.userId !== userId),
-        });
-        memberCursor.current.delete(userId);
-      }
-      case "USER_JOINED": {
-        const { userId } = event.payload;
-        const info = await getUserInfo(userId);
-        setRoomInfo({
-          ...roomInfo,
-          users: [...roomInfo.users, generateUserObject(info)],
-        });
-      }
-      default: {
-        console.log("mess");
-      }
-    }
-  };
+  //     case "CHAT": {
+  //       const message = event.payload;
+  //       if (message?.status === "TO_FRONTEND") {
+  //         setMessages((prev) => [...prev, message]);
+  //       }
+  //       break;
+  //     }
+  //     case "CURSOR": {
+  //       const { userId, coordinates } = event.payload;
+  //       memberCursor.current.set(userId, coordinates);
+  //       break;
+  //     }
+  //     case "USER_LEFT": {
+  //       const { userId } = event.payload;
+  //       setRoomInfo({
+  //         ...roomInfo,
+  //         users: roomInfo.users.filter((u) => u.userId !== userId),
+  //       });
+  //       memberCursor.current.delete(userId);
+  //     }
+  //     case "USER_JOINED": {
+  //       const { userId } = event.payload;
+  //       const info = await getUserInfo(userId);
+  //       setRoomInfo({
+  //         ...roomInfo,
+  //         users: [...roomInfo.users, generateUserObject(info)],
+  //       });
+  //     }
+  //     default: {
+  //       console.log("mess");
+  //     }
+  //   }
+  // };
 
-  const onMessage = (event: MessageEvent) => {
+  const onMessage = (event: ServerSocketDataType) => {
     try {
-      const data = JSON.parse(event.data);
-      if (data.type !== "CURSOR") {
-        console.log(data);
+      if (event.type !== "CURSOR") {
+        console.log(event);
       }
-      handleIncomingMessage(data);
+      const handler = incomingSocketHandlers[event.type];
+      handler({
+        canvasDispatch,
+        event,
+        memberCursorMap: memberCursor.current,
+        setMessages,
+        setRoomInfo,
+      });
     } catch (error) {
       console.error("Failed to parse WebSocket message:", error);
     }
@@ -257,7 +250,7 @@ export const useSocketWithWhiteboard = (): {
       height,
     );
     console.log("text: ", textEdit.text);
-    canvasDispatch({ type: "ADD_SHAPE", payload: element });
+    dispatchWithSocket({ type: "ADD_SHAPE", payload: element });
     setTextEdit(null);
   };
 

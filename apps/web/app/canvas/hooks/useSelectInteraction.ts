@@ -16,6 +16,7 @@ import {
 } from "../utils/createTempShapeHelper";
 import { HandleName } from "../../lib/getHandles";
 import useInteractionState from "./useInteractionState";
+import { Camera, useCamera } from "./useCamera";
 
 type UseInteractionStateReturn = ReturnType<typeof useInteractionState>;
 
@@ -42,6 +43,7 @@ const useSelectInteraction = (
       worldPos: { x: number; y: number },
       currentSelected: DrawElement | undefined,
       canvasState: CanvasState,
+      camera: Camera,
     ): DrawElement | undefined => {
       // ─── Case 1: Something already selected ──────────────────
       if (currentSelected) {
@@ -102,6 +104,7 @@ const useSelectInteraction = (
       ctx: CanvasRenderingContext2D,
       currentSelected: DrawElement | undefined,
       canvasState: CanvasState,
+      camera: Camera,
     ): boolean => {
       if (!currentSelected) return false;
 
@@ -117,6 +120,7 @@ const useSelectInteraction = (
         redrawPreviousShapes(
           ctx,
           canvasState.drawnShapes,
+          camera,
           previewShape,
           currentSelected.id,
         );
@@ -138,6 +142,7 @@ const useSelectInteraction = (
         redrawPreviousShapes(
           ctx,
           canvasState.drawnShapes,
+          camera,
           previewShape,
           currentSelected.id,
         );

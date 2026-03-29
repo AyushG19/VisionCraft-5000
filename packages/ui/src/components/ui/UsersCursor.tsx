@@ -1,11 +1,12 @@
 import { UserInfo } from "@repo/hooks";
-import { IconLocation } from "@tabler/icons-react";
+import { IconLocationFilled } from "@tabler/icons-react";
 
 const UsersCursor = ({ color, userId }: UserInfo) => {
   return (
-    <IconLocation
+    <IconLocationFilled
       id={`cursor:${userId}`}
       color={color}
+      stroke={1}
       style={{
         position: "absolute",
         top: `0px`,

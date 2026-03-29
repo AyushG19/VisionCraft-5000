@@ -20,10 +20,6 @@ export const ROOM_IDLE_TTL_MS = Number(env.ROOM_IDLE_TTL_MS ?? 2 * 60 * 60_000);
  */
 export const SWEEP_INTERVAL_MS = Number(env.SWEEP_INTERVAL_MS ?? 10 * 60_000);
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
 interface RoomUser {
   socket: WebSocket;
   joinedAt: number;
@@ -39,9 +35,6 @@ interface RoomMeta {
   emptyTimer: ReturnType<typeof setTimeout> | null;
 }
 
-// ---------------------------------------------------------------------------
-// State
-// ---------------------------------------------------------------------------
 
 /** roomId → ( userId → RoomUser ) */
 export const roomRegistry = new Map<string, Map<string, RoomUser>>();

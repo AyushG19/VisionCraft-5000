@@ -33,6 +33,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.56.1",
+    "react-zoom-pan-pinch": "^3.7.0",
     "tailwind-merge": "^3.2.0"
   },
   "devDependencies": {

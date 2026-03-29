@@ -9,6 +9,7 @@ import {
 } from "../utils/createNewShape";
 import { DrawElement, PencilType, PointType, ToolKitType } from "@repo/common";
 import useInteractionState from "./useInteractionState";
+import { Camera } from "./useCamera";
 
 type UseInteractionStateReturn = ReturnType<typeof useInteractionState>;
 
@@ -50,6 +51,7 @@ const useDrawInteraction = (
       toolState: ToolKitType,
       drawnShapes: DrawElement[],
       selectedShapeId: string | undefined,
+      camera: Camera,
     ) => {
       if (!interaction.current.isDrawing) return;
 
@@ -69,6 +71,7 @@ const useDrawInteraction = (
         redrawPreviousShapes(
           ctx,
           [...drawnShapes, updatedPencil],
+          camera,
           undefined,
           selectedShapeId,
         );
@@ -82,7 +85,13 @@ const useDrawInteraction = (
         worldPos,
       );
 
-      redrawPreviousShapes(ctx, drawnShapes, previewShape, selectedShapeId);
+      redrawPreviousShapes(
+        ctx,
+        drawnShapes,
+        camera,
+        previewShape,
+        selectedShapeId,
+      );
     },
     [interaction, tempShape, setTempShape],
   );

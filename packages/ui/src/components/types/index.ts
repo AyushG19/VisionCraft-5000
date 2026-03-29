@@ -1,25 +1,14 @@
-import {
-  DrawElement,
-  MessageType,
-  WebSocketChatType,
-  WebSocketShapeType,
-} from "@repo/common";
+import { ClientSocketDataType, ServerMessageType } from "@repo/common";
 
-export type MessageReceivedType = Extract<
-  MessageType,
-  { status: "TO_FRONTEND" }
+type sendType = Extract<
+  ClientSocketDataType,
+  { type: "ADD_SHAPE" | "UPD_SHAPE" | "DEL_SHAPE" | "CHAT" | "CURSOR" }
 >;
-export type MessageToSendType = Extract<MessageType, { status: "TO_BACKEND" }>;
-
 export type SideChatPropsType = {
-  // onChatToggle: () => void;
   inRoom: boolean;
-  send: (
-    type: WebSocketChatType["type"] | WebSocketShapeType["type"],
-    payload: WebSocketChatType["payload"] | WebSocketShapeType["payload"],
-  ) => void;
-  messages: MessageReceivedType[];
-  setMessages: React.Dispatch<React.SetStateAction<MessageReceivedType[] | []>>;
+  send: (type: sendType["type"], payload: sendType["payload"]) => void;
+  messages: ServerMessageType[];
+  setMessages: React.Dispatch<React.SetStateAction<ServerMessageType[]>>;
   fetchChartFromAi: (userCommand: string) => void;
   isOpen: boolean;
   isLoading: boolean;

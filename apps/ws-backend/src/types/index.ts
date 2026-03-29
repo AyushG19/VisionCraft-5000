@@ -1,9 +1,9 @@
 import {
   DrawElement,
-  MessageType,
+  ServerMessageType,
   PointType,
-  WebSocketChatType,
   WebSocketShapeType,
+  ClientChatSchemaType,
 } from "@repo/common";
 import { ChatService } from "../services/chat.service";
 import { ElementService } from "../services/element.service";
@@ -15,20 +15,20 @@ import { WebSocket } from "ws";
  */
 export type RedisData =
   | {
-      userId: string;
-      type: "ADD" | "DEL" | "UPD";
-      element: DrawElement;
-    }
+    userId: string;
+    type: "ADD" | "DEL" | "UPD";
+    element: DrawElement;
+  }
   | {
-      userId: string;
-      type: "CHAT";
-      message: Extract<MessageType, { status: "TO_FRONTEND" }>;
-    }
+    userId: string;
+    type: "CHAT";
+    message: ServerMessageType;
+  }
   | { userId: string; type: "CURSOR"; coordinates: PointType }
   | { type: "LEAVE"; userId: string; time: number }
   | { type: "JOIN"; userId: string; time: number };
 
-export type SendPropsType = WebSocketChatType | WebSocketShapeType;
+export type SendPropsType = ClientChatSchemaType | WebSocketShapeType;
 
 export type AddElementPayload = Extract<
   WebSocketShapeType,

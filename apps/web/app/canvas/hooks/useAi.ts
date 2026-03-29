@@ -5,31 +5,40 @@ import {
   convertToShapeType,
 } from "@workspace/ui/lib/convertToShapeType";
 import { useError } from "@repo/hooks";
-import { getScalingFactor } from "app/lib/scalingHelper";
+import { getScalingFactor } from "app/lib/scaling.helper";
 
 const useAi = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [result, setResult] = useState<AIResultType[]>([]);
   const { setError } = useError();
 
-  const handleDrawRequest = useCallback(async (userCommand: string) => {
-    setLoading(true);
-    try {
-      const elements = await getExcalidrawElements(userCommand);
-      console.log("elements:", elements);
-      const sf = getScalingFactor(elements);
-      console.log(sf);
-      // conversion to my local types
-      setResult(() =>
-        elements.map((element) => convertToShapeType(element, sf)),
-      );
-    } catch (error) {
-      setError({ code: "SERVER_ERROR", message: "Errorn with AI" });
-      setLoading(false);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const handleDrawRequest = useCallback(
+    async (
+      ctx: CanvasRenderingContext2D,
+      fontFamily: string,
+      userCommand: string,
+    ) => {
+      setLoading(true);
+      try {
+        const elements = await getExcalidrawElements(userCommand);
+        console.log("elements:", elements);
+        const sf = getScalingFactor(elements);
+        console.log(sf);
+
+        setResult(() =>
+          elements.map((element) =>
+            convertToShapeType(ctx, fontFamily, element, sf),
+          ),
+        );
+      } catch (error) {
+        setError({ code: "SERVER_ERROR", message: "Errorn with AI" });
+        setLoading(false);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
   const handleChatRequest = async (userCommand: string) => {
     // setLoading(true);
@@ -44,6 +53,10 @@ const useAi = () => {
     //   setLoading(false);
     // }
   };
+
+  // const handleDiagramAccept = (ctx: CanvasRenderingContext2D) => {
+  //   dispatchwithsocket({});
+  // };
   return { loading, result, handleDrawRequest, handleChatRequest };
 };
 

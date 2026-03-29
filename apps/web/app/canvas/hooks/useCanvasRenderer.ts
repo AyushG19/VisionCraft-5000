@@ -3,6 +3,7 @@ import { DrawElement, ShapeType } from "@repo/common";
 import { CanvasState } from "../types";
 import redrawPreviousShapes from "../utils/redrawPreviousShapes";
 import oklchToCSS from "../../lib/oklchToCss";
+import { Camera } from "./useCamera";
 
 const useCanvasRenderer = (
   canvasRef: RefObject<HTMLCanvasElement | null>,
@@ -11,6 +12,7 @@ const useCanvasRenderer = (
   canvasStateRef: React.MutableRefObject<CanvasState>,
   selectedShapeRef: React.MutableRefObject<DrawElement | undefined>,
   isOpen: boolean,
+  camera: Camera,
 ) => {
   const frameRef = useRef<number | null>(null);
 
@@ -36,6 +38,7 @@ const useCanvasRenderer = (
       redrawPreviousShapes(
         ctx,
         canvasState.drawnShapes,
+        camera,
         selectedShape,
         selectedShape?.id,
       );
@@ -56,6 +59,7 @@ const useCanvasRenderer = (
     selectedShapeRef,
     canvasRef,
     isOpen,
+    camera,
   ]);
 };
 

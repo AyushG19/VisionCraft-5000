@@ -46,9 +46,18 @@ const page = () => {
     handleLeaveRoom,
     handleJoinRoom,
     slug,
+    canvasDispatch
   } = useSocketWithWhiteboard();
 
   const { loading, result, handleDrawRequest } = useAi();
+  const sendReqToAi = (command: string) => {
+    const ctx = canvasRef.current?.getContext("2d");
+    if (!ctx) {
+      console.error("no ctx");
+      return;
+    }
+    handleDrawRequest(ctx, canvasState.textState.fontFamily, command);
+  };
 
   const handleChatToggle = () => {
     setIsOpen((prev) => !prev);
@@ -63,7 +72,8 @@ const page = () => {
     }
     console.log(typeof result);
     result.forEach((shape: DrawElement) => {
-      drawShape(ctx, shape);
+      // drawShape(ctx, shape);
+      canvasDispatch({ type: "ADD_SHAPE", payload: shape });
     });
   }, [result]);
 
@@ -80,10 +90,21 @@ const page = () => {
   return (
     <div className={`relative h-screen w-screen duration-300`}>
       <Toolkit {...toolkitProps} />
-      <Button
+      {/* <Button
         className="absolute top-0 left-0 z-1000"
-        onClick={() => handleDrawRequest("any flowchart")}
-      ></Button>
+        onClick={() => {
+          const ctx = canvasRef.current?.getContext("2d");
+          if (!ctx) {
+            console.error("no ctx");
+            return;
+          }
+          handleDrawRequest(
+            ctx,
+            canvasState.textState.fontFamily,
+            "any flowchart",
+          );
+        }}
+      ></Button> */}
       {textEdit && (
         <textarea
           autoFocus
@@ -115,7 +136,7 @@ const page = () => {
       )}
       <canvas
         ref={canvasRef}
-        className="w-full h-full block border bg-canvas text-white"
+        className="w-full h-full bg-canvas text-white"
       ></canvas>
 
       {inRoom ? (
@@ -133,7 +154,7 @@ const page = () => {
             send={send}
             messages={messages}
             setMessages={setMessages}
-            fetchChartFromAi={handleDrawRequest}
+            fetchChartFromAi={sendReqToAi}
             isOpen={isOpen}
             isLoading={loading}
             slug={slug}
@@ -153,7 +174,7 @@ const page = () => {
             send={send}
             messages={messages}
             setMessages={setMessages}
-            fetchChartFromAi={handleDrawRequest}
+            fetchChartFromAi={sendReqToAi}
             isOpen={isOpen}
             isLoading={loading}
             slug={slug}

@@ -1,19 +1,13 @@
 import React, { useState } from "react";
 import { motion } from "motion/react";
-
-interface Avatar {
-  id: string;
-  name: string;
-  imageUrl: string;
-  color?: string;
-}
+import { UserInfo } from "@repo/hooks";
 
 interface AvatarGroupProps {
-  avatars: Avatar[];
+  avatars: UserInfo[];
   maxVisible?: number;
   size?: number;
   overlapAmount?: number;
-  onAvatarClick?: (avatar: Avatar) => void;
+  onAvatarClick?: (userInfo: UserInfo) => void;
   onShowAllClick?: () => void;
 }
 
@@ -53,7 +47,7 @@ const AvatarGroup: React.FC<AvatarGroupProps> = ({
 
         return (
           <motion.div
-            key={avatar.id}
+            key={avatar.userId}
             className="absolute cursor-pointer font-krona"
             initial={false}
             animate={{
@@ -82,17 +76,17 @@ const AvatarGroup: React.FC<AvatarGroupProps> = ({
                 backgroundColor: avatar.color || "#6366f1",
               }}
             >
-              {avatar.imageUrl ? (
+              {/* {avatar.imageUrl ? (
                 <img
                   src={avatar.imageUrl}
                   alt={avatar.name.trim()[0]?.toUpperCase()}
                   className="absolute inset-0 w-full h-full object-cover text-center"
                 />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center font-semibold text-sm">
-                  {avatar.name.trim()[0]?.toUpperCase()}
-                </div>
-              )}
+              ) : ( */}
+              <div className="w-full h-full flex items-center justify-center font-semibold text-sm">
+                {avatar.name.trim()[0]?.toUpperCase()}
+              </div>
+              {/* )} */}
             </div>
           </motion.div>
         );

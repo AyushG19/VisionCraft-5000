@@ -1,6 +1,6 @@
 import z from "zod";
 import { DrawSchema } from "./canvas";
-import { EnrichedMessage } from "./message";
+import { ServerMessage } from "./message";
 
 export const ElementUpsertPayloadSchema = z.object({
   roomId: z.string(),
@@ -22,7 +22,7 @@ export type ElementDeletePayloadSchemaType = z.infer<
 
 export const ChatUpsertPayloadSchema = z.object({
   roomId: z.string(),
-  Message: EnrichedMessage,
+  Message: ServerMessage,
 });
 
 export type ChatUpsertPayloadSchemaType = z.infer<

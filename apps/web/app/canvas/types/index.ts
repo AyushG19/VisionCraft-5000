@@ -1,6 +1,5 @@
 import { RefObject } from "react";
 import {
-  MessageType,
   ToolKitType,
   ColorType,
   AllToolTypes,
@@ -10,9 +9,10 @@ import {
   ImageType,
   LinearType,
   TextStateType,
-  WebSocketChatType,
   WebSocketShapeType,
   ClientCursorSchemaType,
+  ServerChatSchemaType,
+  ClientChatSchemaType,
 } from "@repo/common";
 import { HandleName } from "../../lib/getHandles";
 
@@ -36,16 +36,10 @@ export type Action =
   | { type: "CHANGE_COLOR"; payload: ColorType }
   | { type: "CHANGE_BRUSHSIZE"; payload: number };
 
-export type MessageReceivedType = Extract<
-  MessageType,
-  { status: "TO_FRONTEND" }
->;
-export type MessageToSendType = Extract<MessageType, { status: "TO_BACKEND" }>;
-
 export interface ChatModalProps {
   wsRef: RefObject<WebSocket | null>;
-  messages: MessageReceivedType[];
-  setMessages: React.Dispatch<React.SetStateAction<MessageReceivedType[]>>;
+  messages: ServerChatSchemaType[];
+  setMessages: React.Dispatch<React.SetStateAction<ServerChatSchemaType[]>>;
 }
 export type DragStateType = {
   isDragging: boolean;
@@ -100,6 +94,8 @@ export type TextEditState = {
 
 //join and leaves are handled automatically
 export type SendPropsType =
-  | WebSocketChatType
+  | ClientChatSchemaType
   | WebSocketShapeType
   | ClientCursorSchemaType;
+
+export type eventHandlerContext = {};

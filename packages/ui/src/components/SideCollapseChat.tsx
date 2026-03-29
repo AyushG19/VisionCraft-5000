@@ -4,15 +4,12 @@ import React, { useRef, useState } from "react";
 import { Button } from "./ui/button";
 import { Virtuoso } from "react-virtuoso";
 import MessageBubble from "./ui/MessageBubble";
-import {
-  MessageReceivedType,
-  MessageToSendType,
-  SideChatPropsType,
-} from "./types";
-import { useError, useUser } from "@repo/hooks";
+import { SideChatPropsType } from "./types";
+import { useError, useSocketContext, useUser } from "@repo/hooks";
 import OptionModal, { selected } from "./ui/OptionModal";
 import { AnimatePresence, motion } from "motion/react";
 import ChatTop from "./ChatTop";
+import { ClientMessageType, ServerMessageType } from "@repo/common";
 
 const SideCollapseChat = React.forwardRef<HTMLDivElement, SideChatPropsType>(
   (
@@ -34,6 +31,7 @@ const SideCollapseChat = React.forwardRef<HTMLDivElement, SideChatPropsType>(
     const inputRef = useRef<HTMLInputElement | null>(null);
 
     const { currentUser } = useUser();
+    const { roomInfo } = useSocketContext();
     const { setError } = useError();
 
     const handleMessageSend = async (content: string) => {
@@ -43,10 +41,9 @@ const SideCollapseChat = React.forwardRef<HTMLDivElement, SideChatPropsType>(
       }
       const { userId, name } = currentUser;
 
-      const userMessage: MessageReceivedType = {
+      const userMessage: ServerMessageType = {
         sender_id: userId,
         name: name,
-        status: "TO_FRONTEND",
         timeStamp_ms: Date.now(),
         content: content,
       };
@@ -62,9 +59,8 @@ const SideCollapseChat = React.forwardRef<HTMLDivElement, SideChatPropsType>(
       setMessages((prev) => [...prev, userMessage]);
 
       if (inRoom) {
-        const messageToBackend: MessageToSendType = {
+        const messageToBackend: ClientMessageType = {
           name: name,
-          status: "TO_BACKEND",
           content: content,
         };
         send("CHAT", messageToBackend);
@@ -101,55 +97,7 @@ const SideCollapseChat = React.forwardRef<HTMLDivElement, SideChatPropsType>(
             ref={ref}
             className="absolute right-0 top-0 flex flex-col items-center justify-center h-full w-[360px] bg-light_sky_blue shadow-primary overflow-hidden outline"
           >
-            {inRoom && (
-              <ChatTop
-                slug={slug}
-                avatars={[
-                  {
-                    id: "1",
-                    name: "Alice Johnson",
-                    imageUrl: "",
-                    color: "#ef4444",
-                  },
-                  {
-                    id: "2",
-                    name: "Bob Smith",
-                    imageUrl: "",
-                    color: "#3b82f6",
-                  },
-                  {
-                    id: "3",
-                    name: "Charlie Brown",
-                    imageUrl: "/avatars/charlie.jpg",
-                    color: "#10b981",
-                  },
-                  {
-                    id: "4",
-                    name: "Diana Prince",
-                    imageUrl: "/avatars/diana.jpg",
-                    color: "#f59e0b",
-                  },
-                  {
-                    id: "5",
-                    name: "Eve Davis",
-                    imageUrl: "/avatars/eve.jpg",
-                    color: "#8b5cf6",
-                  },
-                  {
-                    id: "6",
-                    name: "Frank Wilson",
-                    imageUrl: "",
-                    color: "#ec4899",
-                  },
-                  {
-                    id: "7",
-                    name: "Grace Lee",
-                    imageUrl: "",
-                    color: "#14b8a6",
-                  },
-                ]}
-              />
-            )}
+            {inRoom && <ChatTop slug={slug} avatars={roomInfo.users} />}
             <div className="w-full relative !h-full bg-light_sky_blue-700 overflow-hidden">
               <div className="absolute inset-0 bg-[url('/pattern-2.svg')] bg-repeat bg-top-left opacity-20 pointer-events-none" />
 

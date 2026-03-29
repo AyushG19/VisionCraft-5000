@@ -17,6 +17,8 @@ import {
   IconPencilMinus,
   IconSquare,
   IconTrendingUp,
+  IconHandStop,
+  IconDroplet,
 } from "@tabler/icons-react";
 import type {
   ToolKitType,
@@ -26,30 +28,23 @@ import type {
 } from "@repo/common";
 import { Button } from "./ui/button";
 
-type State = {
-  drawnShapes: DrawElement[];
-  history: DrawElement[][];
-  historyIndex: number;
-  toolState: ToolKitType;
-};
-
 const tools: {
   id: AllToolTypes;
   icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<Icon>>;
   label: string;
 }[] = [
-  { id: "select" as const, icon: IconSend, label: "select" },
-  // { id: "hand" as const, icon: IconHandStop, label: "hand" },
-  { id: "ellipse" as const, icon: IconCircle, label: "circle" },
-  { id: "rectangle" as const, icon: IconSquare, label: "square" },
-  { id: "diamond" as const, icon: IconSquareRotated, label: "diamond" },
-  { id: "line" as const, icon: IconLine, label: "line" },
-  { id: "arrow" as const, icon: IconTrendingUp, label: "arrow" },
-  { id: "pencil" as const, icon: IconPencilMinus, label: "pencil" },
-  { id: "text" as const, icon: IconTextSize, label: "text" },
-  { id: "image" as const, icon: IconPhoto, label: "image" },
-  { id: "color" as const, icon: IconDropletFilled, label: "color" },
-];
+    { id: "select" as const, icon: IconSend, label: "select" },
+    { id: "hand" as const, icon: IconHandStop, label: "hand" },
+    { id: "ellipse" as const, icon: IconCircle, label: "circle" },
+    { id: "rectangle" as const, icon: IconSquare, label: "square" },
+    { id: "diamond" as const, icon: IconSquareRotated, label: "diamond" },
+    { id: "line" as const, icon: IconLine, label: "line" },
+    { id: "arrow" as const, icon: IconTrendingUp, label: "arrow" },
+    { id: "pencil" as const, icon: IconPencilMinus, label: "pencil" },
+    { id: "text" as const, icon: IconTextSize, label: "text" },
+    { id: "image" as const, icon: IconPhoto, label: "image" },
+    { id: "color" as const, icon: IconDroplet, label: "color" },
+  ];
 
 type toolkitProps = {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
@@ -106,16 +101,12 @@ const Toolkit = ({
   useEffect(() => {
     if (!toolkitRef.current || !toolIconRef.current) return;
 
-    // Let the browser render first to get actual scrollWidth
     const calculateMaxWidth = () => {
       if (!toolkitRef.current || !toolIconRef.current) return;
 
-      // Get the natural width when all items are in one row
       const toolIconContainer = toolIconRef.current;
       const naturalWidth = toolIconContainer.scrollWidth;
 
-      // Add padding and grip handle width
-      // p-3 = 12px left padding, IconGripVertical width ~16px + ml-1.5 (6px)
       const totalMaxWidth = naturalWidth + 12 + 16 + 6;
 
       setMaxWidth(totalMaxWidth);
@@ -126,7 +117,6 @@ const Toolkit = ({
       setCurrPos({ x: Math.max(0, newX), y: 0 });
     };
 
-    // Use setTimeout to ensure DOM is fully rendered
     setTimeout(calculateMaxWidth, 0);
   }, []);
 
@@ -219,7 +209,7 @@ const Toolkit = ({
     <div
       ref={toolkitRef}
       draggable={false}
-      className="p-3 pb-3.5 pr-0 absolute rounded-lg flex items-center cursor-move bg-light_sky_blue outline-personal shadow-shinyshadow"
+      className="p-3 pb-3.5 pr-0 absolute rounded-lg flex items-center cursor-move bg-light_sky_blue outline-personal shadow-shinyshadow z-20"
       style={{
         top: currPos.y,
         left: currPos.x,

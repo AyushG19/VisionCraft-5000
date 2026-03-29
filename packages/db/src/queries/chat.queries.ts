@@ -1,13 +1,12 @@
-import { MessageType } from "@repo/common";
+import { MessagesType, ServerMessageType } from "@repo/common";
 import { Prisma, prismaClient } from "../pg";
 
-type EnrichedMessage = Extract<MessageType, { status: "TO_FRONTEND" }>;
 
 export type Chat = Prisma.ChatGetPayload<{
   select: { message: true; roomId: true; sentAt: true; userId: true };
 }>;
 
-export async function addChat(roomId: string, message: EnrichedMessage) {
+export async function addChat(roomId: string, message: ServerMessageType) {
   const data: Chat = {
     message: message.content,
     roomId: roomId,

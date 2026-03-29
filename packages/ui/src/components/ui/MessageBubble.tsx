@@ -1,7 +1,7 @@
-import { motion, scale } from "motion/react";
-import { MessageReceivedType } from "../types";
+import { ServerMessageType } from "@repo/common";
+import { motion } from "motion/react";
 type MessageBubbleProps = {
-  message: MessageReceivedType;
+  message: ServerMessageType;
   isOwn: boolean;
   positionInBlock: "single" | "first" | "middle" | "last";
 };
