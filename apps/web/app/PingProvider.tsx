@@ -5,12 +5,15 @@ import { pingAllBackend } from "./api/ping";
 
 export function PingProvider() {
   useEffect(() => {
-    try {
-      console.log("Pinging all backend...");
-      pingAllBackend();
-    } catch (error) {
-      console.log("Error in PING");
-    }
+    const ping = async () => {
+      try {
+        console.log("Pinging all backend...");
+        await pingAllBackend();
+      } catch (error) {
+        console.log("Error in PING");
+      }
+    };
+    ping();
   }, []);
 
   return null;

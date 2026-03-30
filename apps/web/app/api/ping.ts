@@ -23,6 +23,6 @@ async function pingWorker() {
 }
 
 export async function pingAllBackend() {
-  pingHttp();
-  pingWorker();
+  await pingHttp();
+  await pingWorker();
 }
