@@ -34,7 +34,7 @@ const ToolIcon = React.forwardRef<HTMLDivElement, ToolIconProps>(
       onSelectColor,
       onSelectStroke,
     },
-    ref,
+    inputRef,
   ) => {
     const [pickedColor, setPickedColor] = useState<{
       l: number;
@@ -46,6 +46,25 @@ const ToolIcon = React.forwardRef<HTMLDivElement, ToolIconProps>(
     useEffect(() => {
       onSelectColor(pickedColor);
     }, [pickedColor]);
+
+    if (toolInfo.id === "image") {
+      return (
+        <div
+          className={`w-9 h-9 p-2 relative flex items-center justify-center z-10 shadow-[inset_1px_1px_2px_white,3px_3px_black] rounded-lg bg-uranian_blue pointer-events-none outline-personal hover:scale-[103%] ${isSelected && "button-press"} button-press-active transition-all ease-in-out duration-100`}
+          ref={inputRef}
+        >
+          <label>
+            <input
+              className="absolute text-transparent top-0 left-0 w-full h-full cursor-pointer pointer-events-auto"
+              type="file"
+              id="fileInput"
+              accept="image/*"
+            ></input>
+          </label>
+          <toolInfo.icon fill={"none"} stroke={1.5} />
+        </div>
+      );
+    }
     return (
       <Tooltip key={toolInfo.id}>
         <TooltipTrigger>
@@ -53,7 +72,6 @@ const ToolIcon = React.forwardRef<HTMLDivElement, ToolIconProps>(
             onClick={() => onSelectTool(toolInfo.id)}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            ref={ref}
             className={`w-9 h-9 ${toolInfo.id === "color" ? "p-2" : "p-2.5"} relative flex items-center justify-center cursor-pointer z-10 shadow-[inset_1px_1px_2px_white,3px_3px_black] rounded-lg bg-uranian_blue outline-personal hover:scale-[103%] ${toolInfo.id !== "color" && isSelected && "button-press"} button-press-active transition-all ease-in-out duration-100`}
           >
             {toolInfo.id === "color" && isHovered && (
@@ -63,12 +81,15 @@ const ToolIcon = React.forwardRef<HTMLDivElement, ToolIconProps>(
               />
             )}
             <toolInfo.icon
-              fill={toolInfo.id === "color" ? `oklch(${pickedColor.l} ${pickedColor.c} ${pickedColor.h})` : "none"}
+              fill={
+                toolInfo.id === "color"
+                  ? `oklch(${pickedColor.l} ${pickedColor.c} ${pickedColor.h})`
+                  : "none"
+              }
               // color={toolInfo.id === "color" ? `oklch(${pickedColor.l} ${pickedColor.c} ${pickedColor.h})` : "currentColor"}
               // style={{ color: toolInfo.id === "color" ? `oklch(${pickedColor.l} ${pickedColor.c} ${pickedColor.h})` : undefined }}
               stroke={toolInfo.id === "color" ? 1 : 1.5}
             />
-
           </div>
         </TooltipTrigger>
         {!(toolInfo.id === "color") && (

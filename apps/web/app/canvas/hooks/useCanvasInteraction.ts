@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { DrawElement, PointType, ShapeType } from "@repo/common";
 import { Action, CanvasState, TextEditState } from "../types";
 import resizeCanvas from "../utils/canvasResizeHelper";
@@ -14,9 +14,11 @@ import useCanvasRenderer from "./useCanvasRenderer";
 import { getMousePos } from "app/lib/coordinate.helper";
 import { useCamera } from "./useCamera";
 import { screenToWorld } from "app/lib/math";
+import { drawShape } from "../utils/drawing";
 
 const useCanvasInteraction = (
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
+  inputRef: React.RefObject<HTMLInputElement | null>,
   canvasState: CanvasState,
   canvasDispatch: (action: Action) => void,
   dispatchWithSocket: (action: Action) => void,
@@ -59,7 +61,8 @@ const useCanvasInteraction = (
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const fileInput = inputRef.current;
+    if (!canvas || !fileInput) return;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -238,6 +241,37 @@ const useCanvasInteraction = (
       onWheel(e);
     };
 
+    const handleFileInput = async () => {
+      const fileList = fileInput.files;
+      console.log("in file");
+      if (!fileList || fileList.length === 0) return;
+      console.log("file item", fileList[fileList.length - 1]);
+      const lastImg = fileList[fileList.length - 1]!;
+
+      console.log("Mime type:", lastImg.type);
+      //clean data and optimize
+      const worker = new Worker(
+        new URL("../../worker/worker.ts", import.meta.url),
+      );
+      const imgBitmap = await createImageBitmap(lastImg);
+      console.log("bitmap:", imgBitmap);
+
+      worker.postMessage({ imgBitmap });
+      worker.onmessage = async (message) => {
+        // const ctx = canvas.getContext("2d");
+        const blob = message.data as Blob;
+        // console.log("siz:");
+        const bm = await createImageBitmap(blob);
+        ctx?.drawImage(bm, 0, 0);
+        ctx?.drawImage(imgBitmap, imgBitmap.width, 0);
+        console.log("og:", lastImg.size, "now:", blob.size);
+      };
+      //   const tempUrl = URL.createObjectURL(lastImg);
+      //   const img = new Image();
+      //   img.onload = () => ctx?.drawImage(img, 0, 0);
+      //   img.src = tempUrl;
+    };
+
     canvas.addEventListener("mousedown", onMouseDown);
     canvas.addEventListener("dblclick", handleDoubleClick);
     canvas.addEventListener("wheel", handleWheel);
@@ -245,6 +279,7 @@ const useCanvasInteraction = (
     window.addEventListener("mouseup", onMouseUp);
     window.addEventListener("resize", handleResize);
     window.addEventListener("keydown", onKeyDown);
+    fileInput.addEventListener("change", handleFileInput);
 
     redrawPreviousShapes(
       ctx,
@@ -262,6 +297,7 @@ const useCanvasInteraction = (
       window.removeEventListener("mouseup", onMouseUp);
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("keydown", onKeyDown);
+      fileInput.removeEventListener("change", handleFileInput);
     };
   }, [isOpen, camera]);
 

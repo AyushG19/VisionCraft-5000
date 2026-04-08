@@ -1,0 +1,33 @@
+interface WorkerMessage {
+  imgBitmap: ImageBitmap;
+}
+self.onmessage = async function (message: MessageEvent<WorkerMessage>) {
+  const { imgBitmap } = message.data;
+
+  const MAX_DIMENTION = 1950;
+
+  let w = imgBitmap.width;
+  let h = imgBitmap.height;
+
+  if (w > MAX_DIMENTION || h > MAX_DIMENTION) {
+    const scale = Math.min(MAX_DIMENTION / w, MAX_DIMENTION / h);
+    w = w * scale;
+    h = h * scale;
+  }
+
+  try {
+    const offScrCanvas = new OffscreenCanvas(w, h);
+    const ctx = offScrCanvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.drawImage(imgBitmap, 0, 0, w, h);
+    imgBitmap.close();
+    const compressedBlob = await offScrCanvas.convertToBlob({
+      type: "image/webp",
+      quality: 0.7,
+    });
+    self.postMessage(compressedBlob);
+  } catch (error) {
+    console.error("Worker error: ", error);
+  }
+};

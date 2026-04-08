@@ -81,12 +81,17 @@ const highlightShape = (
   ctx.restore();
 
   // Draw resize handles
-  drawHandles(ctx, {
-    x: bounds.x - 5 / zoom,
-    y: bounds.y - 5 / zoom,
-    width: bounds.width + 10 / zoom,
-    height: bounds.height + 10 / zoom,
-  }, undefined, zoom);
+  drawHandles(
+    ctx,
+    {
+      x: bounds.x - 5 / zoom,
+      y: bounds.y - 5 / zoom,
+      width: bounds.width + 10 / zoom,
+      height: bounds.height + 10 / zoom,
+    },
+    undefined,
+    zoom,
+  );
 };
 
 const drawSmoothPencilPath = (
@@ -319,8 +324,6 @@ export const drawShape = (
 ): void => {
   if (!ctx || !shape) return;
   const zoom = camera?.z ?? 1;
-
-
   const type = shape.type;
 
   // convert color
@@ -338,7 +341,7 @@ export const drawShape = (
 
   ctx.save();
   try {
-    if (shape.type === "pencil") {
+    if (type === "pencil") {
       ctx.beginPath();
       drawSmoothPencilPath(
         ctx,
@@ -353,7 +356,7 @@ export const drawShape = (
       );
       ctx.stroke();
     }
-    if (shape.type === "arrow") {
+    if (type === "arrow") {
       console.log(shape.startX, shape.points[2]!.x);
       drawEnhancedArrow(
         ctx,
@@ -424,6 +427,18 @@ export const drawShape = (
       drawText(ctx, shape);
     } else if (type === "line") {
       drawLine(ctx, { x: shape.startX, y: shape.startY }, shape.points);
+    } else if (type === "image") {
+      if (shape.state === "loading") {
+        console.log("shape loading..");
+        return;
+      }
+      if (!shape.link) return;
+
+      const img = new Image();
+      img.onload = () => {
+        ctx.drawImage(img, shape.startX, shape.startY);
+      };
+      img.src = shape.link;
     }
   } finally {
     ctx.restore();

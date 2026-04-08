@@ -33,21 +33,22 @@ const tools: {
   icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<Icon>>;
   label: string;
 }[] = [
-    { id: "select" as const, icon: IconSend, label: "select" },
-    { id: "hand" as const, icon: IconHandStop, label: "hand" },
-    { id: "ellipse" as const, icon: IconCircle, label: "circle" },
-    { id: "rectangle" as const, icon: IconSquare, label: "square" },
-    { id: "diamond" as const, icon: IconSquareRotated, label: "diamond" },
-    { id: "line" as const, icon: IconLine, label: "line" },
-    { id: "arrow" as const, icon: IconTrendingUp, label: "arrow" },
-    { id: "pencil" as const, icon: IconPencilMinus, label: "pencil" },
-    { id: "text" as const, icon: IconTextSize, label: "text" },
-    { id: "image" as const, icon: IconPhoto, label: "image" },
-    { id: "color" as const, icon: IconDroplet, label: "color" },
-  ];
+  { id: "select" as const, icon: IconSend, label: "select" },
+  { id: "hand" as const, icon: IconHandStop, label: "hand" },
+  { id: "ellipse" as const, icon: IconCircle, label: "circle" },
+  { id: "rectangle" as const, icon: IconSquare, label: "square" },
+  { id: "diamond" as const, icon: IconSquareRotated, label: "diamond" },
+  { id: "line" as const, icon: IconLine, label: "line" },
+  { id: "arrow" as const, icon: IconTrendingUp, label: "arrow" },
+  { id: "pencil" as const, icon: IconPencilMinus, label: "pencil" },
+  { id: "text" as const, icon: IconTextSize, label: "text" },
+  { id: "image" as const, icon: IconPhoto, label: "image" },
+  { id: "color" as const, icon: IconDroplet, label: "color" },
+];
 
 type toolkitProps = {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
+  inputRef: React.RefObject<HTMLInputElement | null>;
   toolKitState: ToolKitType;
   handleToolSelect: (toolname: AllToolTypes) => void;
   handleColorSelect: (color: ColorType) => void;
@@ -58,6 +59,7 @@ type toolkitProps = {
 
 const Toolkit = ({
   canvasRef,
+  inputRef,
   toolKitState,
   handleToolSelect,
   handleColorSelect,
@@ -221,6 +223,7 @@ const Toolkit = ({
         {tools.map((tool) => {
           return (
             <ToolIcon
+              ref={inputRef}
               isSelected={toolKitState.currentTool === tool.id}
               key={tool.id}
               toolInfo={tool}

@@ -16,8 +16,7 @@ const useInteractionState = () => {
 
   const tempShapeRef = useRef<DrawElement | null>(null);
 
-  // ═══ WRITERS ═══════════════════════════════════════════════
-
+  //here we write
   const startDrag = useCallback(
     (
       shapeId: string,
@@ -68,8 +67,7 @@ const useInteractionState = () => {
     interactionRef.current.isDrawing = false;
   }, []);
 
-  // ═══ READERS ═══════════════════════════════════════════════
-
+  // raders
   const getDragState = useCallback(
     (): DragStateType => ({
       draggedShapeId: interactionRef.current.draggedShapeId,

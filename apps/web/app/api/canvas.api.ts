@@ -23,3 +23,7 @@ export const leaveRoom = async (roomId: string): Promise<any> => {
   const res = await axiosInstance.post("/api/rooms/leave", { roomId: roomId });
   return res.data;
 };
+
+// export const uploadImg = async(formData:FormData){
+//   const res = await axiosInstance.post(`https://api.cloudinary.com/v1_1/{{cloud_name}}/:resource_type/upload`)
+// }

@@ -46,7 +46,8 @@ const page = () => {
     handleLeaveRoom,
     handleJoinRoom,
     slug,
-    canvasDispatch
+    canvasDispatch,
+    inputRef,
   } = useSocketWithWhiteboard();
 
   const { loading, result, handleDrawRequest } = useAi();
@@ -79,6 +80,7 @@ const page = () => {
 
   const toolkitProps: toolkitProps = {
     canvasRef,
+    inputRef,
     handleColorSelect,
     handleStrokeSelect,
     handleToolSelect,
@@ -89,6 +91,14 @@ const page = () => {
 
   return (
     <div className={`relative h-screen w-screen duration-300`}>
+      {/* {toolkitProps.toolKitState.currentTool === "image" && ( */}
+      {/* <input
+        className="absolute w-10 h-10 bg-amber-400"
+        type="file"
+        id="fileInput"
+        accept="image/*"
+      /> */}
+      {/* )} */}
       <Toolkit {...toolkitProps} />
       {/* <Button
         className="absolute top-0 left-0 z-1000"

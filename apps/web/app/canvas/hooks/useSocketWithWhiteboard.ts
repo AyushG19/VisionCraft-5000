@@ -24,6 +24,7 @@ import {
 
 export const useSocketWithWhiteboard = (): {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
+  inputRef: React.RefObject<HTMLInputElement | null>;
   canvasState: CanvasState;
   selectedShape: DrawElement | undefined;
   setSelectedShape: (shape: DrawElement | undefined) => void;
@@ -59,7 +60,7 @@ export const useSocketWithWhiteboard = (): {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [messages, setMessages] = useState<ServerMessageType[]>([]);
   const [textEdit, setTextEdit] = useState<TextEditState>(null);
-
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const {
     inRoom,
     setToken,
@@ -212,6 +213,7 @@ export const useSocketWithWhiteboard = (): {
 
   const { selectedShape, setSelectedShape } = useCanvasInteraction(
     canvasRef,
+    inputRef,
     canvasState,
     canvasDispatch,
     dispatchWithSocket,
@@ -280,6 +282,7 @@ export const useSocketWithWhiteboard = (): {
 
   return {
     canvasRef,
+    inputRef,
     canvasState,
     selectedShape,
     setSelectedShape,

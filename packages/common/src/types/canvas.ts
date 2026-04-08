@@ -71,8 +71,10 @@ export type ShapeType = z.infer<typeof ShapeElementSchema>;
 
 export const ImageElementSchema = BaseElementSchema.extend({
   type: z.literal("image"),
-  fileId: z.string(),
-  scale: z.tuple([z.number(), z.number()]),
+  state: z.enum(["loading", "finished"]),
+  link: z.string().nullable(),
+  width: z.number(),
+  height: z.number(),
 });
 
 export type ImageType = z.infer<typeof ImageElementSchema>;
