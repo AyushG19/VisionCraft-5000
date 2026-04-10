@@ -1,72 +1,49 @@
 "use client";
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   RoomOptions,
   JoinRoomModal,
   Toolkit,
   toolkitProps,
   SideCollapseChat,
-  Button,
 } from "@repo/ui";
-import { drawShape } from "./utils/drawing";
 import { DrawElement } from "@repo/common";
 import { useSocketWithWhiteboard } from "./hooks/useSocketWithWhiteboard";
 import { createRoomService } from "app/services/canvas.service";
 import oklchToCSS from "../lib/oklchToCss";
 import useAi from "./hooks/useAi";
-import { useError, useSocketContext } from "@repo/hooks";
+import { useSocketContext } from "@repo/hooks";
 import { ErrorModal } from "@workspace/ui/components/ErrorModal";
 import UsersCursor from "@workspace/ui/components/ui/UsersCursor";
 import useRafLoop from "./hooks/useRafLoop";
 
-const page = () => {
+const Page = () => {
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
   const { roomInfo, memberCursor } = useSocketContext();
 
   useRafLoop({ cursorMap: memberCursor.current });
 
-  const {
-    canvasRef,
-    canvasState,
-    handleColorSelect,
-    handleRedo,
-    handleStrokeSelect,
-    handleToolSelect,
-    handleUndo,
-    send,
-    messages,
-    setMessages,
-    textEdit,
-    setTextEdit,
-    finishText,
-    cancelText,
-    inRoom,
-    isOpen,
-    setIsOpen,
-    handleLeaveRoom,
-    handleJoinRoom,
-    slug,
-    canvasDispatch,
-    inputRef,
-  } = useSocketWithWhiteboard();
+  const wb = useSocketWithWhiteboard();
+  const canvas = wb.canvasRef.current;
 
   const { loading, result, handleDrawRequest } = useAi();
   const sendReqToAi = (command: string) => {
-    const ctx = canvasRef.current?.getContext("2d");
+    const ctx = wb.canvasRef.current?.getContext("2d");
     if (!ctx) {
       console.error("no ctx");
       return;
     }
-    handleDrawRequest(ctx, canvasState.textState.fontFamily, command);
+    handleDrawRequest(ctx, wb.canvasState.textState.fontFamily, command);
   };
 
   const handleChatToggle = () => {
-    setIsOpen((prev) => !prev);
+    wb.setIsOpen((prev) => !prev);
   };
 
+  const canvasDispatch = wb.canvasDispatch;
   useEffect(() => {
-    if (!canvasRef.current) return;
-    const ctx = canvasRef.current.getContext("2d");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
     if (!ctx) {
       console.error("canvas element not available");
       return;
@@ -79,14 +56,13 @@ const page = () => {
   }, [result]);
 
   const toolkitProps: toolkitProps = {
-    canvasRef,
-    inputRef,
-    handleColorSelect,
-    handleStrokeSelect,
-    handleToolSelect,
-    toolKitState: canvasState.toolState,
-    handleRedo,
-    handleUndo,
+    canvasRef: wb.canvasRef,
+    handleColorSelect: wb.handleColorSelect,
+    handleStrokeSelect: wb.handleStrokeSelect,
+    handleToolSelect: wb.handleToolSelect,
+    toolKitState: wb.canvasState.toolState,
+    handleRedo: wb.handleRedo,
+    handleUndo: wb.handleUndo,
   };
 
   return (
@@ -99,7 +75,7 @@ const page = () => {
         accept="image/*"
       /> */}
       {/* )} */}
-      <Toolkit {...toolkitProps} />
+      <Toolkit {...toolkitProps} ref={wb.inputRef} />
       {/* <Button
         className="absolute top-0 left-0 z-1000"
         onClick={() => {
@@ -115,79 +91,81 @@ const page = () => {
           );
         }}
       ></Button> */}
-      {textEdit && (
+      {wb.textEdit && (
         <textarea
           autoFocus
           ref={textAreaRef}
-          onBlur={finishText}
-          value={textEdit.text}
-          onChange={(e) => setTextEdit({ ...textEdit, text: e.target.value })}
+          onBlur={wb.finishText}
+          value={wb.textEdit.text}
+          onChange={(e) =>
+            wb.setTextEdit({ ...wb.textEdit!, text: e.target.value })
+          }
           onKeyDown={(e) => {
-            if (e.key === "Enter") finishText();
-            if (e.key === "Escape") cancelText();
+            if (e.key === "Enter") wb.finishText();
+            if (e.key === "Escape") wb.cancelText();
           }}
           style={{
             position: "absolute",
-            left: textEdit.x,
-            top: textEdit.y,
+            left: wb.textEdit.x,
+            top: wb.textEdit.y,
             width: "auto",
             height: "auto",
-            fontSize: canvasState.textState.fontSize,
+            fontSize: wb.canvasState.textState.fontSize,
             background: "transparent",
             border: "none",
             outline: "none",
             resize: "none",
-            color: oklchToCSS(canvasState.toolState.currentColor),
-            textAlign: canvasState.textState.alignment,
+            color: oklchToCSS(wb.canvasState.toolState.currentColor),
+            textAlign: wb.canvasState.textState.alignment,
             overflow: "hidden",
-            fontFamily: canvasState.textState.fontFamily,
+            fontFamily: wb.canvasState.textState.fontFamily,
           }}
         />
       )}
       <canvas
-        ref={canvasRef}
+        ref={wb.canvasRef}
         className="w-full h-full bg-canvas text-white"
       ></canvas>
 
-      {inRoom ? (
+      {wb.inRoom ? (
         <>
           <RoomOptions
             onChatToggle={handleChatToggle}
-            isChatOpen={isOpen}
-            handleLeaveRoom={handleLeaveRoom}
+            isChatOpen={wb.isOpen}
+            handleLeaveRoom={wb.handleLeaveRoom}
           />
           {roomInfo.users.map((u) => (
             <UsersCursor key={u.userId} {...u} />
           ))}
           <SideCollapseChat
-            inRoom={inRoom}
-            send={send}
-            messages={messages}
-            setMessages={setMessages}
+            inRoom={wb.inRoom}
+            send={wb.send}
+            messages={wb.messages}
+            setMessages={wb.setMessages}
             fetchChartFromAi={sendReqToAi}
-            isOpen={isOpen}
+            isOpen={wb.isOpen}
             isLoading={loading}
-            slug={slug}
+            slug={wb.slug}
           />
         </>
       ) : (
         <>
           <JoinRoomModal
             makeNewRoom={createRoomService}
-            verifyJoin={handleJoinRoom}
+            verifyJoin={wb.handleJoinRoom}
             onChatToggle={handleChatToggle}
-            isChatOpen={isOpen}
+            isChatOpen={wb.isOpen}
           />
 
           <SideCollapseChat
-            inRoom={inRoom}
-            send={send}
-            messages={messages}
-            setMessages={setMessages}
+            inRoom={wb.inRoom}
+            send={wb.send}
+            messages={wb.messages}
+            setMessages={wb.setMessages}
             fetchChartFromAi={sendReqToAi}
-            isOpen={isOpen}
+            isOpen={wb.isOpen}
             isLoading={loading}
-            slug={slug}
+            slug={wb.slug}
           />
         </>
       )}
@@ -196,4 +174,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

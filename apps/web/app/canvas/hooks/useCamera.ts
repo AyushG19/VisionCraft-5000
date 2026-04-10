@@ -2,7 +2,7 @@ import { RefObject, useCallback, useEffect, useRef, useState } from "react";
 
 export type Camera = { x: number; y: number; z: number };
 
-const WORLD_LIMIT = 5000;
+const WORLD_LIMIT = 50000;
 const PADDING = 150;
 const SNAP_SPEED = 0.15;
 
@@ -13,14 +13,13 @@ export function useCamera(
   const [camera, setCamera] = useState<Camera>(() => {
     if (typeof window !== "undefined") {
       return {
-        x: window.innerWidth / 2 - (WORLD_LIMIT / 2),
-        y: window.innerHeight / 2 - (WORLD_LIMIT / 2),
-        z: 1
-      }
+        x: window.innerWidth / 2 - WORLD_LIMIT / 2,
+        y: window.innerHeight / 2 - WORLD_LIMIT / 2,
+        z: 1,
+      };
     }
     return { x: 0, y: 0, z: 1 };
   });
-
 
   const isPanning = useRef(false);
   const lastPos = useRef({ x: 0, y: 0 });

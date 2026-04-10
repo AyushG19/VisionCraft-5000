@@ -5,6 +5,9 @@ export const WebEnv = z.object({
   HTTP_BACKEND_URL: z.string(),
   WS_BACKEND_URL: z.string(),
   WORKER_BACKEND_URL: z.string(),
+  CLOUD_API_KEY: z.string(),
+  CLOUD_SECRET: z.string(),
+  CLOUD_NAME: z.string(),
 });
 
 export type WebEnvType = z.infer<typeof WebEnv>;

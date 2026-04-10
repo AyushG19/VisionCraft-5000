@@ -1,9 +1,12 @@
 import { useCallback } from "react";
-import { pencilIcon, selectIcon } from "../../lib/pencilIcon";
+import { pencilIcon } from "../../lib/pencilIcon";
 import { AllToolTypes, DrawElement, ShapeType } from "@repo/common";
 import { HandleName } from "../../lib/getHandles";
-import { isInsideSelectBound, isPointInHandle } from "../utils/isPointInShape";
-import isClickOnShape from "../utils/isPointInShape";
+import {
+  isInsideSelectBound,
+  isPointInHandle,
+  isClickOnShape,
+} from "../utils/isPointInShape";
 import {
   getBoundsForHandles,
   getOutlineBounds,

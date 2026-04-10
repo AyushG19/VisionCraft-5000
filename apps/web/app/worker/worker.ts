@@ -1,8 +1,11 @@
+export {};
+
 interface WorkerMessage {
   imgBitmap: ImageBitmap;
 }
 self.onmessage = async function (message: MessageEvent<WorkerMessage>) {
   const { imgBitmap } = message.data;
+  console.log("imgbitmap:", imgBitmap);
 
   const MAX_DIMENTION = 1950;
 
@@ -20,13 +23,12 @@ self.onmessage = async function (message: MessageEvent<WorkerMessage>) {
     const ctx = offScrCanvas.getContext("2d");
     if (!ctx) return;
 
-    ctx.drawImage(imgBitmap, 0, 0, w, h);
-    imgBitmap.close();
     const compressedBlob = await offScrCanvas.convertToBlob({
       type: "image/webp",
       quality: 0.7,
     });
     self.postMessage(compressedBlob);
+    imgBitmap.close();
   } catch (error) {
     console.error("Worker error: ", error);
   }

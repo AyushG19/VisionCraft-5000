@@ -1,4 +1,10 @@
-import { DrawElement, PencilType, PointType, ShapeType } from "@repo/common";
+import {
+  DrawElement,
+  PencilType,
+  PointType,
+  ShapeType,
+  type ImageType,
+} from "@repo/common";
 import { DragStateType, ResizeStateType } from "../types";
 
 export const createDraggedShape = (
@@ -16,7 +22,7 @@ export const createDraggedShape = (
     const dy = shape.endY - shape.startY;
     const clampedX = currMousePos.x - dragState.offsetX;
     const clampedY = currMousePos.y - dragState.offsetY;
-    
+
     return {
       ...shape,
       startX: clampedX,
@@ -24,12 +30,12 @@ export const createDraggedShape = (
       endX: clampedX + dx,
       endY: clampedY + dy,
     };
-  } else if (shape.type === "text") {
+  } else if (shape.type === "text" || shape.type === "image") {
     const dx = shape.width;
     const dy = shape.height;
     const clampedX = currMousePos.x - dragState.offsetX;
     const clampedY = currMousePos.y - dragState.offsetY;
-    
+
     return {
       ...shape,
       startX: clampedX,
@@ -40,7 +46,7 @@ export const createDraggedShape = (
     const dy = shape.points[2]!.y;
     const clampedX = currMousePos.x - dragState.offsetX;
     const clampedY = currMousePos.y - dragState.offsetY;
-    
+
     return {
       ...shape,
       startX: clampedX,
@@ -82,14 +88,16 @@ export const createDraggedShape = (
 
 type ResizableShape =
   | ShapeType // rectangle, ellipse, triangle
-  | PencilType; // pencil (has endX/endY in your model)
+  | PencilType // pencil (has endX/endY in your model)
+  | ImageType;
 
 function isResizableShape(shape: DrawElement): shape is ResizableShape {
   return (
     shape.type === "rectangle" ||
     shape.type === "ellipse" ||
     shape.type === "diamond" ||
-    shape.type === "pencil"
+    shape.type === "pencil" ||
+    shape.type === "image"
   );
 }
 
@@ -100,6 +108,70 @@ export const createResizedShape = (
 ): DrawElement => {
   if (!isResizableShape(shape)) return shape;
 
+  if (shape.type === "image") {
+    // Prevent division by zero errors if width/height are corrupted
+    if (shape.width === 0 || shape.height === 0) return shape;
+
+    // 1. Calculate the original aspect ratio
+    const ratio = shape.width / shape.height;
+
+    // 2. Find the "Anchor Point" (the corner directly opposite to the one you are dragging)
+    let anchorX = 0;
+    let anchorY = 0;
+
+    switch (resizeState.resizeDirection) {
+      case "TOP_LEFT":
+        anchorX = shape.startX + shape.width;
+        anchorY = shape.startY + shape.height;
+        break;
+      case "TOP_RIGHT":
+        anchorX = shape.startX;
+        anchorY = shape.startY + shape.height;
+        break;
+      case "BOTTOM_LEFT":
+        anchorX = shape.startX + shape.width;
+        anchorY = shape.startY;
+        break;
+      case "BOTTOM_RIGHT":
+        anchorX = shape.startX;
+        anchorY = shape.startY;
+        break;
+      default:
+        // If it's a side handle (TOP, BOTTOM, LEFT, RIGHT), you usually either
+        // ignore aspect ratio, or just return the shape.
+        return shape;
+    }
+
+    // 3. Calculate the raw distance from the anchor to the mouse
+    const dx = currPos.x - anchorX;
+    const dy = currPos.y - anchorY;
+
+    const rawW = Math.abs(dx);
+    const rawH = Math.abs(dy);
+
+    // 4. Pick the axis that the user is pulling the furthest to drive the scale
+    let finalW, finalH;
+    if (rawW / ratio > rawH) {
+      finalW = rawW;
+      finalH = rawW / ratio; // Force height to match ratio
+    } else {
+      finalH = rawH;
+      finalW = rawH * ratio; // Force width to match ratio
+    }
+
+    // 5. Calculate new start positions.
+    // If dx/dy are negative, the mouse was dragged past the anchor (inverting the shape).
+    const newStartX = dx < 0 ? anchorX - finalW : anchorX;
+    const newStartY = dy < 0 ? anchorY - finalH : anchorY;
+
+    return {
+      ...shape,
+      startX: newStartX,
+      startY: newStartY,
+      width: finalW,
+      height: finalH,
+    };
+  }
   let newStartX = shape.startX;
   let newStartY = shape.startY;
   let newEndX = shape.endX;

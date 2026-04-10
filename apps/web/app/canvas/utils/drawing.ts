@@ -1,19 +1,8 @@
 import oklchToCSS from "../../lib/oklchToCss";
-import {
-  ActionTool,
-  PointType,
-  TextType,
-  type DrawElement,
-} from "@repo/common";
-import { Bounds, getHandles, Handle } from "../../lib/getHandles";
-import { start } from "repl";
-import {
-  createRoundedRectPath,
-  drawHandles,
-  drawLabel,
-} from "app/lib/drawing.helpers";
-import { formToJSON } from "axios";
+import { ImageType, PointType, TextType, type DrawElement } from "@repo/common";
+import { drawHandles, drawLabel } from "app/lib/drawing.helpers";
 import { Camera } from "../hooks/useCamera";
+import { imageCache } from "./redrawPreviousShapes";
 
 // Type definitions for better type safety
 interface Point {
@@ -45,7 +34,7 @@ const hasFillColor = (
   return "fillColor" in shape && shape.fillColor != null;
 };
 
-// Type guard to check if shape has line width
+// Typ
 const hasLineWidth = (
   shape: DrawElement,
 ): shape is DrawElement & { lineWidth: number } => {
@@ -194,7 +183,7 @@ const drawEnhancedArrow = (
   ctx.stroke();
 };
 
-const drawRoundedDiamond = (
+const drawRoundedDiamond_ = (
   ctx: CanvasRenderingContext2D,
   startX: number,
   startY: number,
@@ -286,6 +275,54 @@ const drawRoundedDiamond = (
 
   ctx.closePath();
 };
+export const drawRoundedRhombus = (
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number = 10,
+  zoom: number = 1,
+  isSelectionUI: boolean = false,
+) => {
+  const cx = x + width / 2;
+  const cy = y + height / 2;
+
+  const top = { x: cx, y };
+  const right = { x: x + width, y: cy };
+  const bottom = { x: cx, y: y + height };
+  const left = { x, y: cy };
+
+  // 1. Calculate desired radius based on zoom (grows huge when zooming out)
+  const targetRadius = isSelectionUI ? radius / zoom : radius;
+
+  // 2. THE FIX: Protect the shape's geometry!
+  // The radius can safely be at most 25% of the shortest side.
+  // If we exceed this, arcTo() will glitch and turn inside out.
+  const maxSafeRadius = Math.min(width, height) * 0.25;
+  const activeRadius = Math.min(radius, maxSafeRadius); // Clamp it
+
+  const activeLineWidth = isSelectionUI ? 2 / zoom : 2;
+
+  ctx.save();
+  ctx.beginPath();
+
+  // Start EXACTLY at the midpoint of the top-right edge
+  ctx.moveTo(x + width * 0.75, y + height * 0.25);
+
+  // Draw the corners safely
+  ctx.arcTo(right.x, right.y, bottom.x, bottom.y, activeRadius);
+  ctx.arcTo(bottom.x, bottom.y, left.x, left.y, activeRadius);
+  ctx.arcTo(left.x, left.y, top.x, top.y, activeRadius);
+  ctx.arcTo(top.x, top.y, right.x, right.y, activeRadius);
+
+  ctx.closePath();
+
+  ctx.lineWidth = activeLineWidth;
+  ctx.lineJoin = "round"; // Hides sharp glitches if they somehow happen
+  ctx.stroke();
+  ctx.restore();
+};
 
 function drawText(ctx: CanvasRenderingContext2D, el: TextType) {
   ctx.save();
@@ -319,8 +356,8 @@ function drawLine(
 export const drawShape = (
   ctx: CanvasRenderingContext2D,
   shape: DrawElement,
+  camera: Camera,
   selectedShapeId?: string,
-  camera?: Camera,
 ): void => {
   if (!ctx || !shape) return;
   const zoom = camera?.z ?? 1;
@@ -385,14 +422,15 @@ export const drawShape = (
       const width = shape.endX - shape.startX;
       const height = shape.endY - shape.startY;
       const radius = Math.min(8, Math.abs(width) / 8, Math.abs(height) / 8);
-      createRoundedRectPath(
-        ctx,
-        shape.startX,
-        shape.startY,
-        width,
-        height,
-        radius,
-      );
+      // createRoundedRectPath(
+      //   ctx,
+      //   shape.startX,
+      //   shape.startY,
+      //   width,
+      //   height,
+      //   radius,
+      // );
+      ctx.roundRect(shape.startX, shape.startY, width, height, 20);
       if (shape.label) {
         const centerY = shape.startY + height / 2;
         const centerX = shape.startX + width / 2;
@@ -405,14 +443,19 @@ export const drawShape = (
     } else if (type === "diamond") {
       const width = shape.endX - shape.startX;
       const height = shape.endY - shape.startY;
-      const radius = Math.min(6, Math.abs(width) / 10, Math.abs(height) / 10);
-      drawRoundedDiamond(
+      const radius = Math.min(
+        6 * camera.z,
+        (Math.abs(width) * camera.z) / 10,
+        (Math.abs(height) * camera.z) / 10,
+      );
+      drawRoundedRhombus(
         ctx,
         shape.startX,
         shape.startY,
-        shape.endX,
-        shape.endY,
-        radius,
+        width,
+        height,
+        20,
+        camera.z,
       );
       if (shape.label) {
         const centerY = shape.startY + height / 2;
@@ -428,24 +471,14 @@ export const drawShape = (
     } else if (type === "line") {
       drawLine(ctx, { x: shape.startX, y: shape.startY }, shape.points);
     } else if (type === "image") {
-      if (shape.state === "loading") {
-        console.log("shape loading..");
-        return;
-      }
-      if (!shape.link) return;
-
-      const img = new Image();
-      img.onload = () => {
-        ctx.drawImage(img, shape.startX, shape.startY);
-      };
-      img.src = shape.link;
+      drawImageShape(ctx, shape, imageCache);
     }
   } finally {
     ctx.restore();
   }
 
   if (shape.id === selectedShapeId) {
-    if (shape.type === "text") {
+    if (shape.type === "text" || shape.type === "image") {
       const bounds = {
         x: shape.startX,
         y: shape.startY,
@@ -455,11 +488,11 @@ export const drawShape = (
       highlightShape(ctx, shape, bounds, zoom);
       return;
     }
+
     if (
       shape.type === "line" ||
       shape.type === "arrow" ||
-      shape.type === "pencil" ||
-      shape.type === "image"
+      shape.type === "pencil"
     )
       return;
 
@@ -469,5 +502,46 @@ export const drawShape = (
       const bounds = { x: shape.startX, y: shape.startY, width, height };
       highlightShape(ctx, shape, bounds, zoom);
     }
+  }
+};
+
+export const drawImageShape = (
+  ctx: CanvasRenderingContext2D,
+  shape: ImageType,
+  imageCache?: Map<string, ImageBitmap | Promise<ImageBitmap>>,
+  onLoad?: () => void, // triggers re-render after bitmap loads
+) => {
+  if (!imageCache) return;
+
+  const cached = imageCache.get(shape.id);
+  ctx.lineWidth = shape.strokeWidth || 5;
+  ctx.strokeStyle = oklchToCSS(shape.strokeColor) || "white";
+  // ✅ Already ready — draw immediately
+  if (cached instanceof ImageBitmap) {
+    ctx.drawImage(
+      cached,
+      shape.startX,
+      shape.startY,
+      shape.width,
+      shape.height,
+    );
+    return;
+  }
+
+  // ⏳ Already loading — do nothing, wait for resolve
+  if (cached instanceof Promise) return;
+
+  // 🔴 Not in cache yet — if has cloudinary link, load from URL
+  if (shape.link) {
+    const promise = fetch(shape.link)
+      .then((r) => r.blob())
+      .then((blob) => createImageBitmap(blob))
+      .then((bm) => {
+        imageCache.set(shape.id, bm);
+        onLoad?.(); // trigger one redraw
+        return bm;
+      });
+    imageCache.set(shape.id, promise); // block duplicate calls
+    return;
   }
 };

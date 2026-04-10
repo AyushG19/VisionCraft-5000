@@ -39,3 +39,5 @@ yarn-error.log*
 
 # TypeScript incremental build info
 *.tsbuildinfo
+.vscod
+.zed

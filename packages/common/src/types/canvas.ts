@@ -71,7 +71,7 @@ export type ShapeType = z.infer<typeof ShapeElementSchema>;
 
 export const ImageElementSchema = BaseElementSchema.extend({
   type: z.literal("image"),
-  state: z.enum(["loading", "finished"]),
+  state: z.enum(["loading", "finished"]).optional(),
   link: z.string().nullable(),
   width: z.number(),
   height: z.number(),

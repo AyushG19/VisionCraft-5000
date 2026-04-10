@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { DrawElement, ShapeType } from "@repo/common";
-import isClickOnShape, {
+import {
+  isClickOnShape,
   isInsideSelectBound,
   isPointInHandle,
 } from "../utils/isPointInShape";
@@ -9,14 +10,14 @@ import {
   getOutlineBounds,
 } from "../utils/getBoundsHelpers";
 import redrawPreviousShapes from "../utils/redrawPreviousShapes";
-import { CanvasState, Action, DrawableTool } from "../types";
+import { CanvasState, Action } from "../types";
 import {
   createDraggedShape,
   createResizedShape,
 } from "../utils/createTempShapeHelper";
 import { HandleName } from "../../lib/getHandles";
 import useInteractionState from "./useInteractionState";
-import { Camera, useCamera } from "./useCamera";
+import { Camera } from "./useCamera";
 
 type UseInteractionStateReturn = ReturnType<typeof useInteractionState>;
 
@@ -43,9 +44,8 @@ const useSelectInteraction = (
       worldPos: { x: number; y: number },
       currentSelected: DrawElement | undefined,
       canvasState: CanvasState,
-      camera: Camera,
     ): DrawElement | undefined => {
-      // ─── Case 1: Something already selected ──────────────────
+      //Case 1: Something already selected
       if (currentSelected) {
         const outlineBounds = getOutlineBounds(currentSelected);
         const handleBounds = getBoundsForHandles(currentSelected);
@@ -73,7 +73,7 @@ const useSelectInteraction = (
         }
       }
 
-      // ─── Case 2: Click on different shape ────────────────────
+      //  Case 2: Click on different shape
       // Search from end so topmost (last-drawn) wins
       const clickedShape = [...canvasState.drawnShapes]
         .reverse()

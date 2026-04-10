@@ -11,7 +11,7 @@ const useCanvasRenderer = (
   selectedShape: DrawElement | undefined,
   canvasStateRef: React.MutableRefObject<CanvasState>,
   selectedShapeRef: React.MutableRefObject<DrawElement | undefined>,
-  isOpen: boolean,
+  inRoom: boolean,
   camera: Camera,
 ) => {
   const frameRef = useRef<number | null>(null);
@@ -58,7 +58,7 @@ const useCanvasRenderer = (
     canvasStateRef,
     selectedShapeRef,
     canvasRef,
-    isOpen,
+    inRoom,
     camera,
   ]);
 };

@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useEffect, useReducer, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useCallback,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import useCanvasInteraction from "./useCanvasInteraction";
 import canvasReducer, { initialCanvasState } from "../utils/canvasReducer";
 import { Action, CanvasState, SendPropsType, TextEditState } from "../types";
@@ -21,6 +27,8 @@ import {
   generateUserObject,
   incomingSocketHandlers,
 } from "app/lib/socket.helper";
+import { screenToWorld } from "app/lib/math";
+import { useCamera } from "./useCamera";
 
 export const useSocketWithWhiteboard = (): {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
@@ -61,6 +69,7 @@ export const useSocketWithWhiteboard = (): {
   const [messages, setMessages] = useState<ServerMessageType[]>([]);
   const [textEdit, setTextEdit] = useState<TextEditState>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  // const imageCache= useRef< Map<string, ImageBitmap | Promise<ImageBitmap>>>(new Map());
   const {
     inRoom,
     setToken,
@@ -70,6 +79,8 @@ export const useSocketWithWhiteboard = (): {
     roomInfo,
     memberCursor,
   } = useSocketContext();
+
+  const { camera } = useCamera(canvasRef, canvasState.toolState.currentTool);
 
   const { getScreenCoordinates } = useMousePosition(canvasRef);
 
@@ -191,7 +202,7 @@ export const useSocketWithWhiteboard = (): {
     }
   };
 
-  const dispatchWithSocket = (action: Action) => {
+  const dispatchWithSocket = useCallback((action: Action) => {
     canvasDispatch(action);
 
     if (!send) return;
@@ -209,7 +220,7 @@ export const useSocketWithWhiteboard = (): {
         send("DEL_SHAPE", action.payload);
         break;
     }
-  };
+  }, []);
 
   const { selectedShape, setSelectedShape } = useCanvasInteraction(
     canvasRef,
@@ -218,7 +229,7 @@ export const useSocketWithWhiteboard = (): {
     canvasDispatch,
     dispatchWithSocket,
     sendCursorState,
-    isOpen,
+    inRoom,
     setTextEdit,
   );
   useEffect(() => {
@@ -246,7 +257,7 @@ export const useSocketWithWhiteboard = (): {
     const element = createNewText(
       canvasState.toolState,
       canvasState.textState,
-      { x: textEdit.x, y: textEdit.y },
+      screenToWorld(textEdit.x, textEdit.y, camera),
       textEdit.text,
       width,
       height,

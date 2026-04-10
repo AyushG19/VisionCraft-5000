@@ -1,4 +1,4 @@
-import { DrawElement, ShapeType } from "@repo/common";
+import { DrawElement, ShapeElementSchema, ShapeType } from "@repo/common";
 import { Bounds } from "../../lib/getHandles";
 
 export const getOutlineBounds = (shape: DrawElement): Bounds => {
@@ -15,6 +15,12 @@ export const getOutlineBounds = (shape: DrawElement): Bounds => {
     };
   } else if (shape.type === "line") {
   } else if (shape.type === "image") {
+    return {
+      x: shape.startX,
+      y: shape.startY,
+      width: shape.width,
+      height: shape.height,
+    };
   } else if (shape.type === "text") {
   } else {
   }
@@ -36,6 +42,13 @@ export const getBoundsForHandles = (shape: DrawElement): Bounds => {
       y: shape.startY,
       width: shape.endX - shape.startX,
       height: shape.endY - shape.startY,
+    };
+  } else if (shape.type === "image") {
+    return {
+      x: shape.startX,
+      y: shape.startY,
+      width: shape.width,
+      height: shape.height,
     };
   }
   return {

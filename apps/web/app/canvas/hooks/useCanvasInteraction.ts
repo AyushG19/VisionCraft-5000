@@ -4,7 +4,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { DrawElement, PointType, ShapeType } from "@repo/common";
 import { Action, CanvasState, TextEditState } from "../types";
 import resizeCanvas from "../utils/canvasResizeHelper";
-import redrawPreviousShapes from "../utils/redrawPreviousShapes";
+import redrawPreviousShapes, {
+  imageCache,
+} from "../utils/redrawPreviousShapes";
 
 import useInteractionState from "./useInteractionState";
 import useCanvasCursor from "./useCanvasCursor";
@@ -15,6 +17,10 @@ import { getMousePos } from "app/lib/coordinate.helper";
 import { useCamera } from "./useCamera";
 import { screenToWorld } from "app/lib/math";
 import { drawShape } from "../utils/drawing";
+import { storeImg } from "app/services/canvas.service";
+import { set } from "idb-keyval";
+import { get } from "http";
+import { createNewImage, createNewShape } from "../utils/createNewShape";
 
 const useCanvasInteraction = (
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
@@ -23,7 +29,7 @@ const useCanvasInteraction = (
   canvasDispatch: (action: Action) => void,
   dispatchWithSocket: (action: Action) => void,
   sendCursorState: (pos: PointType) => void,
-  isOpen: boolean,
+  inRoom: boolean,
   setTextEdit: React.Dispatch<React.SetStateAction<TextEditState>>,
 ) => {
   const [selectedShape, setSelectedShape] = useState<DrawElement | undefined>(
@@ -55,14 +61,17 @@ const useCanvasInteraction = (
     selectedShape,
     canvasStateRef,
     selectedShapeRef,
-    isOpen,
+    inRoom,
     camera,
   );
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const fileInput = inputRef.current;
-    if (!canvas || !fileInput) return;
+    if (!canvas || !fileInput) {
+      console.log("somethng missing:");
+      return;
+    }
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -119,7 +128,6 @@ const useCanvasInteraction = (
           pos,
           currentSelected,
           currentState,
-          camera,
         );
         if (newSelected?.type === "text") {
           setTextEdit({
@@ -145,7 +153,6 @@ const useCanvasInteraction = (
           screenToWorld(pos.x, pos.y, camera),
           currentSelected,
           currentState,
-          camera,
         );
         setSelectedShape(newSelected);
       } else if (tool === "text") {
@@ -254,22 +261,34 @@ const useCanvasInteraction = (
         new URL("../../worker/worker.ts", import.meta.url),
       );
       const imgBitmap = await createImageBitmap(lastImg);
-      console.log("bitmap:", imgBitmap);
+      const newImage = createNewImage(
+        imgBitmap.width,
+        imgBitmap.height,
+        camera,
+        canvasState.toolState.currentColor,
+        canvasState.toolState.strokeSize,
+      );
+      console.log("newimg", newImage);
 
       worker.postMessage({ imgBitmap });
       worker.onmessage = async (message) => {
-        // const ctx = canvas.getContext("2d");
-        const blob = message.data as Blob;
-        // console.log("siz:");
-        const bm = await createImageBitmap(blob);
-        ctx?.drawImage(bm, 0, 0);
-        ctx?.drawImage(imgBitmap, imgBitmap.width, 0);
-        console.log("og:", lastImg.size, "now:", blob.size);
+        const compressedBlob = message.data;
+        await set(newImage.id, compressedBlob);
+        imageCache.set(newImage.id, imgBitmap);
+        dispatchWithSocket({ type: "ADD_SHAPE", payload: newImage });
+
+        if (inRoom) {
+          storeImg(compressedBlob).then((res: any) => {
+            const updatedShape = { ...newImage, link: res };
+            dispatchWithSocket({ type: "UPD_SHAPE", payload: updatedShape });
+          });
+        }
       };
-      //   const tempUrl = URL.createObjectURL(lastImg);
-      //   const img = new Image();
-      //   img.onload = () => ctx?.drawImage(img, 0, 0);
-      //   img.src = tempUrl;
+      // const tempUrl = URL.createObjectURL(lastImg);
+      // const img = new Image();
+      // img.onload = () => ctx.drawImage(img, 0, 0);
+      // img.src =
+      //   "http://res.cloudinary.com/dg6spymhq/image/upload/v1775821766/djv9uk6ksl2s344mnpqu.webp";
     };
 
     canvas.addEventListener("mousedown", onMouseDown);
@@ -299,7 +318,7 @@ const useCanvasInteraction = (
       window.removeEventListener("keydown", onKeyDown);
       fileInput.removeEventListener("change", handleFileInput);
     };
-  }, [isOpen, camera]);
+  }, [inRoom, camera]);
 
   useEffect(() => {
     selectedShapeRef.current = selectedShape;

@@ -1,6 +1,7 @@
 import {
   ColorType,
   DrawElement,
+  ImageType,
   LinearType,
   LineTool,
   PencilType,
@@ -11,6 +12,8 @@ import {
   TextType,
   ToolKitType,
 } from "@repo/common";
+import { screenToWorld } from "app/lib/math";
+import { Camera } from "../hooks/useCamera";
 
 export function createNewShape(
   toolKitState: ToolKitType,
@@ -35,13 +38,15 @@ export function createNewShape(
   // }
   const type = toolKitState.currentTool;
   if (type === "arrow") {
+    const midX = (currentPos.x - startPos.x) / 2;
+    const midY = (currentPos.y - startPos.y) / 2;
     return {
       id: crypto.randomUUID(),
       startX: startPos.x,
       startY: startPos.y,
       points: [
         { x: 0, y: 0 },
-        { x: currentPos.x - startPos.x, y: currentPos.y - startPos.y },
+        { x: midX, y: midY },
         { x: currentPos.x - startPos.x, y: currentPos.y - startPos.y },
       ],
       strokeWidth: toolKitState.strokeSize,
@@ -253,5 +258,33 @@ export function finishPencil(shape: PencilType) {
     ...shape,
     points: normalizedPoints,
     isNormalized: true,
+  };
+}
+
+export function createNewImage(
+  width: number,
+  height: number,
+  camera: Camera,
+  strokeColor: ColorType,
+  strokeWidth: number = 5,
+  link?: string,
+): ImageType {
+  const { x, y } = screenToWorld(
+    window.innerWidth / 2 - width / 2,
+    window.innerHeight / 2 - height / 2,
+    camera,
+  );
+  return {
+    id: crypto.randomUUID(),
+    type: "image",
+    isDeleted: false,
+    height: height,
+    width: width,
+    startX: x,
+    startY: y,
+    link: link ?? null,
+    backgroundColor: null,
+    strokeColor: strokeColor,
+    strokeWidth: strokeWidth,
   };
 }
