@@ -213,7 +213,7 @@ const Toolkit = React.forwardRef<HTMLInputElement, toolkitProps>(
       <div
         ref={toolkitRef}
         draggable={false}
-        className="p-3 pb-3.5 pr-0 absolute rounded-lg flex items-center cursor-move bg-light_sky_blue outline-personal shadow-shinyshadow z-20"
+        className="p-3 pb-3.5 pr-0 absolute rounded-lg flex items-center cursor-move bg-primary outline-1 outline-global-shadow shadow-shinyprimary z-20"
         style={{
           top: currPos.y,
           left: currPos.x,
@@ -237,16 +237,16 @@ const Toolkit = React.forwardRef<HTMLInputElement, toolkitProps>(
           })}
           {/* <div className="h-8 w-[1px] ml-1 mt-1 bg-black"></div> */}
           <Button
-            className="w-9 h-9 p-2.5 flex items-center justify-center cursor-pointer text-black shadow-shinyshadow bg-uranian_blue button-press-active transition-all ease-in-out duration-100 "
+            className="w-9 h-9 p-0 flex items-center justify-center cursor-pointer text-black shadow-shinysecondary bg-secondary button-press-active transition-all ease-in-out duration-100 outline-1 outline-global-shadow"
             onClick={handleUndo}
           >
-            <IconArrowBackUp size={20} stroke={1.5} />
+            <IconArrowBackUp size={15} stroke={1.5} />
           </Button>
           <Button
-            className="w-9 h-9 p-2.5 flex items-center justify-center cursor-pointer text-black shadow-shinyshadow bg-uranian_blue button-press-active transition-all ease-in-out duration-100 "
+            className="w-9 h-9 p-0 flex items-center justify-center cursor-pointer text-black shadow-shinysecondary bg-secondary button-press-active transition-all ease-in-out duration-100 outline-1 outline-global-shadow "
             onClick={handleRedo}
           >
-            <IconArrowForwardUp size={20} stroke={1.5} />
+            <IconArrowForwardUp size={15} stroke={1.5} />
           </Button>
         </div>
 

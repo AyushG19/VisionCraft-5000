@@ -51,12 +51,16 @@ const checkCodeResponse = z.object({
 });
 
 export type CheckCodeResponseType = z.infer<typeof checkCodeResponse>;
+export type newRoom = {
+  id: string;
+  slug: string;
+  name: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  adminId: string;
+};
 
-const CreateRoomObjectType = z.object({
-  canvas: DrawSchema,
-});
-
-export type Room = z.infer<typeof CreateRoomObjectType>;
+// export type Room = z.infer<typeof CreateRoomObjectType>;
 
 export const leaveRoomBodySchema = z.object({
   roomId: z.string(),

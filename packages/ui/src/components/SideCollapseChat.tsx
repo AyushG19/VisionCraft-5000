@@ -10,6 +10,7 @@ import OptionModal, { selected } from "./ui/OptionModal";
 import { AnimatePresence, motion } from "motion/react";
 import ChatTop from "./ChatTop";
 import { ClientMessageType, ServerMessageType } from "@repo/common";
+import Loader from "./ui/Loader";
 
 const SideCollapseChat = React.forwardRef<HTMLDivElement, SideChatPropsType>(
   (
@@ -95,10 +96,10 @@ const SideCollapseChat = React.forwardRef<HTMLDivElement, SideChatPropsType>(
             exit={{ x: "100%" }}
             transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
             ref={ref}
-            className="absolute right-0 top-0 flex flex-col items-center justify-center h-full w-[360px] bg-light_sky_blue shadow-primary overflow-hidden outline"
+            className="absolute right-0 top-0 flex flex-col items-center justify-center h-full w-[360px] bg-priamry shadow-primary overflow-hidden outline-1 outline-global-shadow"
           >
             {inRoom && <ChatTop slug={slug} avatars={roomInfo.users} />}
-            <div className="w-full relative !h-full bg-light_sky_blue-700 overflow-hidden">
+            <div className="w-full relative !h-full bg-gradient-to-t from-primary via-secondary to-primary overflow-hidden">
               <div className="absolute inset-0 bg-[url('/pattern-2.svg')] bg-repeat bg-top-left opacity-20 pointer-events-none" />
 
               <div className="absolute h-full inset-0 bottom-14 p-2">
@@ -153,36 +154,37 @@ const SideCollapseChat = React.forwardRef<HTMLDivElement, SideChatPropsType>(
 
             <div
               draggable={false}
-              className="p-2 flex w-full h-14 gap-1.5 mt-auto items-center justify-center overflow-visible border-t bg-light_sky_blue"
+              className="p-2 flex w-full h-14 gap-1.5 mt-auto items-center justify-center bg-primary"
             >
               <div
                 onClick={handleShowOption}
-                className="outline-personal h-full aspect-square rounded-md cursor-pointer p-1 bg-light_sky_blue-700 hover:bg-light_sky_blue flex items-center justify-center transition-colors"
+                className="outline-global-shadow outline-1 h-full aspect-square rounded-md cursor-pointer bg-secondary text-secondary-contrast hover:bg-primary flex items-center justify-center transition-colors"
               >
-                {isLoading ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="animate-spin"
-                  >
-                    <path d="M12 6l0 -3" />
-                    <path d="M16.25 7.75l2.15 -2.15" />
-                    <path d="M18 12l3 0" />
-                    <path d="M16.25 16.25l2.15 2.15" />
-                    <path d="M12 18l0 3" />
-                    <path d="M7.75 16.25l-2.15 2.15" />
-                    <path d="M6 12l-3 0" />
-                    <path d="M7.75 7.75l-2.15 -2.15" />
-                  </svg>
+                {true ? (
+                  // <svg
+                  //   xmlns="http://www.w3.org/2000/svg"
+                  //   width="24"
+                  //   height="24"
+                  //   viewBox="0 0 24 24"
+                  //   fill="none"
+                  //   stroke="currentColor"
+                  //   strokeWidth="2"
+                  //   strokeLinecap="round"
+                  //   strokeLinejoin="round"
+                  //   className="animate-spin"
+                  // >
+                  //   <path d="M12 6l0 -3" />
+                  //   <path d="M16.25 7.75l2.15 -2.15" />
+                  //   <path d="M18 12l3 0" />
+                  //   <path d="M16.25 16.25l2.15 2.15" />
+                  //   <path d="M12 18l0 3" />
+                  //   <path d="M7.75 16.25l-2.15 2.15" />
+                  //   <path d="M6 12l-3 0" />
+                  //   <path d="M7.75 7.75l-2.15 -2.15" />
+                  // </svg>
+                  <Loader></Loader>
                 ) : (
-                  <IconSlash />
+                  <IconSlash size={25} />
                 )}
               </div>
               <input
@@ -192,7 +194,7 @@ const SideCollapseChat = React.forwardRef<HTMLDivElement, SideChatPropsType>(
                 onInput={(e) => setInputText(e.currentTarget.value)}
                 disabled={!isOpen}
                 placeholder="/ for AI, say hAI"
-                className="font-[google_sans_code] placeholder:text-xs text-sm min-w-40 max-w-200 h-full flex-1 rounded-md bg-white px-2 outline-personal"
+                className="font-google-sans-code text-secondary-contrast placeholder:text-xs text-sm min-w-40 max-w-200 h-full flex-1 rounded-md bg-white px-2 outline-1 outline-global-shadow"
               />
               <Button
                 onClick={() => {
@@ -202,9 +204,10 @@ const SideCollapseChat = React.forwardRef<HTMLDivElement, SideChatPropsType>(
                   }
                 }}
                 disabled={!isOpen}
-                className="translate-x-0 rounded-full aspect-square p-0 h-full items-center justify-center flex shadow-shinyshadow button-press-active transition-all ease-in disabled:opacity-50 text-black"
+                variant={"secondary"}
+                className="translate-x-0 rounded-lg aspect-square p-0 h-full items-center justify-center flex shadow-shinyshadow button-press-active transition-all ease-in disabled:opacity-50 text-secondary-contrast outline-1 outline-global-shadow"
               >
-                <IconSend2 fill="black" size={18} stroke={1} />
+                <IconSend2 fill="currentColor" size={18} stroke={1} />
               </Button>
             </div>
           </motion.div>

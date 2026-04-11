@@ -2,14 +2,13 @@
 import React, { useState } from "react";
 import { CodeInputBox } from "./ui/CodeInputBox";
 import { Button } from "./ui/button";
-import { motion, AnimatePresence } from "motion/react";
 import {
-  IconMessagePlus,
   IconSquareArrowRight,
   IconSquarePlus,
   IconUserShare,
 } from "@tabler/icons-react";
 import ChatButton from "./ui/ChatButton";
+import { AnimatePresence, motion } from "motion/react";
 
 const JoinRoomModal = ({
   verifyJoin,
@@ -23,91 +22,89 @@ const JoinRoomModal = ({
   isChatOpen: boolean;
 }) => {
   const [showInputBox, setShowInputBox] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const toggleShowInputBox = () => {
-    setShowInputBox((prev) => !prev);
-    setIsDropdownOpen(false);
-  };
-
-  const handleCreateRoom = () => {
-    makeNewRoom();
-    setIsDropdownOpen(false);
-  };
+  const toggleShowInputBox = () => setShowInputBox((prev) => !prev);
+  const handleCreateRoom = () => makeNewRoom();
 
   return (
     <>
-      <motion.div
-        animate={{ x: isChatOpen ? -360 : 0 }}
-        transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-        className="fixed right-0 top-6 flex flex-col gap-2 "
+      <div
+        className={`fixed right-0 top-6 flex flex-col gap-2 transition-transform duration-250 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+          isChatOpen ? "-translate-x-[360px]" : "translate-x-0"
+        }`}
       >
-        <AnimatePresence mode="wait">
-          {!showInputBox && (
-            <motion.div
-              key="room-button"
-              initial={{ opacity: 0, x: -10, scale: 0.95 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 10, scale: 0.95 }}
-              transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
-              className="rounded-r-none"
-            >
-              <div className="relative">
-                <Button
-                  onMouseEnter={() => setIsDropdownOpen(true)}
-                  onMouseLeave={() => setIsDropdownOpen(false)}
-                  className={`hover:scale-100 w-18 h-8 font-google-sans-code group flex gap-1 text-black shadow-shinyshadow text-xs rounded-r-none transition-all p-0 ${isDropdownOpen ? "rounded-b-none" : ""
-                    }`}
-                >
-                  <span className="text-xs font-normal font-[google_sans_code]">
-                    Room
-                  </span>
-                  <IconUserShare size={15} stroke={1.5} className="group-hover:scale-110 transition-all duration-200" />
-                </Button>
+        {/* ── Room button group ── */}
+        <div className="group flex flex-col">
+          {/* Room pill — rounded-tl + rounded-bl normally, loses rounded-bl on hover */}
+          <Button
+            className="
+              w-18 h-8 flex gap-1 items-center justify-center
+              text-contrast text-xs font-normal font-google-sans-code
+              shadow-shinyshadow
+              rounded-l-lg rounded-r-none
+              group-hover:rounded-bl-none
+              transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]
+              scale-[98%] hover:scale-100
+              cursor-default p-0
+            "
+          >
+            <span className="text-xs font-normal font-google-sans-code">
+              Room
+            </span>
+            <IconUserShare color="currentColor" size={15} stroke={1.5} />
+          </Button>
 
-                <AnimatePresence>
-                  {isDropdownOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
-                      transition={{ duration: 0.12, ease: [0.16, 1, 0.3, 1] }}
-                      onMouseEnter={() => setIsDropdownOpen(true)}
-                      onMouseLeave={() => setIsDropdownOpen(false)}
-                      className="absolute left-0 w-full bg-light_sky_blue shadow-primary overflow-hidden rounded-bl-xl z-50"
-                    >
-                      <motion.li
-                        onClick={handleCreateRoom}
-                        whileTap={{ scale: 0.98 }}
-                        transition={{ duration: 0.08 }}
-                        className="list-none text-center p-0 h-8 bg-light_sky_blue-700 font-google-sans-code cursor-pointer text-xs flex gap-1 items-center justify-center hover:bg-light_sky_blue-600 transition-colors duration-200  group"
-                      >
-                        <span className="text-xs font-normal font-[google_sans_code]">
-                          New
-                        </span>
-                        <IconSquarePlus size={15} stroke={1.5} className="group-hover:scale-110 transition-all duration-200" />
-                      </motion.li>
-                      <motion.li
-                        onClick={toggleShowInputBox}
-                        whileTap={{ scale: 0.98 }}
-                        transition={{ duration: 0.08 }}
-                        className="list-none text-center p-0 h-8 bg-light_sky_blue-700 rounded-bl-xl font-google-sans-code cursor-pointer text-xs flex gap-1 items-center justify-center hover:bg-light_sky_blue-600 transition-colors duration-200 group"
-                      >
-                        <span className="text-xs font-normal font-[google_sans_code]">
-                          Join
-                        </span>
-                        <IconSquareArrowRight size={15} stroke={1.5} className="group-hover:scale-110 transition-all duration-200" />
-                      </motion.li>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+          {/* ── Expanding drawer — uses grid-rows trick so it takes real space ── */}
+          <div
+            className="
+              grid
+              grid-rows-[0fr] group-hover:grid-rows-[1fr]
+              transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]
+            "
+          >
+            <div className="overflow-hidden flex flex-col">
+              {/* New — flat all sides, sits flush against Room button */}
+              <button
+                onClick={handleCreateRoom}
+                className="
+                  w-18 h-8 flex gap-1 items-center justify-center
+                  bg-secondary text-black text-xs font-normal font-google-sans-code
+                  rounded-none
+                  hover:bg-primary-700 hover:text-primary-contrast
+                  transition-all duration-150 cursor-pointer border-personal
+                "
+              >
+                <span className="text-xs font-normal font-google-sans-code">
+                  New
+                </span>
+                <IconSquarePlus size={15} stroke={1.5} />
+              </button>
+
+              {/* Join — flat top, rounded-bl, flat right — closes the group */}
+              <button
+                onClick={toggleShowInputBox}
+                className="
+                  w-18 h-8 flex gap-1 items-center justify-center
+                  bg-secondary text-black text-xs font-normal font-google-sans-code
+                  rounded-none rounded-bl-xl
+                  hover:bg-primary-700 hover:text-primary-contrast
+                  transition-all duration-150 cursor-pointer border-personal
+                "
+              >
+                <span className="text-xs font-normal font-google-sans-code">
+                  Join
+                </span>
+                <IconSquareArrowRight size={15} stroke={1.5} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Chat button — pushed down naturally as drawer expands */}
         <ChatButton isChatOpen={isChatOpen} onChatToggle={onChatToggle} />
-      </motion.div>
+      </div>
 
+      {/* Code input overlay */}
       <AnimatePresence>
         {showInputBox && (
           <motion.div

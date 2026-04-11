@@ -1,6 +1,7 @@
 import "./globals.css";
 import { ErrorContextProvider, UserProvider } from "@repo/hooks";
 import { PingProvider } from "./PingProvider";
+import { ThemeProvider } from "./ThemeProvider";
 
 export default function RootLayout({
   children,
@@ -19,7 +20,7 @@ export default function RootLayout({
         <UserProvider>
           <ErrorContextProvider>
             <PingProvider />
-            {children}
+            <ThemeProvider>{children}</ThemeProvider>
           </ErrorContextProvider>
         </UserProvider>
       </body>

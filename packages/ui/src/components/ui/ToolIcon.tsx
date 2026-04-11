@@ -51,7 +51,7 @@ const ToolIcon = React.forwardRef<HTMLInputElement, ToolIconProps>(
     if (toolInfo.id === "image") {
       return (
         <div
-          className={`w-9 h-9 p-2 relative flex items-center justify-center z-10 shadow-[inset_1px_1px_2px_white,3px_3px_black] rounded-lg bg-uranian_blue pointer-events-none outline-personal hover:scale-[103%] ${isSelected && "button-press"} button-press-active transition-all ease-in-out duration-100`}
+          className={`w-9 h-9 relative flex items-center justify-center z-10 shadow-shinysecondary rounded-lg bg-secondary pointer-events-none outline-1 outline-global-shadow scale-[97%] hover:scale-100 ${isSelected && "button-press"} button-press-active transition-all ease-in-out duration-100 text-secondary-contrast`}
         >
           <label>
             <input
@@ -62,7 +62,12 @@ const ToolIcon = React.forwardRef<HTMLInputElement, ToolIconProps>(
               accept="image/*"
             ></input>
           </label>
-          <toolInfo.icon fill={"none"} stroke={1.3} />
+          <toolInfo.icon
+            color={"currentColor"}
+            size={15}
+            fill={"none"}
+            stroke={1.5}
+          />
         </div>
       );
     }
@@ -73,7 +78,7 @@ const ToolIcon = React.forwardRef<HTMLInputElement, ToolIconProps>(
             onClick={() => onSelectTool(toolInfo.id)}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            className={`w-9 h-9 ${toolInfo.id === "color" ? "p-2" : "p-2.5"} relative flex items-center justify-center cursor-pointer z-10 shadow-[inset_1px_1px_2px_white,3px_3px_black] rounded-lg bg-uranian_blue outline-personal hover:scale-[103%] ${toolInfo.id !== "color" && isSelected && "button-press"} button-press-active transition-all ease-in-out duration-100`}
+            className={`w-9 h-9 relative flex items-center justify-center cursor-pointer z-10 outline-1 outline-global-shadow shadow-shinysecondary rounded-lg bg-secondary scale-[97%] hover:scale-100 ${toolInfo.id !== "color" && isSelected && "button-press"} button-press-active transition-all ease-in-out duration-100 text-secondary-contrast`}
           >
             {toolInfo.id === "color" && isHovered && (
               <ColorSelector
@@ -82,14 +87,14 @@ const ToolIcon = React.forwardRef<HTMLInputElement, ToolIconProps>(
               />
             )}
             <toolInfo.icon
+              color={"currentColor"}
               fill={
                 toolInfo.id === "color"
                   ? `oklch(${pickedColor.l} ${pickedColor.c} ${pickedColor.h})`
                   : "none"
               }
-              // color={toolInfo.id === "color" ? `oklch(${pickedColor.l} ${pickedColor.c} ${pickedColor.h})` : "currentColor"}
-              // style={{ color: toolInfo.id === "color" ? `oklch(${pickedColor.l} ${pickedColor.c} ${pickedColor.h})` : undefined }}
-              stroke={toolInfo.id === "color" ? 1 : 1.3}
+              size={15}
+              stroke={toolInfo.id === "color" ? 1 : 1.5}
             />
           </div>
         </TooltipTrigger>

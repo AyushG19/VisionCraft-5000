@@ -1,6 +1,5 @@
-import { Room, JoinRoomResponseType } from "@repo/common";
+import { JoinRoomResponseType, newRoom } from "@repo/common";
 import { createRoom, joinRoom, leaveRoom, uploadImg } from "app/api/canvas.api";
-import { set } from "idb-keyval";
 
 export async function joinRoomService(
   roomCode: string,
@@ -8,7 +7,7 @@ export async function joinRoomService(
   return await joinRoom(roomCode);
 }
 
-export async function createRoomService(): Promise<Room> {
+export async function createRoomService(): Promise<newRoom> {
   return await createRoom();
 }
 

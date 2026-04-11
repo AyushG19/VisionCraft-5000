@@ -6,6 +6,7 @@ import {
   Toolkit,
   toolkitProps,
   SideCollapseChat,
+  SideToolkit,
 } from "@repo/ui";
 import { DrawElement } from "@repo/common";
 import { useSocketWithWhiteboard } from "./hooks/useSocketWithWhiteboard";
@@ -16,11 +17,14 @@ import { useSocketContext } from "@repo/hooks";
 import { ErrorModal } from "@workspace/ui/components/ErrorModal";
 import UsersCursor from "@workspace/ui/components/ui/UsersCursor";
 import useRafLoop from "./hooks/useRafLoop";
+import { useTheme } from "next-themes";
+import ThemeSwitcher from "@workspace/ui/components/ThemeSwitcher";
 
 const Page = () => {
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
   const { roomInfo, memberCursor } = useSocketContext();
 
+  const { theme, setTheme } = useTheme();
   useRafLoop({ cursorMap: memberCursor.current });
 
   const wb = useSocketWithWhiteboard();
@@ -126,7 +130,13 @@ const Page = () => {
         ref={wb.canvasRef}
         className="w-full h-full bg-canvas text-white"
       ></canvas>
-
+      <ThemeSwitcher theme={theme} setTheme={setTheme} />
+      <SideToolkit
+        selectedShape={wb.selectedShape}
+        tool={wb.canvasState.toolState.currentTool}
+        onChange={() => {}}
+        onDelete={() => {}}
+      ></SideToolkit>
       {wb.inRoom ? (
         <>
           <RoomOptions

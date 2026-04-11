@@ -19,7 +19,10 @@ import {
 } from "@repo/common";
 import { useCanvasSocket } from "./useCanvasSocket";
 import { createNewText } from "../utils/createNewShape";
-import { joinRoomService } from "app/services/canvas.service";
+import {
+  createRoomService,
+  joinRoomService,
+} from "app/services/canvas.service";
 import { useSocketContext } from "@repo/hooks";
 import { measureText } from "app/lib/canvas.helper";
 import useMousePosition from "./useMousePosition";
@@ -29,6 +32,7 @@ import {
 } from "app/lib/socket.helper";
 import { screenToWorld } from "app/lib/math";
 import { useCamera } from "./useCamera";
+import { error } from "console";
 
 export const useSocketWithWhiteboard = (): {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
@@ -59,6 +63,7 @@ export const useSocketWithWhiteboard = (): {
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   handleLeaveRoom: () => void;
   handleJoinRoom: (code: string) => void;
+  handleCreateRoom: () => void;
   slug: string;
 } => {
   const [canvasState, canvasDispatch] = useReducer(
@@ -190,6 +195,16 @@ export const useSocketWithWhiteboard = (): {
     }
   };
 
+  const handleCreateRoom = async () => {
+    try {
+      const res = await createRoomService();
+      if (!res) throw new Error("Error in ROOM creation.");
+      handleJoinRoom(res.slug);
+    } catch (error) {
+      console.error("Error in Room Creation.");
+    }
+  };
+
   const handleLeaveRoom = async () => {
     try {
       disconnect();
@@ -317,6 +332,7 @@ export const useSocketWithWhiteboard = (): {
     setIsOpen,
     handleLeaveRoom,
     handleJoinRoom,
+    handleCreateRoom,
     slug: roomInfo.slug,
   };
 };

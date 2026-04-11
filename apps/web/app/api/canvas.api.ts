@@ -1,4 +1,4 @@
-import { Room, JoinRoomResponseType } from "@repo/common";
+import { newRoom, JoinRoomResponseType } from "@repo/common";
 import { axiosInstance } from "./axios";
 import { env } from "config";
 
@@ -15,7 +15,7 @@ export const joinRoom = async (
   return res.data;
 };
 
-export const createRoom = async (): Promise<Room> => {
+export const createRoom = async (): Promise<newRoom> => {
   const res = await axiosInstance.post("/api/rooms/create");
   return res.data;
 };
