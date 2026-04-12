@@ -1,31 +1,72 @@
 "use client";
-
 import { useEffect, useState } from "react";
+import { Button } from "./ui/button";
 
 export default function ThemeSwitcher({
   theme,
   setTheme,
 }: {
-  theme: any;
-  setTheme: any;
+  theme: string;
+  setTheme: (t: string) => void;
 }) {
   const [mounted, setMounted] = useState(false);
-
-  // Prevent hydration mismatch
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
 
+  const themeInfo = [
+    {
+      name: "default",
+      canvas: "#300b43",
+      primary: "#a2d2ff",
+      secondary: "#bde0fe",
+    },
+    {
+      name: "terra",
+      canvas: "#1a1a1a",
+      primary: "#4e6851",
+      secondary: "#dcc9a9",
+    },
+    {
+      name: "punktown",
+      canvas: "#233d4d",
+      primary: "#fe7f3d",
+      secondary: "#fff2df",
+    },
+    {
+      name: "eyeburn",
+      canvas: "#fafafa",
+      primary: "#868686",
+      secondary: "#e7e6e6",
+    },
+    {
+      name: "batman",
+      canvas: "#181818",
+      primary: "#e2e2e2",
+      secondary: "#3f3f3f",
+    },
+    {
+      name: "lowsun",
+      canvas: "#24150f",
+      primary: "#85431e",
+      secondary: "#d39858",
+    },
+  ];
+
   return (
-    <select
-      value={theme}
-      onChange={(e) => setTheme(e.target.value)}
-      className="p-2 border-2 border-primary rounded-md bg-background text-foreground absolute top-0 left-0 "
-    >
-      <option value="light">Light Mode</option>
-      <option value="dark">Dark Mode</option>
-      <option value="neon">Neon Mode</option>
-      <option value="white">White Mode</option>
-      <option value="black">Black Mode</option>
-    </select>
+    <div className="flex gap-1.5">
+      {themeInfo.map((t) => (
+        <Button
+          key={t.name}
+          onClick={() => setTheme(t.name)}
+          className="w-6 h-6 flex outline-1 outline-global-shadow p-0 overflow-clip"
+        >
+          <div className="w-3 h-6" style={{ background: t.canvas }} />
+          <div className="flex flex-col w-3 h-6">
+            <div className="w-3 h-3" style={{ background: t.primary }} />
+            <div className="w-3 h-3" style={{ background: t.secondary }} />
+          </div>
+        </Button>
+      ))}
+    </div>
   );
 }

@@ -237,13 +237,13 @@ const Toolkit = React.forwardRef<HTMLInputElement, toolkitProps>(
           })}
           {/* <div className="h-8 w-[1px] ml-1 mt-1 bg-black"></div> */}
           <Button
-            className="w-9 h-9 p-0 flex items-center justify-center cursor-pointer text-black shadow-shinysecondary bg-secondary button-press-active transition-all ease-in-out duration-100 outline-1 outline-global-shadow"
+            className="w-9 h-9 p-0 flex items-center justify-center cursor-pointer shadow-shinysecondary bg-secondary text-secondary-contrast button-press-active transition-all ease-in-out duration-100 outline-1 outline-global-shadow"
             onClick={handleUndo}
           >
             <IconArrowBackUp size={15} stroke={1.5} />
           </Button>
           <Button
-            className="w-9 h-9 p-0 flex items-center justify-center cursor-pointer text-black shadow-shinysecondary bg-secondary button-press-active transition-all ease-in-out duration-100 outline-1 outline-global-shadow "
+            className="w-9 h-9 p-0 flex items-center justify-center cursor-pointer text-secondary-contrast shadow-shinysecondary bg-secondary button-press-active transition-all ease-in-out duration-100 outline-1 outline-global-shadow "
             onClick={handleRedo}
           >
             <IconArrowForwardUp size={15} stroke={1.5} />

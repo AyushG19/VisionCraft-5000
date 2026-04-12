@@ -4,21 +4,21 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../lib/utils";
 
 const buttonVariants = cva(
-  " inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:opacity-50 cursor-pointer scale-[97%] hover:scale-100 transform ease-in",
+  " inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:opacity-50 cursor-pointer scale-[97%] hover:scale-100 transform ease-in outline-1 outline-global-shadow",
   {
     variants: {
       variant: {
         default:
-          " bg-primary text-[var(--primary-foreground)] hover:bg-[color-mix(in srgb, var(--primary) 90%, black)]  transform transition-transform ease-in-out outline-personal",
-        destructive:
-          "bg-[var(--destructive)] text-black hover:bg-[color-mix(in srgb, var(--destructive) 90%, black)]",
+          " bg-primary text-[var(--primary-foreground)] hover:bg-[color-mix(in srgb, var(--primary) 90%, black)]  transform transition-transform ease-in-out ",
+        destructive: "bg-accent text-black ",
         outline:
-          "shadow-primary outline-personal bg-[var(--background)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]",
-        secondary: "bg-secondary hover:bg-primary ",
+          "shadow-primary  bg-[var(--background)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]",
+        secondary:
+          "bg-secondary hover:bg-secondary-700 text-secondary-contrast ",
         ghost: "hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]",
         link: "text-[var(--primary)] underline-offset-4 hover:underline",
         iconic:
-          "overflow-hidden relative flex min-w-0 rounded-2xl border-personal bg-transparent px-3 py-1 text-base shadow-primary  disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm active:shadow-pressed hover:scale-none after:content-[''] after:w-1/10 after:h-[200%] after:rotate-30 after:absolute after:top-0 after:left-0 after:-translate-y-8 after:-translate-x-15 hover:after:transition-transform  hover:after:translate-x-110 hover:after:duration-300 hover:after:ease-in after:blur-sm after:bg-white after:opacity-60 hover ",
+          "overflow-hidden relative flex min-w-0 rounded-2xl bg-transparent px-3 py-1 text-base shadow-primary  disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm active:shadow-pressed hover:scale-none after:content-[''] after:w-1/10 after:h-[200%] after:rotate-30 after:absolute after:top-0 after:left-0 after:-translate-y-8 after:-translate-x-15 hover:after:transition-transform  hover:after:translate-x-110 hover:after:duration-300 hover:after:ease-in after:blur-sm after:bg-white after:opacity-60 hover ",
       },
       size: {
         default: "h-10 px-4 py-2",

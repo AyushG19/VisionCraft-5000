@@ -8,7 +8,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     <NextThemesProvider
       attribute="data-theme"
       defaultTheme="system"
-      themes={["light", "dark", "neon", "white", "black", "candy"]} // List your themes here
+      themes={["default", "terra", "punktown", "eyeburn", "batman", "lowsun"]} // List your themes here
     >
       {children}
     </NextThemesProvider>

@@ -1,6 +1,22 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { IconTrash, IconGripHorizontal, IconSlash } from "@tabler/icons-react";
+"use client";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  IconTrash,
+  IconGripHorizontal,
+  IconSlash,
+  IconMinus,
+  IconCircleCaretLeft,
+  IconCaretLeft,
+  IconCaretRightFilled,
+  IconCaretLeftFilled,
+  IconLineDotted,
+  IconLineDashed,
+  IconLine,
+  IconMinusVertical,
+} from "@tabler/icons-react";
 import { AllToolTypes, DrawElement, ShapeType } from "@repo/common";
+import { Button } from "./ui/button";
+import ThemeSwitcher from "./ThemeSwitcher";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -9,7 +25,6 @@ type FillMode = "fill" | "none" | "hatch";
 export type ShapeEditorState = {
   strokeColor: string;
   fillColor: string;
-  fillMode: FillMode;
   strokeWidth: number;
   roundness: number;
   opacity: number;
@@ -20,6 +35,9 @@ type ShapeEditorPanelProps = {
   selectedShape: DrawElement | undefined;
   onDelete: () => void;
   onChange: (state: ShapeEditorState) => void;
+  panelRef: React.RefObject<HTMLDivElement | null>;
+  theme: string;
+  setTheme: () => void;
 };
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -32,9 +50,6 @@ const QUICK_COLORS = [
   "#378ADD",
   "#7F77DD",
   "#D4537E",
-  "#2C2C2A",
-  "#ffffff",
-  "#888780",
 ];
 
 const TOOL_LABEL: Partial<Record<AllToolTypes, string>> = {
@@ -48,7 +63,6 @@ const TOOL_LABEL: Partial<Record<AllToolTypes, string>> = {
   image: "image",
 };
 
-// Which sections each tool shows
 const TOOL_CAPS: Record<
   string,
   { stroke: boolean; fill: boolean; roundness: boolean }
@@ -68,23 +82,12 @@ const DEFAULT_STATE: ShapeEditorState = {
   fillColor: "#EEEDFE",
   fillMode: "fill",
   strokeWidth: 2,
-  roundness: 8,
-  opacity: 100,
 };
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <p
-    style={{
-      fontSize: 9,
-      textTransform: "uppercase",
-      letterSpacing: "0.07em",
-      color: "var(--color-text-tertiary)",
-      marginBottom: 5,
-      fontWeight: 500,
-    }}
-  >
+  <p className="text-xs tracking-[0.07em] text-global-shadow font-medium capitalize ">
     {children}
   </p>
 );
@@ -96,71 +99,25 @@ const ColorSwatches = ({
   value: string;
   onChange: (c: string) => void;
 }) => (
-  <div
-    style={{ display: "flex", gap: 5, flexWrap: "wrap", alignItems: "center" }}
-  >
+  <div className="flex items-center flex-wrap">
     {QUICK_COLORS.map((c) => (
       <button
         key={c}
         onClick={() => onChange(c)}
-        style={{
-          width: 18,
-          height: 18,
-          borderRadius: "50%",
-          background: c,
-          border:
-            value === c
-              ? "2px solid var(--color-text-primary)"
-              : "1.5px solid var(--color-border-secondary)",
-          cursor: "pointer",
-          flexShrink: 0,
-          transition: "transform 0.1s",
-          padding: 0,
-        }}
-        onMouseEnter={(e) =>
-          ((e.currentTarget as HTMLElement).style.transform = "scale(1.2)")
-        }
-        onMouseLeave={(e) =>
-          ((e.currentTarget as HTMLElement).style.transform = "scale(1)")
-        }
+        className="w-5 h-5 rounded-sm outline-1 outline-global-shadow cursor-pointer shrink-0 transition-transform duration-75 hover:scale-100 scale-80"
+        style={{ background: c }}
       />
     ))}
     {/* Custom color picker */}
-    <div
-      style={{
-        width: 18,
-        height: 18,
-        borderRadius: "50%",
-        overflow: "hidden",
-        border: "1.5px solid var(--color-border-secondary)",
-        flexShrink: 0,
-        position: "relative",
-      }}
-    >
+    <IconMinusVertical className="-mx-1" stroke={1} />
+    <div className="w-[18px] h-[18px] rounded-full overflow-hidden border-[1.5px] border-[var(--color-border-secondary)] shrink-0 relative ">
       <input
         type="color"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        style={{
-          width: "200%",
-          height: "200%",
-          margin: "-50%",
-          border: "none",
-          cursor: "pointer",
-          padding: 0,
-        }}
+        className="border-none cursor-pointer p-0"
       />
     </div>
-    <span
-      style={{
-        fontSize: 10,
-        fontFamily: "var(--font-mono)",
-        color: "var(--color-text-secondary)",
-        marginLeft: 2,
-      }}
-    >
-      {value}
-    </span>
   </div>
 );
 
@@ -170,21 +127,14 @@ const SliderRow = ({
   step = 1,
   value,
   onChange,
-  unit = "",
-  leftIcon,
-  rightIcon,
 }: {
   min: number;
   max: number;
   step?: number;
   value: number;
   onChange: (v: number) => void;
-  unit?: string;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
 }) => (
-  <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-    {leftIcon}
+  <div className="flex items-center py-2 ">
     <input
       type="range"
       min={min}
@@ -192,20 +142,8 @@ const SliderRow = ({
       step={step}
       value={value}
       onChange={(e) => onChange(+e.target.value)}
-      style={{ flex: 1, accentColor: "#7F77DD", height: 4 }}
+      className="flex-1 h-1 bg-accent text-accent w-full hover:cursor-grab active:cursor-grab accent-accent appearance-auto overflow-hidden"
     />
-    {rightIcon}
-    <span
-      style={{
-        fontSize: 11,
-        minWidth: 28,
-        textAlign: "right",
-        color: "var(--color-text-secondary)",
-      }}
-    >
-      {Math.round(value)}
-      {unit}
-    </span>
   </div>
 );
 
@@ -222,31 +160,17 @@ const FillToggle = ({
     { id: "hatch", label: "hatch" },
   ];
   return (
-    <div
-      style={{
-        display: "flex",
-        gap: 4,
-        background: "var(--color-background-secondary)",
-        borderRadius: 8,
-        padding: 3,
-      }}
-    >
+    <div className="flex gap-4 bg-primary rounded-lg p-1">
       {modes.map((m) => (
         <button
           key={m.id}
           onClick={() => onChange(m.id)}
-          style={{
-            flex: 1,
-            padding: "3px 0",
-            fontSize: 10,
-            borderRadius: 6,
-            border: "none",
-            cursor: "pointer",
-            fontWeight: value === m.id ? 500 : 400,
-            background: value === m.id ? "#7F77DD" : "transparent",
-            color: value === m.id ? "#fff" : "var(--color-text-secondary)",
-            transition: "all 0.12s",
-          }}
+          className={[
+            "flex-1 py-[3px] text-[10px] rounded-md border-none cursor-pointer transition-all duration-[120ms]",
+            value === m.id
+              ? "font-medium bg-[#7F77DD] text-white"
+              : "font-normal bg-transparent text-[var(--color-text-secondary)]",
+          ].join(" ")}
         >
           {m.label}
         </button>
@@ -256,12 +180,7 @@ const FillToggle = ({
 };
 
 const Divider = () => (
-  <div
-    style={{
-      borderTop: "0.5px solid var(--color-border-tertiary)",
-      margin: "8px 0",
-    }}
-  />
+  <div className="border-t-[0.5px] border-[var(--color-border-tertiary)] my-2" />
 );
 
 // ─── Main Component ───────────────────────────────────────────────────────────
@@ -271,8 +190,10 @@ export const ShapeEditorPanel = ({
   selectedShape,
   onDelete,
   onChange,
+  panelRef,
+  theme,
+  setTheme,
 }: ShapeEditorPanelProps) => {
-  const panelRef = useRef<HTMLDivElement | null>(null);
   const dragState = useRef({ on: false, ox: 0, oy: 0 });
   const [pos, setPos] = useState({ x: 16, y: 80 });
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -300,6 +221,7 @@ export const ShapeEditorPanel = ({
   // ─── Drag (mouse) ────────────────────────────────────────────────────────
 
   const onHandleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.target !== panelRef.current) return;
     dragState.current.on = true;
     const r = panelRef.current!.getBoundingClientRect();
     dragState.current.ox = e.clientX - r.left;
@@ -309,7 +231,7 @@ export const ShapeEditorPanel = ({
 
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
-      if (!dragState.current.on || !panelRef.current) return;
+      if (!panelRef || !dragState.current.on || !panelRef.current) return;
       const pw = panelRef.current.offsetWidth;
       const ph = panelRef.current.offsetHeight;
       const x = Math.max(
@@ -373,123 +295,98 @@ export const ShapeEditorPanel = ({
   // ─── Render ───────────────────────────────────────────────────────────────
 
   const panelContent = (
-    <div style={{ width: 210 }}>
-      {/* ── Drag handle ── */}
-      <div
-        onMouseDown={onHandleMouseDown}
-        onTouchStart={onHandleTouchStart}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          cursor: "grab",
-          paddingBottom: 8,
-          marginBottom: 8,
-          borderBottom: "0.5px solid var(--color-border-tertiary)",
-          userSelect: "none",
-        }}
-      >
-        <IconGripHorizontal size={14} color="var(--color-text-tertiary)" />
-        <span
-          style={{
-            fontSize: 10,
-            color: "var(--color-text-tertiary)",
-            textTransform: "uppercase",
-            letterSpacing: "0.06em",
-          }}
-        >
-          properties
-        </span>
-        <span
-          style={{
-            fontSize: 10,
-            background: "#EEEDFE",
-            color: "#534AB7",
-            borderRadius: 5,
-            padding: "2px 6px",
-            fontWeight: 500,
-          }}
-        >
-          {TOOL_LABEL[tool] ?? tool}
-        </span>
-      </div>
+    <div
+      ref={panelRef}
+      onMouseDown={onHandleMouseDown}
+      onTouchStart={onHandleTouchStart}
+      className="flex max-w-[250px] flex-col gap-3 items-start justify-center select-none px-2 py-3 absolute bg-primary rounded-lg outline-1 outline-global-shadow shadow-shinyprimary cursor-move"
+      style={{ top: pos.y, left: pos.x }}
+    >
+      {/* <IconGripHorizontal size={14} color="var(--color-text-tertiary)" /> */}
+
+      {/* <span className="text-[10px] bg-[#EEEDFE] text-[#534AB7] rounded-[5px] px-[6px] py-[2px] font-medium">
+        {TOOL_LABEL[tool] ?? tool}
+      </span> */}
 
       {/* ── Stroke color ── */}
       {caps.stroke && (
-        <div style={{ marginBottom: 10 }}>
-          <SectionLabel>stroke color</SectionLabel>
-          <ColorSwatches
-            value={editorState.strokeColor}
-            onChange={(c) => update({ strokeColor: c })}
-          />
-        </div>
-      )}
-
-      {/* ── Stroke width ── */}
-      {caps.stroke && (
-        <div style={{ marginBottom: 10 }}>
-          <SectionLabel>stroke width</SectionLabel>
-          <SliderRow
-            min={1}
-            max={16}
-            value={editorState.strokeWidth}
-            onChange={(v) => update({ strokeWidth: v })}
-            leftIcon={
-              <IconSlash
-                size={10}
-                style={{ opacity: 0.4 }}
-                color="var(--color-text-primary)"
-              />
-            }
-            rightIcon={
-              <IconSlash
-                size={14}
-                style={{ opacity: 0.8 }}
-                color="var(--color-text-primary)"
-              />
-            }
-          />
+        <div className="flex flex-col gap-1.5 w-full cursor-default">
+          <SectionLabel>stroke</SectionLabel>
+          <div className="bg-secondary gap-1 rounded-sm p-1.5 flex flex-col w-full">
+            <ColorSwatches
+              value={editorState.strokeColor}
+              onChange={(c) => update({ strokeColor: c })}
+            />
+          </div>
         </div>
       )}
 
       {/* ── Fill ── */}
       {caps.fill && (
-        <>
-          <Divider />
-          <div style={{ marginBottom: 10 }}>
-            <SectionLabel>fill</SectionLabel>
-            <FillToggle
-              value={editorState.fillMode}
+        <div className="flex flex-col w-full gap-1.5 rounded-sm cursor-default">
+          {/* <SectionLabel>fill</SectionLabel> */}
+          {/* <FillToggle
+              value={"none"}
               onChange={(m) => update({ fillMode: m })}
-            />
-            {editorState.fillMode !== "none" && (
-              <div style={{ marginTop: 8 }}>
-                <ColorSwatches
-                  value={editorState.fillColor}
-                  onChange={(c) => update({ fillColor: c })}
-                />
-              </div>
-            )}
-          </div>
-        </>
+            /> */}
+          <SectionLabel>background</SectionLabel>
+          {editorState.fillMode !== "none" && (
+            <div className="bg-secondary p-1.5 rounded-sm w-full">
+              <ColorSwatches
+                value={editorState.fillColor}
+                onChange={(c) => update({ fillColor: c })}
+              />
+            </div>
+          )}
+        </div>
       )}
 
+      {/* ──  stroke width ── */}
+      {caps.stroke && (
+        <div className="w-full flex flex-col items-center bg- rounded-sm text-global-shadow gap-1.5 cursor-default">
+          <div className="w-full flex items-center justify-between">
+            <SectionLabel>stroke width</SectionLabel>
+            <span className="text-[10px] font-semibold bg-primary px-1 py-0.5 w-fit h-fit text-center rounded-sm text-global-shadow">
+              {16}
+            </span>
+          </div>
+          <SliderRow
+            min={1}
+            max={16}
+            value={editorState.opacity}
+            onChange={(v) => update({ opacity: v })}
+          />
+        </div>
+      )}
+
+      {
+        <div className=" cursor-default">
+          <SectionLabel>stroke style</SectionLabel>
+          <div className="w-full mt-1.5 flex gap-1">
+            <Button variant={"secondary"} size={"sm"}>
+              <IconMinus />
+            </Button>
+            <Button variant={"secondary"} size={"sm"}>
+              <IconLineDashed />
+            </Button>
+            <Button variant={"secondary"} size={"sm"}>
+              <IconLineDotted />
+            </Button>
+          </div>
+        </div>
+      }
       {/* ── Roundness ── */}
-      {caps.roundness && (
+
+      {/* {caps.roundness && (
         <>
           <Divider />
-          <div style={{ marginBottom: 10 }}>
+          <div className="mb-[10px]">
             <SectionLabel>roundness</SectionLabel>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div className="flex items-center gap-2">
+              {/* border-radius preview box — dynamic value, must stay inline 
               <div
-                style={{
-                  width: 26,
-                  height: 26,
-                  border: "2px solid #7F77DD",
-                  borderRadius: editorState.roundness,
-                  flexShrink: 0,
-                  transition: "border-radius 0.12s",
-                }}
+                className="w-[26px] h-[26px] border-2 border-[#7F77DD] shrink-0 transition-[border-radius] duration-[120ms]"
+                style={{ borderRadius: editorState.roundness }}
               />
               <input
                 type="range"
@@ -498,26 +395,19 @@ export const ShapeEditorPanel = ({
                 step={1}
                 value={editorState.roundness}
                 onChange={(e) => update({ roundness: +e.target.value })}
-                style={{ flex: 1, accentColor: "#7F77DD", height: 4 }}
+                className="flex-1 h-1 accent-[#7F77DD]"
               />
-              <span
-                style={{
-                  fontSize: 11,
-                  minWidth: 22,
-                  textAlign: "right",
-                  color: "var(--color-text-secondary)",
-                }}
-              >
+              <span className="text-[11px] min-w-[22px] text-right text-[var(--color-text-secondary)]">
                 {Math.round(editorState.roundness)}
               </span>
             </div>
           </div>
         </>
-      )}
+      )} */}
 
       {/* ── Opacity ── */}
-      <Divider />
-      <div style={{ marginBottom: 10 }}>
+      {/* <Divider />
+      <div className="mb-[10px]">
         <SectionLabel>opacity</SectionLabel>
         <SliderRow
           min={0}
@@ -526,36 +416,24 @@ export const ShapeEditorPanel = ({
           onChange={(v) => update({ opacity: v })}
           unit="%"
         />
+      </div> */}
+
+      {/* ── options ── */}
+      <div className=" cursor-default">
+        <SectionLabel>options</SectionLabel>
+        <Button
+          variant={"destructive"}
+          size={"icon"}
+          onClick={onDelete}
+          className="w-8 h-8 mt-1.5 flex items-center gap-1 rounded-md cursor-pointer transition-colors duration-100 text-primary-contrast"
+        >
+          <IconTrash size={15} />
+        </Button>
       </div>
 
-      {/* ── Delete ── */}
-      <Divider />
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <button
-          onClick={onDelete}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
-            fontSize: 11,
-            color: "#E24B4A",
-            background: "none",
-            border: "0.5px solid #F09595",
-            borderRadius: 6,
-            padding: "3px 9px",
-            cursor: "pointer",
-            transition: "background 0.1s",
-          }}
-          onMouseEnter={(e) =>
-            ((e.currentTarget as HTMLElement).style.background = "#FCEBEB")
-          }
-          onMouseLeave={(e) =>
-            ((e.currentTarget as HTMLElement).style.background = "none")
-          }
-        >
-          <IconTrash size={11} />
-          delete
-        </button>
+      <div className="flex flex-col gap-1.5 cursor-default">
+        <SectionLabel>themes</SectionLabel>
+        <ThemeSwitcher theme={theme} setTheme={setTheme}></ThemeSwitcher>
       </div>
     </div>
   );
@@ -564,20 +442,8 @@ export const ShapeEditorPanel = ({
     <>
       {/* ── Desktop floating panel ── */}
       <div
-        ref={panelRef}
-        style={{
-          position: "fixed",
-          top: pos.y,
-          left: pos.x,
-          background: "var(--color-background-primary)",
-          border: "0.5px solid var(--color-border-secondary)",
-          borderRadius: 14,
-          padding: 10,
-          boxShadow: "0 4px 24px rgba(0,0,0,0.10)",
-          zIndex: 100,
-          display: "block",
-        }}
-        className="shape-editor-panel hidden sm:block"
+
+      // className="hidden sm:block fixed z-[100] items-center rounded-lg justify-between outline-1 outline-global-shadow select-none shadow-shinyprimary shape-editor-panel bg-primary p-1 cursor-grab"
       >
         {panelContent}
       </div>
@@ -585,46 +451,14 @@ export const ShapeEditorPanel = ({
       {/* ── Mobile FAB ── */}
       <button
         onClick={() => setMobileOpen((o) => !o)}
-        style={{
-          position: "fixed",
-          bottom: 24,
-          right: 24,
-          width: 46,
-          height: 46,
-          borderRadius: "50%",
-          background: "#7F77DD",
-          border: "none",
-          color: "#fff",
-          fontSize: 20,
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 200,
-          boxShadow: "0 4px 16px rgba(127,119,221,0.35)",
-        }}
-        className="sm:hidden"
+        className="sm:hidden fixed bottom-6 right-6 w-[46px] h-[46px] rounded-full bg-[#7F77DD] border-none text-white text-xl cursor-pointer flex items-center justify-center z-[200] shadow-[0_4px_16px_rgba(127,119,221,0.35)]"
       >
         ✦
       </button>
 
       {/* ── Mobile bottom sheet ── */}
       {mobileOpen && (
-        <div
-          style={{
-            position: "fixed",
-            bottom: 80,
-            left: 12,
-            right: 12,
-            background: "var(--color-background-primary)",
-            border: "0.5px solid var(--color-border-secondary)",
-            borderRadius: 14,
-            padding: 10,
-            zIndex: 200,
-            boxShadow: "0 -4px 24px rgba(0,0,0,0.10)",
-          }}
-          className="sm:hidden"
-        >
+        <div className="sm:hidden fixed bottom-20 left-3 right-3 bg-[var(--color-background-primary)] border-[0.5px] border-[var(--color-border-secondary)] rounded-[14px] p-[10px] z-[200] shadow-[0_-4px_24px_rgba(0,0,0,0.10)]">
           {panelContent}
         </div>
       )}

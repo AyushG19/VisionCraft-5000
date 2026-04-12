@@ -31,6 +31,7 @@ const useCanvasInteraction = (
   sendCursorState: (pos: PointType) => void,
   inRoom: boolean,
   setTextEdit: React.Dispatch<React.SetStateAction<TextEditState>>,
+  sideToolkitRef: React.RefObject<HTMLDivElement | null>,
 ) => {
   const [selectedShape, setSelectedShape] = useState<DrawElement | undefined>(
     undefined,

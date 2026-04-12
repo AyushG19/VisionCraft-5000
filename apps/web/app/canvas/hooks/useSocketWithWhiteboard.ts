@@ -37,6 +37,7 @@ import { error } from "console";
 export const useSocketWithWhiteboard = (): {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
   inputRef: React.RefObject<HTMLInputElement | null>;
+  sideToolkitRef: React.RefObject<HTMLDivElement | null>;
   canvasState: CanvasState;
   selectedShape: DrawElement | undefined;
   setSelectedShape: (shape: DrawElement | undefined) => void;
@@ -74,7 +75,7 @@ export const useSocketWithWhiteboard = (): {
   const [messages, setMessages] = useState<ServerMessageType[]>([]);
   const [textEdit, setTextEdit] = useState<TextEditState>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
-  // const imageCache= useRef< Map<string, ImageBitmap | Promise<ImageBitmap>>>(new Map());
+  const sideToolkitRef = useRef<HTMLDivElement | null>(null);
   const {
     inRoom,
     setToken,
@@ -246,6 +247,7 @@ export const useSocketWithWhiteboard = (): {
     sendCursorState,
     inRoom,
     setTextEdit,
+    sideToolkitRef,
   );
   useEffect(() => {
     console.log(textEdit);
@@ -333,6 +335,7 @@ export const useSocketWithWhiteboard = (): {
     handleLeaveRoom,
     handleJoinRoom,
     handleCreateRoom,
+    sideToolkitRef,
     slug: roomInfo.slug,
   };
 };

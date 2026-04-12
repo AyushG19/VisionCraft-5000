@@ -39,13 +39,13 @@ const JoinRoomModal = ({
           <Button
             className="
               w-18 h-8 flex gap-1 items-center justify-center
-              text-contrast text-xs font-normal font-google-sans-code
+              text-primary-contrast bg-primary text-xs font-normal font-google-sans-code
               shadow-shinyshadow
               rounded-l-lg rounded-r-none
               group-hover:rounded-bl-none
               transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]
               scale-[98%] hover:scale-100
-              cursor-default p-0
+              cursor-default p-0 outline-1 outline-global-shadow
             "
           >
             <span className="text-xs font-normal font-google-sans-code">

@@ -7,6 +7,7 @@ import {
   toolkitProps,
   SideCollapseChat,
   SideToolkit,
+  Loader,
 } from "@repo/ui";
 import { DrawElement } from "@repo/common";
 import { useSocketWithWhiteboard } from "./hooks/useSocketWithWhiteboard";
@@ -131,12 +132,17 @@ const Page = () => {
         className="w-full h-full bg-canvas text-white"
       ></canvas>
       <ThemeSwitcher theme={theme} setTheme={setTheme} />
+      <Loader></Loader>
       <SideToolkit
         selectedShape={wb.selectedShape}
         tool={wb.canvasState.toolState.currentTool}
         onChange={() => {}}
         onDelete={() => {}}
+        panelRef={wb.sideToolkitRef}
+        theme={theme}
+        setTheme={setTheme}
       ></SideToolkit>
+
       {wb.inRoom ? (
         <>
           <RoomOptions

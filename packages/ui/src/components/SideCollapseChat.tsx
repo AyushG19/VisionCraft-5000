@@ -158,9 +158,9 @@ const SideCollapseChat = React.forwardRef<HTMLDivElement, SideChatPropsType>(
             >
               <div
                 onClick={handleShowOption}
-                className="outline-global-shadow outline-1 h-full aspect-square rounded-md cursor-pointer bg-secondary text-secondary-contrast hover:bg-primary flex items-center justify-center transition-colors"
+                className="outline-global-shadow outline-1 h-full aspect-square rounded-md cursor-pointer bg-primary-700 text-primary-contrast hover:bg-secondary hover:text-secondary-contrast flex items-center justify-center transition-colors"
               >
-                {true ? (
+                {isLoading ? (
                   // <svg
                   //   xmlns="http://www.w3.org/2000/svg"
                   //   width="24"
@@ -182,9 +182,9 @@ const SideCollapseChat = React.forwardRef<HTMLDivElement, SideChatPropsType>(
                   //   <path d="M6 12l-3 0" />
                   //   <path d="M7.75 7.75l-2.15 -2.15" />
                   // </svg>
-                  <Loader></Loader>
+                  <Loader />
                 ) : (
-                  <IconSlash size={25} />
+                  <IconSlash color={"currentColor"} size={25} />
                 )}
               </div>
               <input

@@ -1,120 +1,119 @@
-import { useState, useEffect } from "react";
+import React, { useRef } from "react";
 
-const shapes = ["circle", "triangle", "rect"];
-
-export default function Loader() {
-  const [shape, setShape] = useState(
-    () => shapes[Math.floor(Math.random() * shapes.length)],
-  );
-
-  //   useEffect(() => {
-  //     const id = setInterval(() => {
-  //       setShape(shapes[Math.floor(Math.random() * shapes.length)]);
-  //     }, 3000);
-  //     return () => clearInterval(id);
-  //   }, []);
-
-  const stroke = {
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: "10px",
-    strokeLinejoin: "round",
-    strokeLinecap: "round",
-  };
-
-  const dot =
-    "w-[6px] h-[6px] rounded-full absolute block top-[37px] left-[19px] bg-black";
-
+const Loader = () => {
+  const shapes = ["triangle", "circle", "rect"];
+  const shape = useRef(shapes[Math.floor(Math.random() * shapes.length)]);
   return (
-    <div className="flex items-center justify-center border">
-      {shape === "circle" && (
-        <div className="w-[44px] h-[44px] relative inline-block">
-          <div
-            className={`${dot}`}
-            style={{
-              transform: "translate(-18px,-18px)",
-              animation:
-                "dotCircle 3s cubic-bezier(0.785,0.135,0.15,0.86) infinite",
-            }}
-          />
-          <svg viewBox="0 0 80 80" className="block w-full h-full text-black">
-            <circle
-              r={32}
-              cy={40}
-              cx={40}
-              style={{
-                fill: "none",
-                stroke: "currentColor",
-                strokeWidth: "10px",
-                strokeLinejoin: "round",
-                strokeLinecap: "round",
-                strokeDasharray: "150 50 150 50",
-                strokeDashoffset: 75,
-                animation:
-                  "pathCircle 3s cubic-bezier(0.785,0.135,0.15,0.86) reverse infinite",
-              }}
-            />
-          </svg>
-        </div>
-      )}
-      {shape === "triangle" && (
-        <div className="w-[48px] h-[44px] relative inline-block">
-          <div
-            className={`${dot} left-[21px]`}
-            style={{
-              animation:
-                "dotTriangle 3s cubic-bezier(0.785,0.135,0.15,0.86) infinite",
-            }}
-          />
-          <svg viewBox="0 0 86 80" className="block w-full h-full text-black">
-            <polygon
-              points="43 8 79 72 7 72"
-              style={{
-                fill: "none",
-                stroke: "currentColor",
-                strokeWidth: "10px",
-                strokeLinejoin: "round",
-                strokeLinecap: "round",
-                strokeDasharray: "145 76 145 76",
-                strokeDashoffset: 0,
-                animation:
-                  "pathTriangle 3s cubic-bezier(0.785,0.135,0.15,0.86) reverse infinite",
-              }}
-            />
-          </svg>
-        </div>
-      )}
-      {shape === "rect" && (
-        <div className=" relative inline-block">
-          <div
-            className={`${dot}`}
-            style={{
-              transform: "translate(-18px,-18px)",
-              animation:
-                "dotRect 3s cubic-bezier(0.785,0.135,0.15,0.86) infinite",
-            }}
-          />
-          <svg viewBox="0 0 80 80" className="block w-full h-full text-black">
-            <rect
-              height={64}
-              width={64}
-              y={8}
-              x={8}
-              style={{
-                fill: "none",
-                stroke: "currentColor",
-                strokeWidth: "10px",
-                strokeLinejoin: "round",
-                strokeLinecap: "round",
-                strokeDasharray: "192 64 192 64",
-                strokeDashoffset: 0,
-                animation:
-                  "pathRect 3s cubic-bezier(0.785,0.135,0.15,0.86) reverse infinite",
-              }}
-            />
-          </svg>
-        </div>
-      )}
-    </div>
+    <>
+      <style>{`
+        .loader-dot::before {
+          content: "";
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          position: absolute;
+          display: block;
+          top: 37px;
+          left: 19px;
+          transform: translate(-18px, -18px);
+          animation: dotRect 3s cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+        }
+        .loader-triangle::before {
+          content: "";
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          position: absolute;
+          display: block;
+          top: 37px;
+          left: 21px;
+          transform: translate(-10px, -18px);
+          animation: dotTriangle 3s cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+        }
+        .loader-svg-polygon {
+          stroke-dasharray: 145 76 145 76;
+          stroke-dashoffset: 0;
+          animation: pathTriangle 3s cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+        }
+        .loader-svg-rect {
+          stroke-dasharray: 192 64 192 64;
+          stroke-dashoffset: 0;
+          animation: pathRect 3s cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+        }
+        .loader-svg-circle {
+          stroke-dasharray: 150 50 150 50;
+          stroke-dashoffset: 75;
+          animation: pathCircle 3s cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+        }
+        @keyframes pathTriangle {
+          33% { stroke-dashoffset: 74; }
+          66% { stroke-dashoffset: 147; }
+          100% { stroke-dashoffset: 221; }
+        }
+        @keyframes dotTriangle {
+          33% { transform: translate(0, 0); }
+          66% { transform: translate(10px, -18px); }
+          100% { transform: translate(-10px, -18px); }
+        }
+        @keyframes pathRect {
+          25% { stroke-dashoffset: 64; }
+          50% { stroke-dashoffset: 128; }
+          75% { stroke-dashoffset: 192; }
+          100% { stroke-dashoffset: 256; }
+        }
+        @keyframes dotRect {
+          25% { transform: translate(0, 0); }
+          50% { transform: translate(18px, -18px); }
+          75% { transform: translate(0, -36px); }
+          100% { transform: translate(-18px, -18px); }
+        }
+        @keyframes pathCircle {
+          25% { stroke-dashoffset: 125; }
+          50% { stroke-dashoffset: 175; }
+          75% { stroke-dashoffset: 225; }
+          100% { stroke-dashoffset: 275; }
+        }
+      `}</style>
+
+      <div className="flex scale-55">
+        {shape.current === "circle" && (
+          <div className="loader-dot before:bg-canvas relative w-11 h-11 inline-block">
+            <svg viewBox="0 0 80 80" className="block w-full h-full">
+              <circle
+                r={32}
+                cy={40}
+                cx={40}
+                className="loader-svg-circle fill-none stroke-primary-contrast [stroke-width:10px] [stroke-linejoin:round] [stroke-linecap:round]"
+              />
+            </svg>
+          </div>
+        )}
+        {shape.current === "triangle" && (
+          <div className="loader-triangle before:bg-canvas relative w-12 h-11 inline-block">
+            <svg viewBox="0 0 86 80" className="block w-full h-full">
+              <polygon
+                points="43 8 79 72 7 72"
+                className="loader-svg-polygon fill-none stroke-primary-contrast [stroke-width:10px] [stroke-linejoin:round] [stroke-linecap:round]"
+              />
+            </svg>
+          </div>
+        )}
+        {shape.current === "rect" && (
+          <div className="loader-dot before:bg-canvas relative w-11 h-11 inline-block">
+            <svg viewBox="0 0 80 80" className="block w-full h-full">
+              <rect
+                height={64}
+                width={64}
+                y={8}
+                x={8}
+                className="loader-svg-rect fill-none stroke-primary-contrast [stroke-width:10px] [stroke-linejoin:round] [stroke-linecap:round]"
+              />
+            </svg>
+          </div>
+        )}
+      </div>
+    </>
   );
-}
+};
+
+export default Loader;
