@@ -19,12 +19,13 @@ export const drawHandles = (
   ctx: CanvasRenderingContext2D,
   bounds: Bounds,
   handleSize: number = 6,
-  zoom: number
+  zoom: number,
 ): Handle[] => {
   const handles = getHandles(bounds, handleSize / zoom);
 
   ctx.strokeStyle = "#00FFFF";
   ctx.lineWidth = 1 / zoom;
+  ctx.setLineDash([]);
   handles.forEach(({ x, y, size }) => {
     ctx.beginPath();
     ctx.rect(x, y, size, size);

@@ -9,13 +9,27 @@ import React, {
 } from "react";
 import useCanvasInteraction from "./useCanvasInteraction";
 import canvasReducer, { initialCanvasState } from "../utils/canvasReducer";
-import { Action, CanvasState, SendPropsType, TextEditState } from "../types";
 import {
+  Action,
+  CanvasState,
+  FontTypes,
+  SendPropsType,
+  SideToolKitState,
+  TextEditState,
+} from "../types";
+import {
+  AllowedFonts,
   AllToolTypes,
+  ColorType,
   DrawElement,
+  LinearType,
+  PencilType,
   PointType,
   ServerMessageType,
   ServerSocketDataType,
+  ShapeType,
+  TextStateType,
+  TextType,
 } from "@repo/common";
 import { useCanvasSocket } from "./useCanvasSocket";
 import { createNewText } from "../utils/createNewShape";
@@ -24,15 +38,14 @@ import {
   joinRoomService,
 } from "app/services/canvas.service";
 import { useSocketContext } from "@repo/hooks";
-import { measureText } from "app/lib/canvas.helper";
+import { measureText } from "app/canvas/helper/canvas.helper";
 import useMousePosition from "./useMousePosition";
 import {
   generateUserObject,
   incomingSocketHandlers,
-} from "app/lib/socket.helper";
+} from "app/canvas/helper/socket.helper";
 import { screenToWorld } from "app/lib/math";
 import { useCamera } from "./useCamera";
-import { error } from "console";
 
 export const useSocketWithWhiteboard = (): {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
@@ -66,6 +79,17 @@ export const useSocketWithWhiteboard = (): {
   handleJoinRoom: (code: string) => void;
   handleCreateRoom: () => void;
   slug: string;
+  handleElementDelete: (element: DrawElement) => void;
+  handleStrokeStyle: (
+    style: "dash" | "dotted" | "normal",
+    element?: ShapeType | LinearType | PencilType,
+  ) => void;
+  handleFillSelect: (color: ColorType, shape?: ShapeType) => void;
+  setEditorState: (partial: Partial<SideToolKitState>) => void;
+  setTextState: (partial: Partial<TextStateType>) => void;
+  handleFontSelect: (font: FontTypes, shape: ShapeType | TextType) => void;
+  handleFontSize: (size: number, shape?: TextType) => void;
+  handleFontFamily: (font: AllowedFonts, shape?: TextType) => void;
 } => {
   const [canvasState, canvasDispatch] = useReducer(
     canvasReducer,
@@ -90,65 +114,12 @@ export const useSocketWithWhiteboard = (): {
 
   const { getScreenCoordinates } = useMousePosition(canvasRef);
 
-  // const handleIncomingMessage = async (event: ServerSocketDataType) => {
-  //   switch (event.type) {
-  //     case "ADD_SHAPE": {
-  //       const shape = event.payload;
-  //       if (shape) {
-  //         canvasDispatch({ type: "ADD_SHAPE", payload: shape });
-  //       }
-  //       break;
-  //     }
-
-  //     case "UPD_SHAPE": {
-  //       const shape = event.payload;
-  //       if (shape) {
-  //         canvasDispatch({ type: "UPD_SHAPE", payload: shape });
-  //       }
-  //       break;
-  //     }
-
-  //     case "DEL_SHAPE": {
-  //       const shape = event.payload;
-  //       if (shape) {
-  //         canvasDispatch({ type: "DEL_SHAPE", payload: shape });
-  //       }
-  //       break;
-  //     }
-
-  //     case "CHAT": {
-  //       const message = event.payload;
-  //       if (message?.status === "TO_FRONTEND") {
-  //         setMessages((prev) => [...prev, message]);
-  //       }
-  //       break;
-  //     }
-  //     case "CURSOR": {
-  //       const { userId, coordinates } = event.payload;
-  //       memberCursor.current.set(userId, coordinates);
-  //       break;
-  //     }
-  //     case "USER_LEFT": {
-  //       const { userId } = event.payload;
-  //       setRoomInfo({
-  //         ...roomInfo,
-  //         users: roomInfo.users.filter((u) => u.userId !== userId),
-  //       });
-  //       memberCursor.current.delete(userId);
-  //     }
-  //     case "USER_JOINED": {
-  //       const { userId } = event.payload;
-  //       const info = await getUserInfo(userId);
-  //       setRoomInfo({
-  //         ...roomInfo,
-  //         users: [...roomInfo.users, generateUserObject(info)],
-  //       });
-  //     }
-  //     default: {
-  //       console.log("mess");
-  //     }
-  //   }
-  // };
+  const setTextState = (partial: Partial<TextStateType>) => {
+    canvasDispatch({ type: "UPD_TEXT_STATE", payload: partial });
+  };
+  const setEditorState = (partial: Partial<SideToolKitState>) => {
+    canvasDispatch({ type: "UPD_EDITOR", payload: partial });
+  };
 
   const onMessage = (event: ServerSocketDataType) => {
     try {
@@ -247,7 +218,7 @@ export const useSocketWithWhiteboard = (): {
     sendCursorState,
     inRoom,
     setTextEdit,
-    sideToolkitRef,
+    sideToolkitRef.current,
   );
   useEffect(() => {
     console.log(textEdit);
@@ -281,6 +252,7 @@ export const useSocketWithWhiteboard = (): {
     );
     console.log("text: ", textEdit.text);
     dispatchWithSocket({ type: "ADD_SHAPE", payload: element });
+    dispatchWithSocket({ type: "CHANGE_TOOL", payload: "select" });
     setTextEdit(null);
   };
 
@@ -292,12 +264,109 @@ export const useSocketWithWhiteboard = (): {
     setTextEdit(null);
   };
 
-  const handleColorSelect = (color: { l: number; c: number; h: number }) => {
+  /**Handling color of stroke */
+  const handleColorSelect = (
+    color: { l: number; c: number; h: number },
+    shape?: ShapeType | LinearType | PencilType,
+  ) => {
+    console.log("handle color selct stroke");
+    if (shape) {
+      console.log("shape hai ", shape);
+      const newShape: ShapeType | LinearType | PencilType = {
+        ...shape,
+        strokeColor: color,
+      };
+      canvasDispatch({ type: "UPD_SHAPE", payload: newShape });
+      setSelectedShape(newShape);
+      return;
+    }
     canvasDispatch({ type: "CHANGE_COLOR", payload: color });
   };
 
-  const handleStrokeSelect = (size: number) => {
+  /**For size handling of stroke */
+  const handleStrokeSelect = (
+    size: number,
+    shape?: ShapeType | LinearType | PencilType,
+  ) => {
+    console.log("handle stroke select size");
+    if (shape) {
+      const newShape: ShapeType | LinearType | PencilType = {
+        ...shape,
+        strokeWidth: size,
+      };
+      canvasDispatch({ type: "UPD_SHAPE", payload: newShape });
+      setSelectedShape(newShape);
+      return;
+    }
     canvasDispatch({ type: "CHANGE_BRUSHSIZE", payload: size });
+  };
+
+  /**Handling background color of shapes */
+  const handleFillSelect = (color: ColorType, shape?: ShapeType) => {
+    console.log("handle fill select");
+    if (shape) {
+      console.log("shape", shape);
+      const newShape: ShapeType = { ...shape, fillColor: color };
+      canvasDispatch({ type: "UPD_SHAPE", payload: newShape });
+      setSelectedShape(newShape);
+      return;
+    }
+  };
+
+  const handleStrokeStyle = (
+    style: "dash" | "dotted" | "normal",
+    element?: ShapeType | LinearType | PencilType,
+  ) => {
+    if (element) {
+      const newShape: ShapeType | LinearType | PencilType = {
+        ...element,
+        strokeType: style,
+      };
+      canvasDispatch({ type: "UPD_SHAPE", payload: newShape });
+      setSelectedShape(newShape);
+      return;
+    }
+  };
+  const handleElementDelete = (element: DrawElement) => {
+    if (element) {
+      const newElement: DrawElement = { ...element, isDeleted: true };
+      canvasDispatch({ type: "UPD_SHAPE", payload: newElement });
+      setSelectedShape(newElement);
+      return;
+    }
+  };
+
+  const handleFontSelect = (font: FontTypes, shape?: ShapeType | TextType) => {
+    if (shape) {
+      let newShape: ShapeType | TextType;
+      if (shape.type === "text") {
+        newShape = { ...shape, fontFamily: font };
+      } else {
+        if (!shape.label) return;
+        newShape = { ...shape, label: { ...shape.label, fontFamily: font } };
+      }
+      canvasDispatch({ type: "UPD_SHAPE", payload: newShape });
+      setSelectedShape(newShape);
+      return;
+    }
+  };
+
+  const handleFontSize = (size: number, shape?: TextType) => {
+    if (shape) {
+      const newText: TextType = { ...shape, fontSize: size };
+      canvasDispatch({ type: "UPD_SHAPE", payload: newText });
+      setSelectedShape(newText);
+      return;
+    }
+  };
+
+  const handleFontFamily = (font: AllowedFonts, shape?: TextType) => {
+    if (shape) {
+      const newText: TextType = { ...shape, fontFamily: font };
+      canvasDispatch({ type: "UPD_SHAPE", payload: newText });
+      setSelectedShape(newText);
+      return;
+    }
   };
 
   const handleRedo = () => {
@@ -336,6 +405,14 @@ export const useSocketWithWhiteboard = (): {
     handleJoinRoom,
     handleCreateRoom,
     sideToolkitRef,
+    handleElementDelete,
+    handleStrokeStyle,
+    handleFillSelect,
+    setEditorState,
+    handleFontSelect,
+    setTextState,
+    handleFontSize,
+    handleFontFamily,
     slug: roomInfo.slug,
   };
 };

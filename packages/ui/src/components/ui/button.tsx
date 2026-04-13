@@ -9,12 +9,12 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          " bg-primary text-[var(--primary-foreground)] hover:bg-[color-mix(in srgb, var(--primary) 90%, black)]  transform transition-transform ease-in-out ",
-        destructive: "bg-accent text-black ",
+          " bg-primary text-global-shadow hover:bg-primary-700 shadow-shinyprimary active:shadow-pressed transform transition-transform ease-in-out ",
+        destructive: "bg-accent text-primary-contrast ",
         outline:
-          "shadow-primary  bg-[var(--background)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]",
+          " bg-[var(--background)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]",
         secondary:
-          "bg-secondary hover:bg-secondary-700 text-secondary-contrast ",
+          "bg-secondary hover:bg-secondary-700 text-secondary-contrast shadow-shinysecondary ",
         ghost: "hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]",
         link: "text-[var(--primary)] underline-offset-4 hover:underline",
         iconic:

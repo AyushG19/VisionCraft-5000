@@ -63,6 +63,7 @@ export const ShapeElementSchema = BaseElementSchema.extend({
   type: ShapeToolSchema,
   label: LabelSchema.optional(),
   fillColor: ColorSchema.optional(),
+  strokeType: z.enum(["dash", "dotted", "normal"]),
   endX: z.number(),
   endY: z.number(),
 });
@@ -91,6 +92,7 @@ export const LinearElementSchema = BaseElementSchema.extend({
   points: z.array(PointSchema).readonly(),
   startBinding: z.any().optional(),
   endBinding: z.any().optional(),
+  strokeType: z.enum(["dash", "dotted", "normal"]),
 });
 
 export type LinearType = z.infer<typeof LinearElementSchema>;
@@ -101,6 +103,7 @@ export const PencilElementSchema = BaseElementSchema.extend({
   endX: z.number(),
   endY: z.number(),
   isNormalized: z.boolean(),
+  strokeType: z.enum(["dash", "dotted", "normal"]),
 });
 
 export type PencilType = z.infer<typeof PencilElementSchema>;
@@ -114,3 +117,6 @@ export const DrawSchema = z.discriminatedUnion("type", [
 ]);
 
 export type DrawElement = z.infer<typeof DrawSchema>;
+
+export const AllowedFontsArr = ["google sans code", "handlee", "krona one"];
+export type AllowedFonts = (typeof AllowedFontsArr)[number];

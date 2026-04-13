@@ -5,7 +5,7 @@ import {
   convertToShapeType,
 } from "@workspace/ui/lib/convertToShapeType";
 import { useError } from "@repo/hooks";
-import { getScalingFactor } from "app/lib/scaling.helper";
+import { getScalingFactor } from "app/canvas/helper/scaling.helper";
 
 const useAi = () => {
   const [loading, setLoading] = useState<boolean>(false);

@@ -13,7 +13,7 @@ import useCanvasCursor from "./useCanvasCursor";
 import useSelectInteraction from "./useSelectInteraction";
 import useDrawInteraction from "./useDrawingInteraction";
 import useCanvasRenderer from "./useCanvasRenderer";
-import { getMousePos } from "app/lib/coordinate.helper";
+import { getMousePos } from "../helper/coordinate.helper";
 import { useCamera } from "./useCamera";
 import { screenToWorld } from "app/lib/math";
 import { drawShape } from "../utils/drawing";
@@ -31,7 +31,7 @@ const useCanvasInteraction = (
   sendCursorState: (pos: PointType) => void,
   inRoom: boolean,
   setTextEdit: React.Dispatch<React.SetStateAction<TextEditState>>,
-  sideToolkitRef: React.RefObject<HTMLDivElement | null>,
+  sideToolkit: HTMLDivElement | null,
 ) => {
   const [selectedShape, setSelectedShape] = useState<DrawElement | undefined>(
     undefined,
@@ -216,6 +216,10 @@ const useCanvasInteraction = (
     };
 
     const onMouseUp = (e: MouseEvent) => {
+      console.log("up ", e.target, sideToolkit);
+      if (e.target === sideToolkit) {
+        return;
+      }
       const pos = getMousePos(canvasRef, { x: e.clientX, y: e.clientY });
       const currentState = canvasStateRef.current;
       const currentSelected = selectedShapeRef.current;
@@ -295,8 +299,8 @@ const useCanvasInteraction = (
     canvas.addEventListener("mousedown", onMouseDown);
     canvas.addEventListener("dblclick", handleDoubleClick);
     canvas.addEventListener("wheel", handleWheel);
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
+    canvas.addEventListener("mousemove", onMouseMove);
+    canvas.addEventListener("mouseup", onMouseUp);
     window.addEventListener("resize", handleResize);
     window.addEventListener("keydown", onKeyDown);
     fileInput.addEventListener("change", handleFileInput);
@@ -313,8 +317,8 @@ const useCanvasInteraction = (
       canvas.removeEventListener("mousedown", onMouseDown);
       canvas.removeEventListener("dblclick", handleDoubleClick);
       canvas.removeEventListener("wheel", handleWheel);
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
+      canvas.removeEventListener("mousemove", onMouseMove);
+      canvas.removeEventListener("mouseup", onMouseUp);
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("keydown", onKeyDown);
       fileInput.removeEventListener("change", handleFileInput);
@@ -327,6 +331,17 @@ const useCanvasInteraction = (
 
   useEffect(() => {
     canvasStateRef.current = canvasState;
+
+    const ctx = canvasRef.current?.getContext("2d");
+    if (!ctx) return;
+    redrawPreviousShapes(
+      ctx,
+      canvasState.drawnShapes,
+      camera,
+      selectedShape,
+      selectedShape?.id,
+    );
+    console.log("redraw occured");
   }, [canvasState]);
 
   // useEffect(() => {

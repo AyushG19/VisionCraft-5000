@@ -20,5 +20,5 @@ export {
 export { default as SideCollapseChat } from "./components/SideCollapseChat";
 export { default as userCursor } from "./components/ui/UsersCursor";
 export { default as SideToolkit } from "./components/SideToolkit";
-export { default as ThemeStitcher } from "./components/ThemeSwitcher";
+export { default as ThemeSwitcher } from "./components/ThemeSwitcher";
 export { default as Loader } from "./components/ui/Loader";

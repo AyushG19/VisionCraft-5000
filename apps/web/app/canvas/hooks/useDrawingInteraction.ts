@@ -96,7 +96,7 @@ const useDrawInteraction = (
     [interaction, tempShape, setTempShape],
   );
 
-  // ═══ MOUSEUP ═══════════════════════════════════════════════
+  // ---- MOUSEUP
   // Finalizes and commits the shape.
 
   const handleDrawMouseUp = useCallback(

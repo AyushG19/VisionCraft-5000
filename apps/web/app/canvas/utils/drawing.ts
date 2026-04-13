@@ -1,8 +1,14 @@
 import oklchToCSS from "../../lib/oklchToCss";
 import { ImageType, PointType, TextType, type DrawElement } from "@repo/common";
-import { drawHandles, drawLabel } from "app/lib/drawing.helpers";
+import { drawHandles, drawLabel } from "app/canvas/helper/drawing.helpers";
 import { Camera } from "../hooks/useCamera";
 import { imageCache } from "./redrawPreviousShapes";
+import {
+  drawEnhancedArrow,
+  drawRoundedRhombus,
+  drawSmoothPencilPath,
+} from "../helper/drawShape.helper";
+import { measureText } from "../helper/canvas.helper";
 
 // Type definitions for better type safety
 interface Point {
@@ -47,6 +53,31 @@ const hasContent = (
   return "content" in shape && typeof shape.content === "string";
 };
 
+const handleStrokeType = (
+  ctx: CanvasRenderingContext2D,
+  shape: DrawElement,
+  zoom: number = 1,
+) => {
+  if (shape.type === "image" || shape.type === "text") return;
+  switch (shape.strokeType) {
+    case "dash": {
+      const first = shape.strokeWidth > 5 ? shape.strokeWidth : 6;
+      const second = shape.strokeWidth > 5 ? shape.strokeWidth * 2 : 6;
+      ctx.setLineDash([first / zoom, second / zoom]);
+      break;
+    }
+    case "dotted": {
+      const first = shape.strokeWidth > 5 ? shape.strokeWidth / 3 : 2;
+      const sedond = shape.strokeWidth > 5 ? shape.strokeWidth * 2 : 6;
+      ctx.setLineDash([first / zoom, sedond / zoom]);
+      break;
+    }
+    case "normal": {
+      ctx.setLineDash([]);
+      break;
+    }
+  }
+};
 // Highlight selected shape (outline + handles)
 const highlightShape = (
   ctx: CanvasRenderingContext2D,
@@ -56,7 +87,7 @@ const highlightShape = (
 ) => {
   ctx.save();
   ctx.beginPath();
-  ctx.setLineDash([4 / zoom, 2 / zoom]);
+  ctx.setLineDash([6 / zoom, 2 / zoom]);
   ctx.strokeStyle = "#00FFFF";
   ctx.lineWidth = 1 / zoom;
 
@@ -81,247 +112,6 @@ const highlightShape = (
     undefined,
     zoom,
   );
-};
-
-const drawSmoothPencilPath = (
-  ctx: CanvasRenderingContext2D,
-  points: readonly Point[],
-  startPos: PointType,
-  width: number,
-  height: number,
-  isNormalized: boolean,
-): void => {
-  if (points.length < 2) return;
-
-  const getScreenPoint = (p: Point) => {
-    if (isNormalized) {
-      return {
-        x: startPos.x + p.x * width,
-        y: startPos.y + p.y * height,
-      };
-    }
-    return { x: p.x, y: p.y };
-  };
-
-  const p0 = getScreenPoint(points[0]!);
-  const p1 = getScreenPoint(points[1]!);
-
-  ctx.moveTo(p0.x, p0.y);
-
-  if (points.length === 2) {
-    ctx.lineTo(p1.x, p1.y);
-    return;
-  }
-
-  for (let i = 1; i < points.length - 1; i++) {
-    const currentPoint = getScreenPoint(points[i]!);
-    const nextPoint = getScreenPoint(points[i + 1]!);
-
-    const controlX = currentPoint.x;
-    const controlY = currentPoint.y;
-
-    const endX = (currentPoint.x + nextPoint.x) / 2;
-    const endY = (currentPoint.y + nextPoint.y) / 2;
-
-    ctx.quadraticCurveTo(controlX, controlY, endX, endY);
-  }
-
-  const lastPoint = getScreenPoint(points[points.length - 1]!);
-  ctx.lineTo(lastPoint.x, lastPoint.y);
-};
-
-const drawEnhancedArrow = (
-  ctx: CanvasRenderingContext2D,
-  points: readonly PointType[],
-  startPos: PointType,
-  fillColor?: ColorType | null,
-): void => {
-  const { x: startX, y: startY } = startPos;
-  const secondEndX = startX + points[points.length - 2]!.x;
-  const secondEndY = startY + points[points.length - 2]!.y;
-  const endX = startX + points[points.length - 1]!.x;
-  const endY = startY + points[points.length - 1]!.y;
-
-  const width = endX - startX;
-  const height = endY - startY;
-  const length = Math.sqrt(width * width + height * height);
-
-  const dx = endX - secondEndX;
-  const dy = endY - secondEndY;
-  const angle = Math.atan2(dy, dx);
-
-  ctx.lineCap = "round";
-  ctx.lineJoin = "round";
-  ctx.beginPath();
-  ctx.moveTo(startX, startY);
-
-  points.forEach((p) => {
-    ctx.lineTo(startX + p.x, startY + p.y);
-  });
-
-  ctx.stroke();
-
-  const headLength = Math.min(20, length * 0.2);
-
-  const leftX = endX - headLength * Math.cos(angle - Math.PI / 8);
-  const leftY = endY - headLength * Math.sin(angle - Math.PI / 8);
-  const rightX = endX - headLength * Math.cos(angle + Math.PI / 8);
-  const rightY = endY - headLength * Math.sin(angle + Math.PI / 8);
-
-  ctx.lineJoin = "round";
-  ctx.beginPath();
-  ctx.moveTo(endX, endY);
-  ctx.lineTo(leftX, leftY);
-  ctx.moveTo(rightX, rightY);
-  ctx.lineTo(endX, endY);
-  ctx.closePath();
-
-  if (fillColor) {
-    // ctx.fillStyle = oklchToCSS(fillColor);
-    // ctx.fill();
-  }
-  ctx.stroke();
-};
-
-const drawRoundedDiamond_ = (
-  ctx: CanvasRenderingContext2D,
-  startX: number,
-  startY: number,
-  endX: number,
-  endY: number,
-  radius: number = 4,
-): void => {
-  const width = endX - startX;
-  const height = endY - startY;
-
-  const centerX = startX + width / 2;
-  const centerY = startY + height / 2;
-
-  // vertices
-  const top = { x: centerX, y: startY };
-  const right = { x: endX, y: centerY };
-  const bottom = { x: centerX, y: endY };
-  const left = { x: startX, y: centerY };
-
-  // Calculating edge lengths
-  const topToRight = Math.sqrt(
-    Math.pow(right.x - top.x, 2) + Math.pow(right.y - top.y, 2),
-  );
-  const rightToBottom = Math.sqrt(
-    Math.pow(bottom.x - right.x, 2) + Math.pow(bottom.y - right.y, 2),
-  );
-  const bottomToLeft = Math.sqrt(
-    Math.pow(left.x - bottom.x, 2) + Math.pow(left.y - bottom.y, 2),
-  );
-  const leftToTop = Math.sqrt(
-    Math.pow(top.x - left.x, 2) + Math.pow(top.y - left.y, 2),
-  );
-
-  const minEdge = Math.min(topToRight, rightToBottom, bottomToLeft, leftToTop);
-  const maxRadius = Math.min(radius, minEdge / 3);
-
-  if (maxRadius <= 0.5 || minEdge < 10) {
-    ctx.beginPath();
-    ctx.moveTo(top.x, top.y);
-    ctx.lineTo(right.x, right.y);
-    ctx.lineTo(bottom.x, bottom.y);
-    ctx.lineTo(left.x, left.y);
-    ctx.closePath();
-    return;
-  }
-
-  // Helper function to calculate point along edge
-  const getPointOnEdge = (
-    from: { x: number; y: number },
-    to: { x: number; y: number },
-    distance: number,
-  ) => {
-    const edgeLen = Math.sqrt(
-      Math.pow(to.x - from.x, 2) + Math.pow(to.y - from.y, 2),
-    );
-    const ratio = distance / edgeLen;
-    return {
-      x: from.x + (to.x - from.x) * ratio,
-      y: from.y + (to.y - from.y) * ratio,
-    };
-  };
-
-  const topRightStart = getPointOnEdge(top, right, maxRadius);
-  const topRightEnd = getPointOnEdge(right, top, maxRadius);
-
-  const rightBottomStart = getPointOnEdge(right, bottom, maxRadius);
-  const rightBottomEnd = getPointOnEdge(bottom, right, maxRadius);
-
-  const bottomLeftStart = getPointOnEdge(bottom, left, maxRadius);
-  const bottomLeftEnd = getPointOnEdge(left, bottom, maxRadius);
-
-  const leftTopStart = getPointOnEdge(left, top, maxRadius);
-  const leftTopEnd = getPointOnEdge(top, left, maxRadius);
-
-  ctx.beginPath();
-
-  ctx.moveTo(leftTopEnd.x, leftTopEnd.y);
-  ctx.lineTo(topRightStart.x, topRightStart.y);
-  ctx.quadraticCurveTo(top.x, top.y, topRightEnd.x, topRightEnd.y);
-
-  ctx.lineTo(rightBottomStart.x, rightBottomStart.y);
-  ctx.quadraticCurveTo(right.x, right.y, rightBottomEnd.x, rightBottomEnd.y);
-
-  ctx.lineTo(bottomLeftStart.x, bottomLeftStart.y);
-  ctx.quadraticCurveTo(bottom.x, bottom.y, bottomLeftEnd.x, bottomLeftEnd.y);
-
-  ctx.lineTo(leftTopStart.x, leftTopStart.y);
-  ctx.quadraticCurveTo(left.x, left.y, leftTopEnd.x, leftTopEnd.y);
-
-  ctx.closePath();
-};
-export const drawRoundedRhombus = (
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  radius: number = 10,
-  zoom: number = 1,
-  isSelectionUI: boolean = false,
-) => {
-  const cx = x + width / 2;
-  const cy = y + height / 2;
-
-  const top = { x: cx, y };
-  const right = { x: x + width, y: cy };
-  const bottom = { x: cx, y: y + height };
-  const left = { x, y: cy };
-
-  // 1. Calculate desired radius based on zoom (grows huge when zooming out)
-  const targetRadius = isSelectionUI ? radius / zoom : radius;
-
-  // 2. THE FIX: Protect the shape's geometry!
-  // The radius can safely be at most 25% of the shortest side.
-  // If we exceed this, arcTo() will glitch and turn inside out.
-  const maxSafeRadius = Math.min(width, height) * 0.25;
-  const activeRadius = Math.min(radius, maxSafeRadius); // Clamp it
-
-  const activeLineWidth = isSelectionUI ? 2 / zoom : 2;
-
-  ctx.save();
-  ctx.beginPath();
-
-  // Start EXACTLY at the midpoint of the top-right edge
-  ctx.moveTo(x + width * 0.75, y + height * 0.25);
-
-  // Draw the corners safely
-  ctx.arcTo(right.x, right.y, bottom.x, bottom.y, activeRadius);
-  ctx.arcTo(bottom.x, bottom.y, left.x, left.y, activeRadius);
-  ctx.arcTo(left.x, left.y, top.x, top.y, activeRadius);
-  ctx.arcTo(top.x, top.y, right.x, right.y, activeRadius);
-
-  ctx.closePath();
-
-  ctx.lineWidth = activeLineWidth;
-  ctx.lineJoin = "round"; // Hides sharp glitches if they somehow happen
-  ctx.stroke();
-  ctx.restore();
 };
 
 function drawText(ctx: CanvasRenderingContext2D, el: TextType) {
@@ -359,22 +149,19 @@ export const drawShape = (
   camera: Camera,
   selectedShapeId?: string,
 ): void => {
-  if (!ctx || !shape) return;
+  if (!ctx || !shape || shape.isDeleted) return;
   const zoom = camera?.z ?? 1;
   const type = shape.type;
 
   // convert color
-  let strokeColor = "white";
-  try {
-    if (shape.strokeColor) strokeColor = oklchToCSS(shape.strokeColor);
-  } catch (e) {
-    console.warn("Invalid lineColor", e);
-  }
-
-  ctx.strokeStyle = strokeColor;
-  ctx.lineWidth = hasLineWidth(shape) ? shape.lineWidth / zoom : 2 / zoom;
+  ctx.strokeStyle = shape.strokeColor
+    ? oklchToCSS(shape.strokeColor)
+    : "#ffffff";
+  ctx.lineWidth = shape.strokeWidth / zoom || 2 / zoom;
   ctx.lineJoin = "round";
   ctx.lineCap = "round";
+
+  handleStrokeType(ctx, shape, camera.z);
 
   ctx.save();
   try {
@@ -422,23 +209,22 @@ export const drawShape = (
       const width = shape.endX - shape.startX;
       const height = shape.endY - shape.startY;
       const radius = Math.min(8, Math.abs(width) / 8, Math.abs(height) / 8);
-      // createRoundedRectPath(
-      //   ctx,
-      //   shape.startX,
-      //   shape.startY,
-      //   width,
-      //   height,
-      //   radius,
-      // );
+
       ctx.roundRect(shape.startX, shape.startY, width, height, 20);
+
       if (shape.label) {
         const centerY = shape.startY + height / 2;
         const centerX = shape.startX + width / 2;
         ctx.fillStyle = oklchToCSS(shape.strokeColor);
         drawLabel(ctx, { x: centerX, y: centerY }, shape.label, width);
       }
-      if (hasFillColor(shape))
-        (ctx.fillStyle = oklchToCSS(shape.fillColor)), ctx.fill();
+
+      if (hasFillColor(shape)) {
+        console.log("has fill color");
+        ctx.fillStyle = oklchToCSS(shape.fillColor);
+        ctx.fill();
+      }
+
       ctx.stroke();
     } else if (type === "diamond") {
       const width = shape.endX - shape.startX;
@@ -463,8 +249,10 @@ export const drawShape = (
         ctx.fillStyle = oklchToCSS(shape.strokeColor);
         drawLabel(ctx, { x: centerX, y: centerY }, shape.label, width);
       }
-      if (hasFillColor(shape))
-        (ctx.fillStyle = oklchToCSS(shape.fillColor)), ctx.fill();
+      if (hasFillColor(shape)) {
+        ctx.fillStyle = oklchToCSS(shape.fillColor);
+        ctx.fill();
+      }
       ctx.stroke();
     } else if (type === "text") {
       drawText(ctx, shape);
@@ -478,12 +266,29 @@ export const drawShape = (
   }
 
   if (shape.id === selectedShapeId) {
-    if (shape.type === "text" || shape.type === "image") {
+    if (shape.type === "image") {
       const bounds = {
         x: shape.startX,
         y: shape.startY,
         width: shape.width,
         height: shape.height,
+      };
+      highlightShape(ctx, shape, bounds, zoom);
+      return;
+    }
+
+    if (shape.type === "text") {
+      const { width, height } = measureText(
+        ctx,
+        shape.text,
+        shape.fontSize,
+        shape.fontFamily,
+      );
+      const bounds = {
+        x: shape.startX,
+        y: shape.startY,
+        width: width,
+        height: height,
       };
       highlightShape(ctx, shape, bounds, zoom);
       return;

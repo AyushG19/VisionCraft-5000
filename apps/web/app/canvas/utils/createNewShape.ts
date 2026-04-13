@@ -20,22 +20,6 @@ export function createNewShape(
   startPos: PointType,
   currentPos: PointType,
 ): DrawElement {
-  // if (content) {
-  //   return {
-  //     id: crypto.randomUUID(),
-  //     startX: startPos.x,
-  //     startY: startPos.y,
-  //     strokeWidth: strokeWidth,
-  //     strokeColor: strokeColor,
-  //     backgroundColor: null,
-  //     isDeleted: false,
-  //     type: type,
-  //     endX: currentPos.x,
-  //     endY: currentPos.y,
-  //     // label?:
-  //     // fillColor?:
-  //   };
-  // }
   const type = toolKitState.currentTool;
   if (type === "arrow") {
     const midX = (currentPos.x - startPos.x) / 2;
@@ -54,6 +38,7 @@ export function createNewShape(
       backgroundColor: null,
       isDeleted: false,
       type: type,
+      strokeType: "normal",
     } as LinearType;
   } else if (type === "line") {
     return {
@@ -70,6 +55,7 @@ export function createNewShape(
       backgroundColor: null,
       isDeleted: false,
       type: type,
+      strokeType: "normal",
     } as LinearType;
   } else if (type === "rectangle" || type === "ellipse" || type === "diamond") {
     return {
@@ -83,6 +69,7 @@ export function createNewShape(
       type: type,
       endX: Math.max(startPos.x, currentPos.x),
       endY: Math.max(startPos.y, currentPos.y),
+      strokeType: "normal",
       // label?:
       // fillColor?:
     } as ShapeType;
@@ -99,6 +86,7 @@ export function createNewShape(
       isDeleted: false,
       type: "pencil",
       points: [currentPos],
+      strokeType: "normal",
       // startBinding?: any;
       // endBinding?: any;
     } as PencilType;
@@ -134,7 +122,7 @@ export function createNewText(
     id: crypto.randomUUID(),
     isDeleted: false,
     startX: startPos.x,
-    startY: startPos.y,
+    startY: startPos.y + 8,
     width: width,
     height: height,
     strokeColor: toolKitState.currentColor,
@@ -185,6 +173,7 @@ export function createNewPencil(
     isNormalized: false,
     type: "pencil",
     points: [currentPos],
+    strokeType: "normal",
     // startBinding?: any;
     // endBinding?: any;
   };

@@ -56,6 +56,7 @@ export default function ThemeSwitcher({
     <div className="flex gap-1.5">
       {themeInfo.map((t) => (
         <Button
+          variant={"outline"}
           key={t.name}
           onClick={() => setTheme(t.name)}
           className="w-6 h-6 flex outline-1 outline-global-shadow p-0 overflow-clip"

@@ -19,7 +19,6 @@ import { ErrorModal } from "@workspace/ui/components/ErrorModal";
 import UsersCursor from "@workspace/ui/components/ui/UsersCursor";
 import useRafLoop from "./hooks/useRafLoop";
 import { useTheme } from "next-themes";
-import ThemeSwitcher from "@workspace/ui/components/ThemeSwitcher";
 
 const Page = () => {
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -131,7 +130,6 @@ const Page = () => {
         ref={wb.canvasRef}
         className="w-full h-full bg-canvas text-white"
       ></canvas>
-      <ThemeSwitcher theme={theme} setTheme={setTheme} />
       <Loader></Loader>
       <SideToolkit
         selectedShape={wb.selectedShape}
@@ -141,6 +139,19 @@ const Page = () => {
         panelRef={wb.sideToolkitRef}
         theme={theme}
         setTheme={setTheme}
+        editorState={wb.canvasState.sideToolKitState}
+        setEditorState={wb.setEditorState}
+        textState={wb.canvasState.textState}
+        setTextState={wb.setTextState}
+        shapeEditHelpers={{
+          handleColorSelect: wb.handleColorSelect,
+          handleStrokeSelect: wb.handleStrokeSelect,
+          handleElementDelete: wb.handleElementDelete,
+          handleStrokeStyle: wb.handleStrokeStyle,
+          handleFillSelect: wb.handleFillSelect,
+          handleFontSize: wb.handleFontSize,
+          handleFontFamily: wb.handleFontFamily,
+        }}
       ></SideToolkit>
 
       {wb.inRoom ? (

@@ -9,6 +9,14 @@ export const initialCanvasState: CanvasState = {
     currentColor: { l: 0.7, c: 0.1, h: 0 },
     strokeSize: 2,
   },
+  sideToolKitState: {
+    strokeColor: "oklch(0.6232 0.1502 284.72)",
+    fillColor: "oklch(0.6232 0.1502 284.72)",
+    strokeWidth: 2,
+    roundness: 0,
+    opacity: 100,
+    strokeStyle: "normal",
+  },
   textState: {
     fontFamily: "google sans code",
     alignment: "left",
@@ -36,24 +44,7 @@ export default function canvasReducer(
   }
   if (action.type === "ADD_SHAPE") {
     const previousHistory = state.history.slice(0, state.historyIndex + 1);
-    // let newDrawnShape;
-    // if (action.payload && action.payload.type === "PENCIL") {
-    //   const currentPos = {
-    //     x: action.payload.startX,
-    //     y: action.payload.startY,
-    //   };
-    //   const normalizedPos = {
-    //     x:
-    //       (currentPos.x - action.payload.startX) /
-    //       (action.payload.startX - action.payload.endX),
-    //     y:
-    //       (currentPos.y - action.payload.startY) /
-    //       (action.payload.startY - action.payload.endY),
-    //   };
-    //   newDrawnShape = { ...action.payload, points: [normalizedPos] };
-    // } else {
-    //   newDrawnShape = action.payload;
-    // }
+
     const newCanvasState = [...state.drawnShapes, action.payload];
     return {
       ...state,
@@ -63,22 +54,6 @@ export default function canvasReducer(
     };
   }
 
-  // if (action.type === "FINISH_SHAPE") {
-  //   const shapeIndex = state.drawnShapes.length - 1;
-  //   const shape = state.drawnShapes[shapeIndex];
-  //   if (!shape || !Array.isArray(shape.points) || shape.type !== "PENCIL")
-  //     return state;
-
-  //   const updatedShape = createNormalizedShape(shape);
-
-  //   const newDrawnShapes = [...state.drawnShapes];
-  //   newDrawnShapes[shapeIndex] = updatedShape;
-
-  //   return {
-  //     ...state,
-  //     drawnShapes: newDrawnShapes,
-  //   };
-  // }
   if (action.type === "REDO") {
     if (state.historyIndex < state.history.length - 1) {
       const newIndex = state.historyIndex + 1;
@@ -132,6 +107,24 @@ export default function canvasReducer(
           };
         return s;
       }),
+    };
+  }
+  if (action.type === "UPD_EDITOR") {
+    return {
+      ...state,
+      sideToolKitState: {
+        ...state.sideToolKitState,
+        ...action.payload,
+      },
+    };
+  }
+  if (action.type === "UPD_TEXT_STATE") {
+    return {
+      ...state,
+      textState: {
+        ...state.textState,
+        ...action.payload,
+      },
     };
   }
   return state;

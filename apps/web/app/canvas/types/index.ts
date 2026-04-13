@@ -21,9 +21,18 @@ export type CanvasState = {
   history: DrawElement[][];
   historyIndex: number;
   toolState: ToolKitType;
+  sideToolKitState: SideToolKitState;
   textState: TextStateType;
 };
 
+export type SideToolKitState = {
+  strokeColor: string;
+  fillColor: string;
+  strokeWidth: number;
+  roundness: number;
+  opacity: number;
+  strokeType: "dash" | "dotted" | "normal";
+};
 export type Action =
   | { type: "INITIALIZE_BOARD"; payload: DrawElement[] }
   | { type: "ADD_SHAPE"; payload: DrawElement }
@@ -34,7 +43,9 @@ export type Action =
   | { type: "UNDO" }
   | { type: "CHANGE_TOOL"; payload: AllToolTypes }
   | { type: "CHANGE_COLOR"; payload: ColorType }
-  | { type: "CHANGE_BRUSHSIZE"; payload: number };
+  | { type: "CHANGE_BRUSHSIZE"; payload: number }
+  | { type: "UPD_EDITOR"; payload: Partial<SideToolKitState> }
+  | { type: "UPD_TEXT_STATE"; payload: Partial<TextStateType> };
 
 export interface ChatModalProps {
   wsRef: RefObject<WebSocket | null>;
@@ -99,3 +110,5 @@ export type SendPropsType =
   | ClientCursorSchemaType;
 
 export type eventHandlerContext = {};
+
+export type FontTypes = "google sans code" | "times new roman" | "sans serif";

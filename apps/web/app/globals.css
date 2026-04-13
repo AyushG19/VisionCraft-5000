@@ -35,7 +35,7 @@
   --secondary: #fff2df;
   --secondary-700: #fcfbf9;
   --text:;
-  --accent: oklch(0 0.0168 122.87);
+  --accent: #158853;
   --primary-contrast: #331403;
   --secondary-contrast: #000000;
   --global-shadow: #000000;
@@ -87,10 +87,10 @@
     inset 2px 2px 3px var(--color-secondary-700),
     3px 3px var(--color-global-shadow);
 
-  --shadow-shinyshadow-pressed: inset 1px 1px vae(--color-global-shadow);
+  --shadow-shinyshadow-pressed: inset 1px 1px var(--color-global-shadow);
 
   --font-google-sans-code: "Google Sans Code", ui-monospace, monospace;
-  --font-krona: "Krona One", sans-serif;
+  --font-krona-one: "Krona One", sans-serif;
   --font-handlee: "Handlee", cursive;
 }
 
@@ -139,27 +139,27 @@
   .button-press-active:active {
     @apply relative overflow-clip
     transition-all duration-100 ease-in-out
-    shadow-[inset_1px_1px_black]
+    shadow-shinyshadow-pressed
     after:content-['']
     after:absolute
     after:inset-0
     after:w-full
     after:h-full
     after:rounded-md
-    after:bg-black
+    after:bg-primary
     after:opacity-20;
   }
   .button-press {
     @apply relative overflow-clip
     transition-all duration-100 ease-in-out
-    shadow-[inset_1px_1px_black]
+    shadow-shinyshadow-pressed
     after:content-['']
     after:absolute
     after:inset-0
     after:w-full
     after:h-full
     after:rounded-md
-    after:bg-black
+    after:bg-primary
     after:opacity-20;
   }
 }
