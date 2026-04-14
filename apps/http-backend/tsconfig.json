@@ -2,13 +2,13 @@
   "extends": "@repo/typescript-config/base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src",
     "baseUrl": ".",
     "paths": {
       "@repo/common/*": ["../../packages/common/src/*"],
       "@repo/backend-common/*": ["../../packages/backend-common/src/*"],
-      "@repo/db/pg": ["../../packages/db/src/pg.ts"]
-    }
+      "@repo/db/pg": ["../../packages/db/src/pg.ts"],
+    },
+    "typeRoots": ["./src/@types/express/index.d.ts", "./node_modules/@types"],
   },
-  "include": ["src"]
+  "include": ["src"],
 }

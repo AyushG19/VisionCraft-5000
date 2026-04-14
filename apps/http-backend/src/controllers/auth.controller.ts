@@ -87,12 +87,12 @@ export const refreshToken = async (req: Request, res: Response) => {
       .status(201)
       .cookie(
         "refreshToken",
-        refreshJwtService.sign({ userId: jwtRes.userId }, rfTokenExpiry),
+        refreshJwtService.sign({ userId: jwtRes.userId! }, rfTokenExpiry),
         authConfig.refreshCookies,
       )
       .cookie(
         "accessToken",
-        accessJwtService.sign({ userId: jwtRes.userId }, acTokenExpiry),
+        accessJwtService.sign({ userId: jwtRes.userId! }, acTokenExpiry),
         authConfig.accessCookies,
       )
       .json({

@@ -11,11 +11,7 @@ import { DrawElement, JoinRoomResponseType } from "@repo/common";
 const checkCode = async (req: Request, res: Response) => {
   try {
     console.log("in check code");
-    // const { roomId } = req.query;
-    // if (!roomId || roomId !== "stirng") {
-    //   res.status(400).json("Undefined or Invalid room ID");
-    //   return;
-    // }
+    if (!req.user) return;
     const { userId } = req.user;
     const { accessToken } = req.cookies;
     const slug = req.body.slug;
@@ -45,7 +41,7 @@ const checkCode = async (req: Request, res: Response) => {
 };
 const createRoom = async (req: Request, res: Response) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user?.userId;
     if (!userId) {
       res.status(401).json("UserId undefined");
       return;
@@ -64,6 +60,7 @@ const createRoom = async (req: Request, res: Response) => {
 
 const leaveRoom = async (req: Request, res: Response) => {
   try {
+    if (!req.user) return;
     const { userId } = req.user;
     const { roomId } = req.body;
 
