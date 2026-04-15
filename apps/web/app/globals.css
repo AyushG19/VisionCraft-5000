@@ -15,6 +15,7 @@
   --primary-contrast: #000000;
   --secondary-contrast: #131313;
   --global-shadow: #000000;
+  --canvas-contrast: #000000;
 }
 
 :root[data-theme="terra"] {

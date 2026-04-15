@@ -1,5 +1,4 @@
 import { useCallback } from "react";
-import { pencilIcon } from "../../lib/pencilIcon";
 import { AllToolTypes, DrawElement, ShapeType } from "@repo/common";
 import { HandleName } from "../../lib/getHandles";
 import {
@@ -11,7 +10,8 @@ import {
   getBoundsForHandles,
   getOutlineBounds,
 } from "../utils/getBoundsHelpers";
-import { getCursorSvg } from "../utils/getCursor";
+import { getCursorSvg, getPencilSvg } from "../utils/getCustonSvg";
+import { getVariableValue } from "../utils/getCssColor";
 
 const HANDLE_CURSORS: Record<HandleName, string> = {
   TOP: "n-resize",
@@ -43,7 +43,6 @@ const useCanvasCursor = (
       const canvas = canvasRef.current;
       if (!canvas) return;
 
-      // ─── Panning mode ──────────────────────────────────────
       if (isPanning) {
         canvas.style.cursor = "grabbing";
         return;
@@ -53,7 +52,6 @@ const useCanvasCursor = (
         return;
       }
 
-      // ─── Active interactions ───────────────────────────────
       // During drag/resize, keep the appropriate cursor
       if (isDragging) {
         canvas.style.cursor = "move";
@@ -64,7 +62,6 @@ const useCanvasCursor = (
         return;
       }
 
-      // ─── SELECT mode hover states ──────────────────────────
       if (tool === "select") {
         // Check selected shape first (higher priority)
         if (selectedShape) {
@@ -106,14 +103,15 @@ const useCanvasCursor = (
         return;
       }
 
-      // ─── 4. Drawing tool cursors ──────────────────────────────
+      // Drawing tool cursors
       if (CROSSHAIR_TOOLS.includes(tool)) {
         canvas.style.cursor = "crosshair";
         return;
       }
 
       if (tool === "pencil") {
-        canvas.style.cursor = `url(${pencilIcon}) 3 16, auto`;
+        const color = getVariableValue("--canvas-contrast");
+        canvas.style.cursor = `${getPencilSvg(color)} 3 16, auto`;
         return;
       }
 
@@ -122,7 +120,6 @@ const useCanvasCursor = (
         return;
       }
 
-      // ─── 5. Fallback ──────────────────────────────────────────
       canvas.style.cursor = "default";
     },
     [canvasRef],

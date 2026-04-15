@@ -1,6 +1,5 @@
 import { DrawElement } from "@repo/common";
 import { drawShape } from "./drawing";
-import { createDotPattern } from "../../lib/createPatterns";
 import { Camera } from "../hooks/useCamera";
 import { drawGrid } from "app/lib/drawGrid";
 
@@ -25,7 +24,8 @@ export default function redrawPreviousShapes(
   );
   drawGrid(ctx, camera, ctx.canvas.width / dpr, ctx.canvas.height / dpr);
   for (const shape of drawnShapes) {
-    if (shape.id === selectedShapeId && currentShape?.id === shape.id) continue;
+    if (currentShape?.id === shape.id) continue;
+    console.log("no check");
     drawShape(ctx, shape, camera, selectedShapeId);
   }
   if (currentShape) {

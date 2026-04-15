@@ -1,5 +1,4 @@
 "use client";
-import React, { useEffect, useRef } from "react";
 import {
   RoomOptions,
   JoinRoomModal,
@@ -8,29 +7,22 @@ import {
   SideCollapseChat,
   SideToolkit,
   Loader,
+  TextArea,
 } from "@repo/ui";
-import { DrawElement } from "@repo/common";
 import { useSocketWithWhiteboard } from "./hooks/useSocketWithWhiteboard";
-import { createRoomService } from "app/services/canvas.service";
-import oklchToCSS from "../lib/oklchToCss";
 import useAi from "./hooks/useAi";
-import { useSocketContext } from "@repo/hooks";
 import { ErrorModal } from "@workspace/ui/components/ErrorModal";
 import UsersCursor from "@workspace/ui/components/ui/UsersCursor";
-import useRafLoop from "./hooks/useRafLoop";
 import { useTheme } from "next-themes";
 
 const Page = () => {
-  const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
-  const { roomInfo, memberCursor } = useSocketContext();
-
   const { theme, setTheme } = useTheme();
-  useRafLoop({ cursorMap: memberCursor.current });
+  // useRafLoop({ cursorMap: memberCursor.current });
 
   const wb = useSocketWithWhiteboard();
-  const canvas = wb.canvasRef.current;
 
-  const { loading, result, handleDrawRequest } = useAi();
+  const { loading, handleDrawRequest } = useAi(wb.canvasRef, wb.canvasDispatch);
+
   const sendReqToAi = (command: string) => {
     const ctx = wb.canvasRef.current?.getContext("2d");
     if (!ctx) {
@@ -44,21 +36,6 @@ const Page = () => {
     wb.setIsOpen((prev) => !prev);
   };
 
-  const canvasDispatch = wb.canvasDispatch;
-  useEffect(() => {
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) {
-      console.error("canvas element not available");
-      return;
-    }
-    console.log(typeof result);
-    result.forEach((shape: DrawElement) => {
-      // drawShape(ctx, shape);
-      canvasDispatch({ type: "ADD_SHAPE", payload: shape });
-    });
-  }, [result]);
-
   const toolkitProps: toolkitProps = {
     canvasRef: wb.canvasRef,
     handleColorSelect: wb.handleColorSelect,
@@ -71,59 +48,17 @@ const Page = () => {
 
   return (
     <div className={`relative h-screen w-screen duration-300`}>
-      {/* {toolkitProps.toolKitState.currentTool === "image" && ( */}
-      {/* <input
-        className="absolute w-10 h-10 bg-amber-400"
-        type="file"
-        id="fileInput"
-        accept="image/*"
-      /> */}
-      {/* )} */}
       <Toolkit {...toolkitProps} ref={wb.inputRef} />
-      {/* <Button
-        className="absolute top-0 left-0 z-1000"
-        onClick={() => {
-          const ctx = canvasRef.current?.getContext("2d");
-          if (!ctx) {
-            console.error("no ctx");
-            return;
-          }
-          handleDrawRequest(
-            ctx,
-            canvasState.textState.fontFamily,
-            "any flowchart",
-          );
-        }}
-      ></Button> */}
+
       {wb.textEdit && (
-        <textarea
-          autoFocus
-          ref={textAreaRef}
-          onBlur={wb.finishText}
-          value={wb.textEdit.text}
-          onChange={(e) =>
-            wb.setTextEdit({ ...wb.textEdit!, text: e.target.value })
-          }
-          onKeyDown={(e) => {
-            if (e.key === "Enter") wb.finishText();
-            if (e.key === "Escape") wb.cancelText();
-          }}
-          style={{
-            position: "absolute",
-            left: wb.textEdit.x,
-            top: wb.textEdit.y,
-            width: "auto",
-            height: "auto",
-            fontSize: wb.canvasState.textState.fontSize,
-            background: "transparent",
-            border: "none",
-            outline: "none",
-            resize: "none",
-            color: oklchToCSS(wb.canvasState.toolState.currentColor),
-            textAlign: wb.canvasState.textState.alignment,
-            overflow: "hidden",
-            fontFamily: wb.canvasState.textState.fontFamily,
-          }}
+        <TextArea
+          textAreaRef={wb.textAreaRef}
+          cancelText={wb.cancelText}
+          finishText={wb.finishText}
+          setTextEdit={wb.setTextEdit}
+          textEditorState={wb.canvasState.textState}
+          textEditState={wb.textEdit}
+          toolKitState={wb.canvasState.toolState}
         />
       )}
       <canvas
@@ -161,7 +96,7 @@ const Page = () => {
             isChatOpen={wb.isOpen}
             handleLeaveRoom={wb.handleLeaveRoom}
           />
-          {roomInfo.users.map((u) => (
+          {wb.users.map((u) => (
             <UsersCursor key={u.userId} {...u} />
           ))}
           <SideCollapseChat
@@ -178,7 +113,7 @@ const Page = () => {
       ) : (
         <>
           <JoinRoomModal
-            makeNewRoom={createRoomService}
+            makeNewRoom={wb.handleCreateRoom}
             verifyJoin={wb.handleJoinRoom}
             onChatToggle={handleChatToggle}
             isChatOpen={wb.isOpen}

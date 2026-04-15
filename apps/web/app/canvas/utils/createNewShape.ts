@@ -6,7 +6,6 @@ import {
   LineTool,
   PencilType,
   PointType,
-  ShapeTool,
   ShapeType,
   TextStateType,
   TextType,
@@ -139,6 +138,7 @@ export function createNewLinear(
   type: LineTool,
   strokeWidth: number,
   strokeColor: ColorType,
+  sideToolKitState: SideToolKitState,
   currentPos: { x: number; y: number },
   content?: string,
 ): LinearType {
@@ -152,6 +152,7 @@ export function createNewLinear(
     isDeleted: false,
     type: type,
     points: [currentPos],
+    strokeType: sideToolKitState.strokeType,
     // startBinding?: any;
     // endBinding?: any;
   };
@@ -217,10 +218,10 @@ export function finishPencil(shape: PencilType) {
 
   // 1. FIND THE TRUE BOUNDS from the points array
   // We cannot trust shape.startX/endX because the user might have scribbled outside that line.
-  let minX = Infinity;
-  let minY = Infinity;
-  let maxX = -Infinity;
-  let maxY = -Infinity;
+  const minX = Infinity;
+  const minY = Infinity;
+  const maxX = -Infinity;
+  const maxY = -Infinity;
 
   // shape.points!.forEach((p) => {
   //   if (p.x < minX) minX = p.x;

@@ -1,4 +1,4 @@
-import { DrawElement, ShapeElementSchema, ShapeType } from "@repo/common";
+import { DrawElement } from "@repo/common";
 import { Bounds } from "../../lib/getHandles";
 
 export const getOutlineBounds = (shape: DrawElement): Bounds => {

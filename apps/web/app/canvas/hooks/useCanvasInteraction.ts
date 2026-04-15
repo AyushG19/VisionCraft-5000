@@ -1,7 +1,12 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { DrawElement, PointType, ShapeType } from "@repo/common";
+import {
+  ClientShapeManipulation,
+  DrawElement,
+  PointType,
+  ShapeType,
+} from "@repo/common";
 import { Action, CanvasState, TextEditState } from "../types";
 import resizeCanvas from "../utils/canvasResizeHelper";
 import redrawPreviousShapes, {
@@ -16,11 +21,9 @@ import useCanvasRenderer from "./useCanvasRenderer";
 import { getMousePos } from "../helper/coordinate.helper";
 import { useCamera } from "./useCamera";
 import { screenToWorld } from "app/lib/math";
-import { drawShape } from "../utils/drawing";
 import { storeImg } from "app/services/canvas.service";
 import { set } from "idb-keyval";
-import { get } from "http";
-import { createNewImage, createNewShape } from "../utils/createNewShape";
+import { createNewImage } from "../utils/createNewShape";
 
 const useCanvasInteraction = (
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
@@ -32,6 +35,7 @@ const useCanvasInteraction = (
   inRoom: boolean,
   setTextEdit: React.Dispatch<React.SetStateAction<TextEditState>>,
   sideToolkit: HTMLDivElement | null,
+  sendActiveElementUpdate: (event: ClientShapeManipulation) => void,
 ) => {
   const [selectedShape, setSelectedShape] = useState<DrawElement | undefined>(
     undefined,
@@ -189,6 +193,7 @@ const useCanvasInteraction = (
           currentSelected,
           currentState,
           camera,
+          sendActiveElementUpdate,
         );
       } else if (tool === "hand") {
         onPanMove(e);

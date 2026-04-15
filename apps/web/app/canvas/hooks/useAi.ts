@@ -1,4 +1,5 @@
-import { useCallback, useState } from "react";
+"use client";
+import { useCallback, useEffect, useState } from "react";
 import { getExcalidrawElements } from "app/services/ai.service";
 import {
   AIResultType,
@@ -6,12 +7,30 @@ import {
 } from "@workspace/ui/lib/convertToShapeType";
 import { useError } from "@repo/hooks";
 import { getScalingFactor } from "app/canvas/helper/scaling.helper";
+import { DrawElement } from "@repo/common";
+import { Action } from "../types";
 
-const useAi = () => {
+const useAi = (
+  canvas: React.RefObject<HTMLCanvasElement | null>,
+  canvasDispatch: React.Dispatch<Action>,
+) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [result, setResult] = useState<AIResultType[]>([]);
   const { setError } = useError();
 
+  useEffect(() => {
+    if (!canvas.current) return;
+    const ctx = canvas.current.getContext("2d");
+    if (!ctx) {
+      console.error("canvas element not available");
+      return;
+    }
+    console.log(typeof result);
+    result.forEach((shape: DrawElement) => {
+      // drawShape(ctx, shape);
+      canvasDispatch({ type: "ADD_SHAPE", payload: shape });
+    });
+  }, [result]);
   const handleDrawRequest = useCallback(
     async (
       ctx: CanvasRenderingContext2D,

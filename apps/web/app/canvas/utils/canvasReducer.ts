@@ -6,7 +6,7 @@ export const initialCanvasState: CanvasState = {
   historyIndex: 0,
   toolState: {
     currentTool: "select",
-    currentColor: { l: 0.7, c: 0.1, h: 0 },
+    currentColor: { l: 84.586, c: 0.08089, h: 247.192 },
     strokeSize: 2,
   },
   sideToolKitState: {

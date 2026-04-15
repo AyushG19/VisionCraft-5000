@@ -1,8 +1,8 @@
 "use client";
 
 import React, {
-  useEffect,
   useCallback,
+  useEffect,
   useReducer,
   useRef,
   useState,
@@ -20,6 +20,7 @@ import {
 import {
   AllowedFonts,
   AllToolTypes,
+  ClientShapeManipulation,
   ColorType,
   DrawElement,
   LinearType,
@@ -37,19 +38,22 @@ import {
   createRoomService,
   joinRoomService,
 } from "app/services/canvas.service";
-import { useSocketContext } from "@repo/hooks";
+import { RoomInfo, useSocketContext } from "@repo/hooks";
 import { measureText } from "app/canvas/helper/canvas.helper";
 import useMousePosition from "./useMousePosition";
 import {
   generateUserObject,
   incomingSocketHandlers,
-} from "app/canvas/helper/socket.helper";
+} from "app/canvas/helper/socketMessage.helper";
 import { screenToWorld } from "app/lib/math";
 import { useCamera } from "./useCamera";
+import useRafLoop from "./useRafLoop";
+import redrawPreviousShapes from "../utils/redrawPreviousShapes";
 
 export const useSocketWithWhiteboard = (): {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
   inputRef: React.RefObject<HTMLInputElement | null>;
+  textAreaRef: React.RefObject<HTMLTextAreaElement | null>;
   sideToolkitRef: React.RefObject<HTMLDivElement | null>;
   canvasState: CanvasState;
   selectedShape: DrawElement | undefined;
@@ -90,16 +94,25 @@ export const useSocketWithWhiteboard = (): {
   handleFontSelect: (font: FontTypes, shape: ShapeType | TextType) => void;
   handleFontSize: (size: number, shape?: TextType) => void;
   handleFontFamily: (font: AllowedFonts, shape?: TextType) => void;
+  users: RoomInfo["users"];
 } => {
   const [canvasState, canvasDispatch] = useReducer(
     canvasReducer,
     initialCanvasState,
   );
+  const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [messages, setMessages] = useState<ServerMessageType[]>([]);
   const [textEdit, setTextEdit] = useState<TextEditState>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const sideToolkitRef = useRef<HTMLDivElement | null>(null);
+  const activeElementMap = useRef<
+    Map<
+      string,
+      { isDirty: boolean; element: DrawElement; operation: "resize" | "drag" }
+    >
+  >(new Map());
+
   const {
     inRoom,
     setToken,
@@ -123,9 +136,9 @@ export const useSocketWithWhiteboard = (): {
 
   const onMessage = (event: ServerSocketDataType) => {
     try {
-      if (event.type !== "CURSOR") {
-        console.log(event);
-      }
+      // if (event.type !== "CURSOR") {
+      //   console.log(event);
+      // }
       const handler = incomingSocketHandlers[event.type];
       handler({
         canvasDispatch,
@@ -133,6 +146,7 @@ export const useSocketWithWhiteboard = (): {
         memberCursorMap: memberCursor.current,
         setMessages,
         setRoomInfo,
+        activeElementMap: activeElementMap.current,
       });
     } catch (error) {
       console.error("Failed to parse WebSocket message:", error);
@@ -171,6 +185,7 @@ export const useSocketWithWhiteboard = (): {
     try {
       const res = await createRoomService();
       if (!res) throw new Error("Error in ROOM creation.");
+      console.log("joinig room now ");
       handleJoinRoom(res.slug);
     } catch (error) {
       console.error("Error in Room Creation.");
@@ -189,25 +204,42 @@ export const useSocketWithWhiteboard = (): {
     }
   };
 
-  const dispatchWithSocket = useCallback((action: Action) => {
-    canvasDispatch(action);
+  const dispatchWithSocket = useCallback(
+    (action: Action) => {
+      canvasDispatch(action);
 
-    if (!send) return;
+      if (!send) return;
 
-    switch (action.type) {
-      case "ADD_SHAPE":
-        send("ADD_SHAPE", action.payload);
-        break;
+      switch (action.type) {
+        case "ADD_SHAPE":
+          send("ADD_SHAPE", action.payload);
+          break;
 
-      case "UPD_SHAPE":
-        send("UPD_SHAPE", action.payload);
-        break;
+        case "UPD_SHAPE":
+          send("UPD_SHAPE", action.payload);
+          break;
 
-      case "DEL_SHAPE":
-        send("DEL_SHAPE", action.payload);
-        break;
-    }
-  }, []);
+        case "DEL_SHAPE":
+          send("DEL_SHAPE", action.payload);
+          break;
+      }
+    },
+    [send],
+  );
+
+  const sendActiveElementUpdate = useCallback(
+    (event: ClientShapeManipulation) => {
+      switch (event.type) {
+        case "RESIZE":
+          send("RESIZE", event.payload);
+          break;
+        case "DRAG":
+          send("DRAG", event.payload);
+          break;
+      }
+    },
+    [send],
+  );
 
   const { selectedShape, setSelectedShape } = useCanvasInteraction(
     canvasRef,
@@ -219,10 +251,41 @@ export const useSocketWithWhiteboard = (): {
     inRoom,
     setTextEdit,
     sideToolkitRef.current,
+    sendActiveElementUpdate,
   );
+
+  // Add these two refs near your other refs
+  const drawnShapesRef = useRef(canvasState.drawnShapes);
+  const cameraRef = useRef(camera);
+
+  // Keep them in sync on every render
   useEffect(() => {
-    console.log(textEdit);
-  }, [textEdit]);
+    drawnShapesRef.current = canvasState.drawnShapes;
+  }, [canvasState.drawnShapes]);
+
+  useEffect(() => {
+    cameraRef.current = camera;
+  }, [camera]);
+
+  // Now redrawForActiveElement always reads fresh values
+  const redrawForActiveElement = (element: DrawElement) => {
+    const ctx = canvasRef.current?.getContext("2d");
+    if (!ctx) return;
+
+    redrawPreviousShapes(
+      ctx,
+      drawnShapesRef.current, // ✅ fresh
+      cameraRef.current, // ✅ fresh
+      element,
+      // element.id,
+    );
+  };
+  useRafLoop({
+    cursorMap: memberCursor.current,
+    activeElementMap: activeElementMap.current,
+    redrawForActiveElement,
+  });
+
   const handleToolSelect = (toolName: AllToolTypes) => {
     canvasDispatch({ type: "CHANGE_TOOL", payload: toolName });
 
@@ -307,7 +370,7 @@ export const useSocketWithWhiteboard = (): {
     if (shape) {
       console.log("shape", shape);
       const newShape: ShapeType = { ...shape, fillColor: color };
-      canvasDispatch({ type: "UPD_SHAPE", payload: newShape });
+      dispatchWithSocket({ type: "UPD_SHAPE", payload: newShape });
       setSelectedShape(newShape);
       return;
     }
@@ -322,7 +385,7 @@ export const useSocketWithWhiteboard = (): {
         ...element,
         strokeType: style,
       };
-      canvasDispatch({ type: "UPD_SHAPE", payload: newShape });
+      dispatchWithSocket({ type: "UPD_SHAPE", payload: newShape });
       setSelectedShape(newShape);
       return;
     }
@@ -330,7 +393,7 @@ export const useSocketWithWhiteboard = (): {
   const handleElementDelete = (element: DrawElement) => {
     if (element) {
       const newElement: DrawElement = { ...element, isDeleted: true };
-      canvasDispatch({ type: "UPD_SHAPE", payload: newElement });
+      dispatchWithSocket({ type: "UPD_SHAPE", payload: newElement });
       setSelectedShape(newElement);
       return;
     }
@@ -345,7 +408,7 @@ export const useSocketWithWhiteboard = (): {
         if (!shape.label) return;
         newShape = { ...shape, label: { ...shape.label, fontFamily: font } };
       }
-      canvasDispatch({ type: "UPD_SHAPE", payload: newShape });
+      dispatchWithSocket({ type: "UPD_SHAPE", payload: newShape });
       setSelectedShape(newShape);
       return;
     }
@@ -354,7 +417,7 @@ export const useSocketWithWhiteboard = (): {
   const handleFontSize = (size: number, shape?: TextType) => {
     if (shape) {
       const newText: TextType = { ...shape, fontSize: size };
-      canvasDispatch({ type: "UPD_SHAPE", payload: newText });
+      dispatchWithSocket({ type: "UPD_SHAPE", payload: newText });
       setSelectedShape(newText);
       return;
     }
@@ -380,6 +443,7 @@ export const useSocketWithWhiteboard = (): {
   return {
     canvasRef,
     inputRef,
+    textAreaRef,
     canvasState,
     selectedShape,
     setSelectedShape,
@@ -414,5 +478,6 @@ export const useSocketWithWhiteboard = (): {
     handleFontSize,
     handleFontFamily,
     slug: roomInfo.slug,
+    users: roomInfo.users,
   };
 };

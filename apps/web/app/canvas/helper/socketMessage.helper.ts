@@ -3,6 +3,7 @@ import {
   UserType,
   ServerMessageType,
   PointType,
+  DrawElement,
 } from "@repo/common";
 import { Action } from "app/canvas/types";
 import React from "react";
@@ -24,6 +25,14 @@ export type eventHandlerContext = {
   setRoomInfo: React.Dispatch<React.SetStateAction<RoomInfo>>;
   memberCursorMap: Map<string, PointType>;
   event: ServerSocketDataType;
+  activeElementMap: Map<
+    string,
+    {
+      isDirty: boolean;
+      element: DrawElement;
+      operation: "resize" | "drag";
+    }
+  >;
 };
 export const incomingSocketHandlers: Record<
   ServerSocketDataType["type"],
@@ -84,4 +93,25 @@ export const incomingSocketHandlers: Record<
       users: [...prev.users, generateUserObject(info)],
     }));
   },
+
+  RESIZE: async ({ event, activeElementMap }) => {
+    if (event.type !== "RESIZE") return;
+    const { userId, element } = event.payload;
+    activeElementMap.set(userId, {
+      element: element,
+      isDirty: true,
+      operation: "resize",
+    });
+  },
+
+  DRAG: async ({ event, activeElementMap }) => {
+    if (event.type !== "DRAG") return;
+    const { userId, element } = event.payload;
+    activeElementMap.set(userId, {
+      element: element,
+      isDirty: true,
+      operation: "drag",
+    });
+  },
+  INFO: () => null,
 };

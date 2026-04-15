@@ -13,6 +13,7 @@ import {
   ClientCursorSchemaType,
   ServerChatSchemaType,
   ClientChatSchemaType,
+  ClientShapeManipulation,
 } from "@repo/common";
 import { HandleName } from "../../lib/getHandles";
 
@@ -107,7 +108,8 @@ export type TextEditState = {
 export type SendPropsType =
   | ClientChatSchemaType
   | WebSocketShapeType
-  | ClientCursorSchemaType;
+  | ClientCursorSchemaType
+  | ClientShapeManipulation;
 
 export type eventHandlerContext = {};
 

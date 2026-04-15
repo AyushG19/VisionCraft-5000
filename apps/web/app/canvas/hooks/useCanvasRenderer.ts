@@ -1,5 +1,5 @@
 import { useEffect, RefObject, useRef } from "react";
-import { DrawElement, ShapeType } from "@repo/common";
+import { DrawElement } from "@repo/common";
 import { CanvasState } from "../types";
 import redrawPreviousShapes from "../utils/redrawPreviousShapes";
 import oklchToCSS from "../../lib/oklchToCss";

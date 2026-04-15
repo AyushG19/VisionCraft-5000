@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { DrawElement, ShapeType } from "@repo/common";
+import { ClientShapeManipulation, DrawElement, ShapeType } from "@repo/common";
 import {
   isClickOnShape,
   isInsideSelectBound,
@@ -105,6 +105,7 @@ const useSelectInteraction = (
       currentSelected: DrawElement | undefined,
       canvasState: CanvasState,
       camera: Camera,
+      sendActiveElementUpdate: (event: ClientShapeManipulation) => void,
     ): boolean => {
       if (!currentSelected) return false;
 
@@ -124,6 +125,7 @@ const useSelectInteraction = (
           previewShape,
           currentSelected.id,
         );
+        sendActiveElementUpdate({ type: "DRAG", payload: previewShape });
         return true;
       }
 
@@ -146,6 +148,7 @@ const useSelectInteraction = (
           previewShape,
           currentSelected.id,
         );
+        sendActiveElementUpdate({ type: "RESIZE", payload: previewShape });
         return true;
       }
 
