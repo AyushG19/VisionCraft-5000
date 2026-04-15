@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { Action } from "../types";
+import { Action, SideToolKitState } from "../types";
 import redrawPreviousShapes from "../utils/redrawPreviousShapes";
 import {
   createNewPencil,
@@ -49,6 +49,7 @@ const useDrawInteraction = (
       worldPos: PointType,
       ctx: CanvasRenderingContext2D,
       toolState: ToolKitType,
+      sideToolKit: SideToolKitState,
       drawnShapes: DrawElement[],
       selectedShapeId: string | undefined,
       camera: Camera,
@@ -81,6 +82,7 @@ const useDrawInteraction = (
       // ─── Regular shapes (preview from start→current) ─────────
       const previewShape = createNewShape(
         toolState,
+        sideToolKit,
         interaction.current.startPos,
         worldPos,
       );
@@ -100,7 +102,11 @@ const useDrawInteraction = (
   // Finalizes and commits the shape.
 
   const handleDrawMouseUp = useCallback(
-    (worldPos: PointType, toolKitState: ToolKitType) => {
+    (
+      worldPos: PointType,
+      toolKitState: ToolKitType,
+      sideTookKitState: SideToolKitState,
+    ) => {
       if (!interaction.current.isDrawing) return;
 
       const tool = toolKitState.currentTool;
@@ -122,6 +128,7 @@ const useDrawInteraction = (
       // ─── Regular shapes (finalize from start→end) ────────────
       const finalShape = createNewShape(
         toolKitState,
+        sideTookKitState,
         interaction.current.startPos,
         worldPos,
       );

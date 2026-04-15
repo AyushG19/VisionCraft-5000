@@ -104,6 +104,7 @@
   --color-secondary-contrast: var(--secondary-contrast);
   --color-accent: var(--accent);
   --color-global-shadow: var(--global-shadow);
+  --text-shadow-generic: 6px 6px black;
 
   /* Custom Easy Diagram colors */
   --color-easy-bg: #1a1044;
@@ -115,14 +116,14 @@
   --color-easy-light-blue: #b0caf8;
   --color-easy-purple-muted: #9681d5;
 }
-@layer components {
+/* @layer components {
   .shadow-primary {
     box-shadow: 5px 5px 0px black;
   }
   .shadow-pressed {
     box-shadow: 2px 2px 0px black;
   }
-}
+} */
 @layer utilities {
   /* .outline-personal {
     @apply outline outline-black;
@@ -130,12 +131,12 @@
   /* .border-personal {
     @apply border border-black;
   } */
-  .shadow-primary {
+  /* .shadow-primary {
     box-shadow: 5px 5px 0px black;
   }
   .shadow-pressed {
     box-shadow: 2px 2px 0px black;
-  }
+  } */
   .button-press-active:active {
     @apply relative overflow-clip
     transition-all duration-100 ease-in-out

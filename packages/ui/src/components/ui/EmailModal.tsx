@@ -25,10 +25,12 @@ const EmailModal = ({
   signupService,
   loginService,
   navigate,
+  handleProviderClick,
 }: {
   signupService: (signupData: SignupFormType) => Promise<UserType>;
   loginService: (loginData: LoginFormType) => Promise<UserType>;
   navigate: (route: string) => void;
+  handleProviderClick: (provider: "google" | "github") => void;
 }) => {
   const [email, setEmail] = useState<string>("");
   const [name, setName] = useState<string>("");
@@ -112,15 +114,15 @@ const EmailModal = ({
   };
   return (
     <div>
-      <div className="relative w-full lg:w-110 shadow-primary outline-personal">
+      <div className="relative w-full lg:w-110 shadow-primary outline-1 outline-global-shadow">
         {/* Main modal content */}
         <div className="flex h-full w-full flex-col items-center justify-center gap-5 rounded-[20px] border border-black bg-easy-purple px-4 lg:px-6 py-6 box-shadow-black">
           {/* Email section */}
           <div className="flex flex-col gap-2.5 w-full h-full ">
-            <h2 className="font-krona text-4xl text-white text-shadow-primary capitalize">
+            <h2 className="font-krona-one text-4xl text-white text-shadow-generic capitalize">
               {currStage && currStage.label}
             </h2>
-            <div className="flex items-center w-full h-fullfl">
+            <div className="flex items-center w-full h-full ">
               {currStage && (
                 <Input
                   type={
@@ -132,7 +134,7 @@ const EmailModal = ({
                   value={currStage.state}
                   onInput={(e) => currStage.setState(e.currentTarget.value)}
                   placeholder={currStage?.placeholder}
-                  className="bg-easy-purple-muted placeholder:text-easy-bg placeholder:opacity-40 rounded-r-none "
+                  className="bg-easy-purple-muted placeholder:text-easy-bg placeholder:opacity-40 rounded-r-none outline-1 outline-global-shadow scale-[97%] "
                 ></Input>
               )}
               <Button
@@ -165,6 +167,7 @@ const EmailModal = ({
               size={"xl"}
               variant={"iconic"}
               className="bg-easy-yellow group"
+              onClick={() => handleProviderClick("google")}
             >
               <IconBrandGoogleFilled className="text-easy-bg mr-2" />
               <p className=" font-semibold font- text-base text-easy-bg">
@@ -178,6 +181,7 @@ const EmailModal = ({
               size={"xl"}
               variant={"iconic"}
               className="bg-easy-lime group"
+              onClick={() => handleProviderClick("github")}
             >
               <IconBrandGithubFilled className="text-easy-bg mr-2" />
               <p className=" font-semibold font- text-base text-easy-bg">
@@ -189,21 +193,27 @@ const EmailModal = ({
             </Button>
           </div>
           <div>
-            {signupOrLogin === "login" ? (
-              <div className="flex gap-1 items-center justify-center text-easy-bg text-xs ">
-                <p>Don't have an account?</p>
-                <Button
-                  onClick={() => {
-                    setSignupOrLogin("signup");
-                    setStage(0);
-                  }}
-                  className="p-0 text-sm h-full hover:text-easy-purple-muted hover:cursor-pointer font-semibold -mt-0.5"
-                  variant="link"
-                >
-                  signup
-                </Button>
-              </div>
-            ) : (
+            {/* {signupOrLogin === "login" ? ( */}
+            <div className="flex gap-1 items-center justify-center text-easy-bg text-xs ">
+              <p>
+                {signupOrLogin === "login"
+                  ? "Don't have an account?"
+                  : "Already have an account?"}
+              </p>
+              <Button
+                onClick={() => {
+                  setSignupOrLogin(
+                    signupOrLogin === "login" ? "signup" : "login",
+                  );
+                  setStage(0);
+                }}
+                className="p-0 capitalize text-sm h-full hover:text-easy-purple-muted hover:cursor-pointer font-semibold -mt-0.5 outline-none text-easy-bg "
+                variant="link"
+              >
+                {signupOrLogin === "login" ? "signup" : "login"}
+              </Button>
+            </div>
+            {/* ) : (
               <div className="flex gap-1 items-center justify-center text-easy-bg text-xs ">
                 <p>Already have an account?</p>
                 <Button
@@ -217,7 +227,7 @@ const EmailModal = ({
                   login
                 </Button>
               </div>
-            )}
+            )} */}
           </div>
         </div>
         {/* Corner markers */}

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Tooltip, TooltipTrigger, TooltipContent } from "./ToolTip";
 import { AllToolTypes, ColorType } from "@repo/common";
 import { ColorSelector } from "./ColorSelector";
+import { Button } from "./button";
 
 const oklchToCssHsl = (l: number, c: number, h: number) => {
   const hue = h;
@@ -74,11 +75,12 @@ const ToolIcon = React.forwardRef<HTMLInputElement, ToolIconProps>(
     return (
       <Tooltip key={toolInfo.id}>
         <TooltipTrigger>
-          <div
+          <Button
+            variant={"secondary"}
             onClick={() => onSelectTool(toolInfo.id)}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            className={`w-9 h-9 relative flex items-center justify-center cursor-pointer z-10 outline-1 outline-global-shadow shadow-shinysecondary rounded-lg bg-secondary scale-[97%] hover:scale-100 ${toolInfo.id !== "color" && isSelected && "button-press"} button-press-active transition-all ease-in-out duration-100 text-secondary-contrast`}
+            className={`w-9 h-9 p-0 relative flex items-center justify-center cursor-pointer z-10 outline-1 outline-global-shadow shadow-shinysecondary rounded-lg scale-[97%] hover:scale-100 ${toolInfo.id !== "color" && isSelected && "pointer-events-none button-press"} button-press-active transition-all ease-in-out duration-100 text-secondary-contrast`}
           >
             {toolInfo.id === "color" && isHovered && (
               <ColorSelector
@@ -96,7 +98,7 @@ const ToolIcon = React.forwardRef<HTMLInputElement, ToolIconProps>(
               size={15}
               stroke={toolInfo.id === "color" ? 1 : 1.5}
             />
-          </div>
+          </Button>
         </TooltipTrigger>
         {!(toolInfo.id === "color") && (
           <TooltipContent>{toolInfo.label}</TooltipContent>

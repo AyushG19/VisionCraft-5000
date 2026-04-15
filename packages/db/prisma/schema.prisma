@@ -7,17 +7,35 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
+enum Provider {
+  GOOGLE
+  GITHUB
+}
+
 model User {
   id            String        @id @default(uuid())
-  password      String      
+  password      String?
   email         String        @unique
   name          String
   avatarUrl     String?
-  photo         String?
-  created_at    DateTime      @default(now())
+  createdAt    DateTime      @default(now())
+
   roomUsers     RoomUser[]
   chats         Chat[]
   users         Room[]
+  accounts      Account[]
+}
+
+model Account{
+id                       String @id @default(uuid())
+providerAccountId        String        @unique
+provider                 Provider
+userId                   String
+user                     User        @relation(fields:[userId],references:[id],onDelete:Cascade)
+sessionToken             String?
+
+  @@unique([provider, providerAccountId])
 }
 
 model Room {
@@ -36,7 +54,7 @@ model Room {
 model CanvasElements {
 
   id        String    @id
-  type      String      
+  type      String
   zIndex    Int       @default(0)
   data      Json
   createdAt DateTime  @default(now())
@@ -46,7 +64,7 @@ model CanvasElements {
 
   @@index([roomId])             // every query filters by roomId
   @@index([roomId, zIndex])     // order by zIndex within a room
-  @@index([roomId, type])       
+  @@index([roomId, type])
 }
 
 model RoomUser{

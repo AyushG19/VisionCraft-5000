@@ -9,13 +9,15 @@ import {
 } from "@workspace/ui/index";
 import { loginService, signupService } from "./services/auth.service";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { pingAllBackend } from "./api/ping";
+import { env } from "config";
 
 export default function Page() {
   const router = useRouter();
   const navigate = (route: string) => {
     router.push(`/${route}`);
+  };
+  const handleProviderClick = (provider: "google" | "github") => {
+    window.location.href = `${env.HTTP_BACKEND_URL}/api/auth/${provider}`;
   };
 
   return (
@@ -31,6 +33,7 @@ export default function Page() {
         signupService={signupService}
         loginService={loginService}
         navigate={navigate}
+        handleProviderClick={handleProviderClick}
       />
 
       {/* Bottom section with shapes label */}

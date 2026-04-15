@@ -48,7 +48,7 @@ const AvatarGroup: React.FC<AvatarGroupProps> = ({
         return (
           <motion.div
             key={avatar.userId}
-            className="absolute cursor-pointer font-krona"
+            className="absolute cursor-pointer font-krona-one"
             initial={false}
             animate={{
               x: isHovered ? baseOffset - slideDistance : baseOffset,

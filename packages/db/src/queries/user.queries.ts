@@ -24,7 +24,7 @@ export async function findUserByEmail(
   const res = await prismaClient.user.findUnique({
     where: { email: email },
   });
-  if (!res) return null;
+  if (!res || !res.password) return null;
   return { userId: res.id, name: res.name, password: res.password };
 }
 

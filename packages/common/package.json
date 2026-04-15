@@ -15,8 +15,6 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@tanstack/react-query": "^5.90.2",
-    "axios": "^1.10.0",
     "zod": "^4.3.6"
   }
 }

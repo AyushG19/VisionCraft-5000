@@ -14,9 +14,11 @@ import {
 } from "@repo/common";
 import { screenToWorld } from "app/lib/math";
 import { Camera } from "../hooks/useCamera";
+import { SideToolKitState } from "../types";
 
 export function createNewShape(
   toolKitState: ToolKitType,
+  sideToolKitState: SideToolKitState,
   startPos: PointType,
   currentPos: PointType,
 ): DrawElement {
@@ -55,7 +57,7 @@ export function createNewShape(
       backgroundColor: null,
       isDeleted: false,
       type: type,
-      strokeType: "normal",
+      strokeType: sideToolKitState.strokeType,
     } as LinearType;
   } else if (type === "rectangle" || type === "ellipse" || type === "diamond") {
     return {
@@ -69,7 +71,7 @@ export function createNewShape(
       type: type,
       endX: Math.max(startPos.x, currentPos.x),
       endY: Math.max(startPos.y, currentPos.y),
-      strokeType: "normal",
+      strokeType: sideToolKitState.strokeType,
       // label?:
       // fillColor?:
     } as ShapeType;
@@ -86,7 +88,7 @@ export function createNewShape(
       isDeleted: false,
       type: "pencil",
       points: [currentPos],
-      strokeType: "normal",
+      strokeType: sideToolKitState.strokeType,
       // startBinding?: any;
       // endBinding?: any;
     } as PencilType;

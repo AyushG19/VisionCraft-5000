@@ -20,6 +20,12 @@ export const HttpEnv = z.object({
   RF_TOKEN_EXPIRY: z.number(),
   AC_TOKEN_EXPIRY: z.number(),
   FRONTEND_URL: z.string(),
+  GOOGLE_ID: z.string(),
+  GOOGLE_SECRET: z.string(),
+  GITHUB_ID: z.string(),
+  GITHUB_SECRET: z.string(),
+  GOOGLE_CALLBACK_URL: z.url(),
+  GITHUB_CALLBACK_URL: z.url(),
 });
 
 export type HttpEnvType = z.infer<typeof HttpEnv>;

@@ -197,6 +197,7 @@ const useCanvasInteraction = (
           screenToWorld(pos.x, pos.y, camera),
           ctx,
           currentState.toolState,
+          currentState.sideToolKitState,
           currentState.drawnShapes,
           currentSelected?.id,
           camera,
@@ -236,6 +237,7 @@ const useCanvasInteraction = (
         drawInteraction.handleDrawMouseUp(
           screenToWorld(pos.x, pos.y, camera),
           currentState.toolState,
+          currentState.sideToolKitState,
         );
       }
 

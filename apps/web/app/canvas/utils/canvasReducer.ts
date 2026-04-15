@@ -15,7 +15,7 @@ export const initialCanvasState: CanvasState = {
     strokeWidth: 2,
     roundness: 0,
     opacity: 100,
-    strokeStyle: "normal",
+    strokeType: "normal",
   },
   textState: {
     fontFamily: "google sans code",
