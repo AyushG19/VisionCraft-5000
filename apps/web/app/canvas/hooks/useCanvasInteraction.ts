@@ -184,7 +184,7 @@ const useCanvasInteraction = (
       const currentSelected = selectedShapeRef.current;
       const tool = currentState.toolState.currentTool;
 
-      sendCursorState(pos);
+      sendCursorState(screenToWorld(pos.x, pos.y, camera));
 
       if (tool === "select") {
         selectInteraction.handleSelectMouseMove(

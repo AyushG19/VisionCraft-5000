@@ -2,11 +2,14 @@
 import { useEffect } from "react";
 import { type MemberCursor } from "@repo/hooks";
 import { DrawElement } from "@repo/common";
+import { worldToScreen } from "app/lib/math";
+import { Camera } from "./useCamera";
 
 const useRafLoop = ({
   cursorMap,
   activeElementMap,
   redrawForActiveElement,
+  camera,
 }: {
   cursorMap: MemberCursor;
   activeElementMap: Map<
@@ -18,6 +21,7 @@ const useRafLoop = ({
     }
   >;
   redrawForActiveElement: (element: DrawElement) => void;
+  camera: Camera;
 }) => {
   useEffect(() => {
     let frameId: number;
@@ -26,8 +30,8 @@ const useRafLoop = ({
       memberCursorArr.forEach((user) => {
         const el = document.getElementById(`cursor:${user[0]}`);
         if (!el) return;
-
-        el.style.transform = `translate(${user[1].x - 20}px,${user[1].y - 3}px)`;
+        const pos = worldToScreen(user[1].x, user[1].y, camera);
+        el.style.transform = `translate(${pos.x - 20}px,${pos.y - 3}px)`;
       });
 
       const activeElementArr = Array.from(activeElementMap.entries());

@@ -14,14 +14,26 @@ import useAi from "./hooks/useAi";
 import { ErrorModal } from "@workspace/ui/components/ErrorModal";
 import UsersCursor from "@workspace/ui/components/ui/UsersCursor";
 import { useTheme } from "next-themes";
+import { DrawElement } from "@repo/common";
+import { useCamera } from "./hooks/useCamera";
+import { useEffect } from "react";
+import { useUser } from "@repo/hooks";
 
 const Page = () => {
   const { theme, setTheme } = useTheme();
   // useRafLoop({ cursorMap: memberCursor.current });
-
+  const { currentUser } = useUser();
   const wb = useSocketWithWhiteboard();
+  const { camera } = useCamera(
+    wb.canvasRef,
+    wb.canvasState.toolState.currentTool,
+  );
 
-  const { loading, handleDrawRequest } = useAi(wb.canvasRef, wb.canvasDispatch);
+  const { loading, result, handleDrawRequest } = useAi(
+    wb.canvasRef,
+    wb.canvasDispatch,
+    camera,
+  );
 
   const sendReqToAi = (command: string) => {
     const ctx = wb.canvasRef.current?.getContext("2d");
@@ -35,6 +47,22 @@ const Page = () => {
   const handleChatToggle = () => {
     wb.setIsOpen((prev) => !prev);
   };
+
+  useEffect(() => {
+    if (!wb.canvasRef.current) return;
+    const ctx = wb.canvasRef.current.getContext("2d");
+    if (!ctx) {
+      console.error("canvas element not available");
+      return;
+    }
+    console.log(typeof result);
+    result.forEach((shape: DrawElement) => {
+      // drawShape(ctx, shape);
+      // const screenPos = worldToScreen(shape.startX, shape.startY, camera);
+      // const newShape = { ...shape, startX: screenPos.x, startY: screenPos.y };
+      wb.canvasDispatch({ type: "ADD_SHAPE", payload: shape });
+    });
+  }, [result]);
 
   const toolkitProps: toolkitProps = {
     canvasRef: wb.canvasRef,
@@ -96,9 +124,12 @@ const Page = () => {
             isChatOpen={wb.isOpen}
             handleLeaveRoom={wb.handleLeaveRoom}
           />
-          {wb.users.map((u) => (
-            <UsersCursor key={u.userId} {...u} />
-          ))}
+          {wb.users.map(
+            (u) =>
+              u.userId !== currentUser?.userId && (
+                <UsersCursor key={u.userId} {...u} />
+              ),
+          )}
           <SideCollapseChat
             inRoom={wb.inRoom}
             send={wb.send}

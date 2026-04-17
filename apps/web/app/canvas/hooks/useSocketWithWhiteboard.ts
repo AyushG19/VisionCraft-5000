@@ -284,6 +284,7 @@ export const useSocketWithWhiteboard = (): {
     cursorMap: memberCursor.current,
     activeElementMap: activeElementMap.current,
     redrawForActiveElement,
+    camera: cameraRef.current,
   });
 
   const handleToolSelect = (toolName: AllToolTypes) => {
