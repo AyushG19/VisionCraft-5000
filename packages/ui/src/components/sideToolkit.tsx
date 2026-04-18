@@ -34,7 +34,7 @@ import { isShape, isStokeElement, isText } from "../utils/sideToolHelper";
 
 type FillMode = "fill" | "none" | "hatch";
 
-export type ShapeEditorState = {
+export type SideToolkit = {
   strokeColor: string;
   fillColor: string;
   strokeWidth: number;
@@ -43,18 +43,18 @@ export type ShapeEditorState = {
   strokeType: "dash" | "dotted" | "normal";
 };
 
-export type ShapeEditorPanelProps = {
+export type SideToolkitProps = {
   tool: AllToolTypes;
   selectedShape: DrawElement | undefined;
   onDelete: () => void;
-  onChange: (state: ShapeEditorState) => void;
+  onChange: (state: SideToolkit) => void;
   panelRef: React.RefObject<HTMLDivElement | null>;
   theme: string | undefined;
   setTheme: Dispatch<SetStateAction<string>>;
-  editorState: ShapeEditorState;
+  editorState: SideToolkit;
   textState: TextStateType;
   setTextState: (partial: Partial<TextStateType>) => void;
-  setEditorState: (partial: Partial<ShapeEditorState>) => void;
+  setEditorState: (partial: Partial<SideToolkit>) => void;
   shapeEditHelpers: {
     handleElementDelete: (element: DrawElement) => void;
     handleStrokeStyle: (
@@ -98,7 +98,7 @@ const TOOL_CAPS: Record<
   image: { stroke: false, fill: false, roundness: false },
 };
 
-// const DEFAULT_STATE: ShapeEditorState = {
+// const DEFAULT_STATE: SideToolkit = {
 //   strokeColor: "oklch(0.6232 0.1502 284.72)",
 //   fillColor: "oklch(0.6232 0.1502 284.72)",
 //   strokeWidth: 2,
@@ -185,7 +185,7 @@ const SliderRow = ({
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export const ShapeEditorPanel = ({
+export const SideToolkit = ({
   tool,
   selectedShape,
   panelRef,
@@ -196,21 +196,14 @@ export const ShapeEditorPanel = ({
   editorState,
   setEditorState,
   shapeEditHelpers,
-}: ShapeEditorPanelProps) => {
+}: SideToolkitProps) => {
   const dragState = useRef({ on: false, ox: 0, oy: 0 });
   const [pos, setPos] = useState({ x: 16, y: 80 });
   const [mobileOpen, setMobileOpen] = useState(false);
   // const [editorState, setEditorState] =
-  //   useState<ShapeEditorState>(DEFAULT_STATE);
+  //   useState<SideToolkit>(DEFAULT_STATE);
 
   const activeTool = selectedShape?.type || tool;
-  const caps = TOOL_CAPS[activeTool] ?? {
-    stroke: false,
-    fill: false,
-    roundness: false,
-  };
-
-  // ─── Handlers wired to parent helpers ────────────────────────────────────
 
   // add this useEffect to sync panel state when selectedShape changes
   useEffect(() => {
@@ -589,4 +582,4 @@ export const ShapeEditorPanel = ({
   );
 };
 
-export default ShapeEditorPanel;
+export default SideToolkit;
