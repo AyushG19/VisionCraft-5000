@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 import { Tooltip, TooltipTrigger, TooltipContent } from "./ToolTip";
 import { AllToolTypes, ColorType } from "@repo/common";
@@ -16,13 +16,13 @@ const oklchToCssHsl = (l: number, c: number, h: number) => {
 interface ToolIconProps extends React.ComponentProps<"div"> {
   onSelectTool: (toolname: AllToolTypes) => void;
   onSelectColor: (color: ColorType) => void;
-  onSelectStroke: (size: number) => void;
   isSelected: boolean;
   toolInfo: {
     id: AllToolTypes;
     icon: React.ElementType;
     label: string;
   };
+  initialColor: ColorType;
   // inputRef: React.RefObject<HTMLInputElement | null>;
 }
 
@@ -34,7 +34,7 @@ const ToolIcon = React.forwardRef<HTMLInputElement, ToolIconProps>(
       toolInfo,
       onSelectTool,
       onSelectColor,
-      onSelectStroke,
+      initialColor,
     },
     inputRef,
   ) => {
@@ -42,12 +42,12 @@ const ToolIcon = React.forwardRef<HTMLInputElement, ToolIconProps>(
       l: number;
       c: number;
       h: number;
-    }>({ h: 0, c: 0.15, l: 0.7 }); // Initial color for demonstration
+    }>(initialColor); // Initial color for demonstration
     const [isHovered, setIsHovered] = useState(false);
 
-    useEffect(() => {
-      onSelectColor(pickedColor);
-    }, [pickedColor]);
+    // useEffect(() => {
+    //   onSelectColor(pickedColor);
+    // }, [pickedColor]);
 
     if (toolInfo.id === "image") {
       return (
@@ -85,7 +85,7 @@ const ToolIcon = React.forwardRef<HTMLInputElement, ToolIconProps>(
             {toolInfo.id === "color" && isHovered && (
               <ColorSelector
                 selectedColor={pickedColor}
-                setSelectedColor={setPickedColor}
+                setSelectedColor={onSelectColor}
               />
             )}
             <toolInfo.icon

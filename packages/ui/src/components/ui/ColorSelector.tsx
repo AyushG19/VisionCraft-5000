@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { motion } from 'motion/react';
+import React, { useState, useMemo } from "react";
+import { motion } from "motion/react";
 
 interface ColorState {
   l: number;
@@ -21,7 +21,12 @@ interface Hexagon {
 }
 
 interface ColorSelectorProps {
-  setSelectedColor: React.Dispatch<React.SetStateAction<ColorState>>;
+  setSelectedColor: (color: {
+    l: number;
+    c: number;
+    h: number;
+    a?: number | undefined;
+  }) => void;
   selectedColor: ColorState;
   radius?: number;
   hexSize?: number;
@@ -33,9 +38,9 @@ export function ColorSelector({
   radius = 3,
   hexSize = 10,
   onChange,
-  className = '',
+  className = "",
   selectedColor,
-  setSelectedColor
+  setSelectedColor,
 }: ColorSelectorProps) {
   const [selected, setSelected] = useState<string | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
@@ -91,17 +96,22 @@ export function ColorSelector({
           // Ring 2+: OKLCH Colors
           // Map distance to Lightness (lighter inside, darker outside)
           const normalizedDist = (hex_dist - 2) / Math.max(1, radius - 2);
-          L = 0.85 - (normalizedDist * 0.35); // Ranges from 0.85 to 0.5 for lively/vibrant colors without deep blacks
+          L = 0.85 - normalizedDist * 0.35; // Ranges from 0.85 to 0.5 for lively/vibrant colors without deep blacks
           C = 0.35; // Vibrant colors
         }
 
         const color = `oklch(${L.toFixed(3)} ${C.toFixed(3)} ${H.toFixed(1)})`;
         items.push({
-          q, r,
-          x: x_norm, y: y_norm,
-          color, l: L, c: C, h: H,
+          q,
+          r,
+          x: x_norm,
+          y: y_norm,
+          color,
+          l: L,
+          c: C,
+          h: H,
           id: `hex-${q}-${r}`,
-          dist: hex_dist
+          dist: hex_dist,
         });
       }
     }
@@ -113,17 +123,19 @@ export function ColorSelector({
     for (let i = 0; i < 6; i++) {
       const angle_deg = 60 * i - 30;
       const angle_rad = (Math.PI / 180) * angle_deg;
-      points.push(`${cx + size * Math.cos(angle_rad)},${cy + size * Math.sin(angle_rad)}`);
+      points.push(
+        `${cx + size * Math.cos(angle_rad)},${cy + size * Math.sin(angle_rad)}`,
+      );
     }
-    return points.join(' ');
+    return points.join(" ");
   };
 
   // Calculate SVG dimensions based on the grid size
   const width = Math.sqrt(3) * hexSize * (radius * 2 + 1);
   const height = 2 * hexSize * (radius * 2 + 1) * 0.85;
 
-  const selectedHex = hexes.find(h => h.color === selected);
-  const hoveredHex = hexes.find(h => h.color === hovered);
+  const selectedHex = hexes.find((h) => h.color === selected);
+  const hoveredHex = hexes.find((h) => h.color === hovered);
 
   return (
     <div className={`inline-flex flex-col items-center gap-8 ${className}`}>
@@ -140,7 +152,8 @@ export function ColorSelector({
           const isHovered = hovered === hex.color;
 
           // Use contrasting stroke color based on lightness
-          const strokeColor = hex.l > 0.5 ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.2)';
+          const strokeColor =
+            hex.l > 0.5 ? "rgba(0,0,0,0.15)" : "rgba(255,255,255,0.2)";
 
           return (
             <motion.polygon
@@ -148,11 +161,13 @@ export function ColorSelector({
               key={hex.id}
               points={getHexPoints(cx, cy, hexSize - 1)}
               fill={hex.color}
-              stroke={isSelected ? (hex.l > 0.5 ? '#000' : '#fff') : strokeColor}
+              stroke={
+                isSelected ? (hex.l > 0.5 ? "#000" : "#fff") : strokeColor
+              }
               strokeWidth={isSelected ? 3 : 1}
               initial={{ scale: 0, opacity: 0 }}
               animate={{
-                scale: isSelected ? 1.15 : (isHovered ? 1.25 : 1),
+                scale: isSelected ? 1.15 : isHovered ? 1.25 : 1,
                 opacity: 1,
               }}
               transition={{
@@ -160,21 +175,20 @@ export function ColorSelector({
                 stiffness: 400,
                 damping: 25,
                 mass: 0.8,
-                delay: isLoaded ? 0 : hex.dist * 0.02
+                delay: isLoaded ? 0 : hex.dist * 0.02,
               }}
               onMouseEnter={() => setHovered(hex.color)}
               onMouseLeave={() => setHovered(null)}
               onPointerDown={(e) => {
                 console.log("CLICK FIRED!", hex.color);
-                e.preventDefault()
+                e.preventDefault();
                 setSelected(hex.color);
                 onChange?.(hex.color);
                 setSelectedColor({ l: hex.l, c: hex.c, h: hex.h });
-
               }}
               style={{
                 transformOrigin: `${cx}px ${cy}px`,
-                cursor: 'pointer'
+                cursor: "pointer",
               }}
             >
               <title>{hex.color}</title>
@@ -183,8 +197,12 @@ export function ColorSelector({
         })}
 
         {/* Bring hovered and selected to front using SVG <use> to avoid re-rendering the DOM array */}
-        {selectedHex && <use href={`#${selectedHex.id}`} style={{ pointerEvents: 'none' }} />}
-        {hoveredHex && hoveredHex.id !== selectedHex?.id && <use href={`#${hoveredHex.id}`} style={{ pointerEvents: 'none' }} />}
+        {selectedHex && (
+          <use href={`#${selectedHex.id}`} style={{ pointerEvents: "none" }} />
+        )}
+        {hoveredHex && hoveredHex.id !== selectedHex?.id && (
+          <use href={`#${hoveredHex.id}`} style={{ pointerEvents: "none" }} />
+        )}
       </svg>
 
       {/* Selected Color Display

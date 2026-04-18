@@ -1,4 +1,4 @@
-import { DrawElement, Labeltype, TextType } from "@repo/common";
+import { DrawElement, Labeltype } from "@repo/common";
 import { ExcalidrawElementSkeleton } from "../components/types";
 
 export type AIResultType = Extract<
@@ -12,7 +12,7 @@ function getFittedFontSize(
   fontFamily: string,
   maxWidth: number,
 ): Labeltype {
-  const { fontSize, text } = label; //trust me bro
+  const { fontSize, text } = label;
   ctx.font = `${fontSize}px ${fontFamily}`;
   let newSize = fontSize;
 
@@ -20,15 +20,25 @@ function getFittedFontSize(
     newSize--;
     ctx.font = `${newSize}px ${fontFamily}`;
   }
-
   return { fontSize: newSize, fontFamily: fontFamily, text: text };
 }
+
 export const convertToShapeType = (
   ctx: CanvasRenderingContext2D,
   fontFamily: string,
   e: ExcalidrawElementSkeleton,
   sf: number,
+  viewportCenterWorldX: number,
+  viewportCenterWorldY: number,
 ): AIResultType => {
+  // 1. Get the scaled width and height of the shape
+  const scaledWidth = e.width * sf;
+  const scaledHeight = e.height * sf;
+
+  // 2. Base position + Screen Center - (Half of the shape's width/height)
+  const startX = e.x * sf + viewportCenterWorldX - scaledWidth / 2;
+  const startY = e.y * sf + viewportCenterWorldY - scaledHeight / 2;
+
   if (e.type === "arrow") {
     return {
       id: crypto.randomUUID(),
@@ -39,20 +49,24 @@ export const convertToShapeType = (
       backgroundColor: { l: 100, c: 0, h: 0 },
       strokeColor: { l: 100, c: 0, h: 0 },
       strokeWidth: e.strokeWidth,
-      startX: e.x * sf,
-      startY: e.y * sf,
+      startX: startX,
+      startY: startY,
       //@ts-ignore
       type: e.type,
     };
   } else {
+    // 3. endX and endY are simply the start + the full scaled width/height
+    const endX = startX + scaledWidth;
+    const endY = startY + scaledHeight;
+
     return {
       id: crypto.randomUUID(),
-      endX: (e.x + e.width) * sf,
-      endY: (e.y + e.height) * sf,
+      startX: startX,
+      startY: startY,
+      endX: endX,
+      endY: endY,
       strokeColor: { l: 100, c: 0, h: 0 },
       strokeWidth: e.strokeWidth,
-      startX: e.x * sf,
-      startY: e.y * sf,
       label: getFittedFontSize(ctx, e.label, fontFamily, e.width * sf),
       backgroundColor: { l: 100, c: 0, h: 0 },
       isDeleted: false,

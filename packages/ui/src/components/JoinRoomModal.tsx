@@ -1,7 +1,6 @@
 "use client";
-import React, { useState } from "react";
+import { useState } from "react";
 import { CodeInputBox } from "./ui/CodeInputBox";
-import { Button } from "./ui/button";
 import {
   IconSquareArrowRight,
   IconSquarePlus,
@@ -36,15 +35,14 @@ const JoinRoomModal = ({
         {/* ── Room button group ── */}
         <div className="group flex flex-col">
           {/* Room pill — rounded-tl + rounded-bl normally, loses rounded-bl on hover */}
-          <Button
+          <button
             className="
               w-18 h-8 flex gap-1 items-center justify-center
               text-primary-contrast bg-primary text-xs font-normal font-google-sans-code
-              shadow-shinyshadow
               rounded-l-lg rounded-r-none
               group-hover:rounded-bl-none
               transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]
-              scale-[98%] hover:scale-100
+             hover:scale-105
               cursor-default p-0 outline-1 outline-global-shadow
             "
           >
@@ -52,7 +50,7 @@ const JoinRoomModal = ({
               Room
             </span>
             <IconUserShare color="currentColor" size={15} stroke={1.5} />
-          </Button>
+          </button>
 
           {/* ── Expanding drawer — uses grid-rows trick so it takes real space ── */}
           <div

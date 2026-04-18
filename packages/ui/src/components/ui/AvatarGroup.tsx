@@ -48,7 +48,7 @@ const AvatarGroup: React.FC<AvatarGroupProps> = ({
         return (
           <motion.div
             key={avatar.userId}
-            className="absolute cursor-pointer font-krona-one"
+            className="absolute cursor-pointer font-krona-one outline-1 outline-global-shadow rounded-full  "
             initial={false}
             animate={{
               x: isHovered ? baseOffset - slideDistance : baseOffset,
@@ -71,7 +71,7 @@ const AvatarGroup: React.FC<AvatarGroupProps> = ({
             onClick={() => onAvatarClick?.(avatar)}
           >
             <div
-              className="relative w-full h-full rounded-full border-personal overflow-hidden bg-gray-200"
+              className="relative w-full h-full rounded-full border-personal overflow-hidden bg-gray-200 "
               style={{
                 backgroundColor: avatar.color || "#6366f1",
               }}
@@ -83,7 +83,7 @@ const AvatarGroup: React.FC<AvatarGroupProps> = ({
                   className="absolute inset-0 w-full h-full object-cover text-center"
                 />
               ) : ( */}
-              <div className="w-full h-full flex items-center justify-center font-semibold text-sm">
+              <div className="w-full h-full flex items-center justify-center font-semibold text-sm outline-3 outline-global-shadow">
                 {avatar.name.trim()[0]?.toUpperCase()}
               </div>
               {/* )} */}

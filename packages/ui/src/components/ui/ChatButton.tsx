@@ -12,7 +12,7 @@ const ChatButton = ({
       {/* Chat Toggle Button */}
       <motion.button
         key="chat-button"
-        initial={{ opacity: 0, x: -10, scale: 0.95 }}
+        initial={{ opacity: 0, x: -10, scale: 0.97 }}
         animate={{ opacity: 1, x: 0, scale: 1 }}
         exit={{ opacity: 0, x: 10, scale: 0.95 }}
         transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}

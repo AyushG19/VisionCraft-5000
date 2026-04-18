@@ -1,4 +1,3 @@
-import { CanvasElements } from "@prisma/client";
 import { Prisma, prismaClient } from "../pg";
 
 export async function createNewRoom(slug: string, adminId: string) {
@@ -71,12 +70,14 @@ export type RoomMembers = Prisma.UserGetPayload<{
   select: { id: true; name: true };
 }>[];
 
-export async function insertUserToRoom(
+export async function upsertUserToRoom(
   userId: string,
   roomId: string,
 ): Promise<RoomMembers> {
-  const res = await prismaClient.roomUser.create({
-    data: {
+  const res = await prismaClient.roomUser.upsert({
+    where: { roomId_userId: { roomId, userId } },
+    update: {},
+    create: {
       user: {
         connect: { id: userId },
       },

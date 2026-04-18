@@ -1,5 +1,5 @@
 import { Button } from "./ui/button";
-import { IconDoorExit, IconLogout, IconMessagePlus } from "@tabler/icons-react";
+import { IconDoorExit } from "@tabler/icons-react";
 import { Tooltip, TooltipTrigger, TooltipContent } from "./ui/ToolTip";
 import ChatButton from "./ui/ChatButton";
 import { motion } from "motion/react";
@@ -22,12 +22,12 @@ const RoomOptions = ({
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            className="w-18 h-8 rounded-r-none opacity-80 hover:opacity-100 flex p-0 shadow-shinyshadow button-press"
+            className="w-18 h-8 rounded-l-lg rounded-r-none hover:opacity-100 flex p-0 button-press-active outlien-1 outline-global-shadow "
             variant={"destructive"}
             onClick={() => handleLeaveRoom()}
           >
             <span className="text-xs mr-1 font-google-sans-code">Exit</span>
-            <IconDoorExit color={"black"} stroke={1} size={15} />
+            <IconDoorExit color={"black"} stroke={1.5} size={15} />
           </Button>
         </TooltipTrigger>
         <TooltipContent>

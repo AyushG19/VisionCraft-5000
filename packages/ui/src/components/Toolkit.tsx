@@ -230,8 +230,8 @@ const Toolkit = React.forwardRef<HTMLInputElement, toolkitProps>(
                 key={tool.id}
                 toolInfo={tool}
                 onSelectColor={handleColorSelect}
-                onSelectStroke={handleStrokeSelect}
                 onSelectTool={handleToolSelect}
+                initialColor={toolKitState.currentColor}
               />
             );
           })}

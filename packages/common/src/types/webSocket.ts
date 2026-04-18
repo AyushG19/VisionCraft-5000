@@ -36,6 +36,24 @@ const SocketShapePayload = z.object({
 
 export type WebSocketShapeType = z.infer<typeof SocketShapePayload>;
 
+export const ServerShapeManipulationSchema = z.object({
+  type: z.enum(["RESIZE", "DRAG"]),
+  payload: z.object({ userId: z.string(), element: DrawSchema }),
+});
+
+export type ServerShapeManipulation = z.infer<
+  typeof ServerShapeManipulationSchema
+>;
+
+export const ClientShapeManipulationSchema = z.object({
+  type: z.enum(["RESIZE", "DRAG"]),
+  payload: DrawSchema,
+});
+
+export type ClientShapeManipulation = z.infer<
+  typeof ClientShapeManipulationSchema
+>;
+
 const ClientCursorSchema = z.object({
   type: z.literal("CURSOR"),
   payload: PointSchema,
@@ -50,11 +68,17 @@ const ServerCursorSchema = z.object({
 
 export type ServerCursorSchemaType = z.infer<typeof ServerCursorSchema>;
 
+export const ServerInfoSchema = z.object({
+  type: z.literal("INFO"),
+  payload: z.string(),
+});
 export const ServerSocketData = z.discriminatedUnion("type", [
   SocketShapePayload,
   ServerChatSchema,
   ServerRoomSchema,
   ServerCursorSchema,
+  ServerShapeManipulationSchema,
+  ServerInfoSchema,
 ]);
 
 export type ServerSocketDataType = z.infer<typeof ServerSocketData>;
@@ -64,6 +88,7 @@ export const ClientSocketData = z.discriminatedUnion("type", [
   ClientChatSchema,
   ClientRoomSchema,
   ClientCursorSchema,
+  ClientShapeManipulationSchema,
 ]);
 
 export type ClientSocketDataType = z.infer<typeof ClientSocketData>;

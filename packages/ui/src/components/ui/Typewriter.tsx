@@ -14,7 +14,7 @@ export default function MotionTypewriter({
   pauseDuration?: number;
 }) {
   const [index, setIndex] = useState(0);
-  const currentWord = words[index];
+  const currentWord = words[index] || "disigner";
 
   // A motion value that tracks a number from 0 to the length of the word
   const count = useMotionValue(0);

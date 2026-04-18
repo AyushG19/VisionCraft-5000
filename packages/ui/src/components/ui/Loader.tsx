@@ -1,4 +1,5 @@
-import React, { useRef } from "react";
+"use client";
+import { useRef } from "react";
 
 const Loader = () => {
   const shapes = ["triangle", "circle", "rect"];
