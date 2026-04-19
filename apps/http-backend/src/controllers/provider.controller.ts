@@ -1,8 +1,8 @@
-import { AppError, UserType } from "@repo/common/index";
+import { UserType } from "@repo/common";
 import env from "../env";
 import { Response, Request } from "express";
-import { acTokenExpiry, authConfig, rfTokenExpiry } from "src/config";
-import { accessJwtService, refreshJwtService } from "src/utils/jwtInstance";
+import { acTokenExpiry, authConfig, rfTokenExpiry } from "../config";
+import { accessJwtService, refreshJwtService } from "../utils/jwtInstance";
 
 const sendAuth201Res = (res: Response, user: UserType) => {
   res

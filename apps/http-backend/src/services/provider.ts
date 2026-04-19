@@ -1,8 +1,7 @@
-import { ProviderUser, ProviderUserSchema, UserType } from "@repo/common/index";
+import { ProviderUser, UserType } from "@repo/common";
 import {
   createAccountUser,
   findAccountById,
-  findUserByEmail,
   linkIfExistingByEmail,
 } from "@repo/db";
 

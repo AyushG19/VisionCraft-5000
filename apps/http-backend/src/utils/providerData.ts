@@ -1,6 +1,6 @@
 import { Profile as GoogleProfile } from "passport-google-oauth20";
 import { Profile as GithubProfile } from "passport-github2";
-import { ProviderUser, ProviderUserSchema } from "@repo/common/index";
+import { ProviderUser, ProviderUserSchema } from "@repo/common";
 
 export const cleanGoogleData = (profile: GoogleProfile): ProviderUser => {
   if (!profile.emails || !profile.emails[0]?.verified)

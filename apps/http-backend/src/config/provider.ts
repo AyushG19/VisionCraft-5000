@@ -2,8 +2,8 @@ import { PassportStatic } from "passport";
 import env from "../env";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as GithubStrategy, Profile } from "passport-github2";
-import { syncUserAndCreate } from "src/services/provider";
-import { cleanGithubData, cleanGoogleData } from "src/utils/providerData";
+import { syncUserAndCreate } from "../services/provider";
+import { cleanGithubData, cleanGoogleData } from "../utils/providerData";
 
 export const configureGoogle = (passport: PassportStatic) => {
   passport.use(
