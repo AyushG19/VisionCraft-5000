@@ -11,7 +11,7 @@ const authRouter: Router = express.Router();
 authRouter.post("/signup", validate(CreateUserSchema), signup);
 authRouter.post("/login", validate(LoginSchema), login);
 authRouter.post("/refresh-token", refreshToken);
-// ✅ Step 1: Initiate Google login — redirects user to Google
+
 authRouter.get(
   "/google",
   passport.authenticate("google", {
@@ -20,14 +20,13 @@ authRouter.get(
   }),
 );
 
-// ✅ Step 2: Google redirects back here after user logs in
 authRouter.get(
   "/google/callback",
   passport.authenticate("google", {
     session: false,
-    failureRedirect: env.FRONTEND_URL, // or wherever you want on failure
+    failureRedirect: env.FRONTEND_URL,
   }),
-  handleProviderCallback, // ← now req.user is populated, this runs correctly
+  handleProviderCallback,
 );
 authRouter.get(
   "/github",
@@ -37,13 +36,12 @@ authRouter.get(
   }),
 );
 
-// ✅ Step 2: Google redirects back here after user logs in
 authRouter.get(
   "/github/callback",
   passport.authenticate("github", {
     session: false,
-    failureRedirect: env.FRONTEND_URL, // or wherever you want on failure
+    failureRedirect: env.FRONTEND_URL,
   }),
-  handleProviderCallback, // ← now req.user is populated, this runs correctly
+  handleProviderCallback,
 );
 export default authRouter;

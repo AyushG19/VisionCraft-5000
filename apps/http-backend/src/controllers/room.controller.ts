@@ -3,7 +3,7 @@ import {
   createNewRoom,
   findRoomFromSlug,
   removeUserFromRoom,
-  insertUserToRoom,
+  upsertUserToRoom,
 } from "@repo/db";
 import { generateRandomCode } from "../utils/codeGenerator";
 import { DrawElement, JoinRoomResponseType } from "@repo/common";
@@ -21,7 +21,7 @@ const checkCode = async (req: Request, res: Response) => {
     }
     const room = await findRoomFromSlug(slug);
     if (room && slug === room.slug) {
-      const users = await insertUserToRoom(userId, room.id);
+      const users = await upsertUserToRoom(userId, room.id);
       const processedUsers = users.map((u) => ({ name: u.name, userId: u.id }));
 
       const resData: JoinRoomResponseType = {
