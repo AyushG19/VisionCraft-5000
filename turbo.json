@@ -1,26 +1,93 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+  "globalPassThroughEnv": ["NODE_ENV"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
-      "env": ["JWT_SECRET", "BCRYPT_SALT", "HTTP_BACKEND"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
     "start": {
       "cache": false,
       "persistent": true
     },
-    "lint": {
-      "dependsOn": ["^lint"]
-    },
-    "check-types": {
-      "dependsOn": ["^check-types"]
-    },
     "dev": {
       "cache": false,
       "persistent": true
+    },
+
+    "http-backend#start": {
+      "cache": false,
+      "persistent": true,
+      "passThroughEnv": [
+        "PORT",
+        "JWT_SECRET",
+        "BCRYPT_SALT",
+        "MODEL",
+        "GROQ_API_KEY",
+        "RF_TOKEN_EXPIRY",
+        "AC_TOKEN_EXPIRY",
+        "GOOGLE_ID",
+        "GOOGLE_SECRET",
+        "GOOGLE_CALLBACK_URL",
+        "GITHUB_ID",
+        "GITHUB_SECRET",
+        "GITHUB_CALLBACK_URL",
+        "FRONTEND_URL",
+        "DATABASE_URL"
+      ]
+    },
+
+    "ws-backend#start": {
+      "cache": false,
+      "persistent": true,
+      "passThroughEnv": [
+        "PORT",
+        "JWT_SECRET",
+        "BCRYPT_SALT",
+        "MODEL",
+        "GROQ_API_KEY",
+        "RS_HOST",
+        "RS_PORT",
+        "RS_USERNAME",
+        "RS_PASSWORD",
+        "EMPTY_ROOM_TTL_MS",
+        "ROOM_IDLE_TTL_MS",
+        "SWEEP_INTERVAL_MS"
+      ]
+    },
+
+    "web#start": {
+      "cache": false,
+      "persistent": true,
+      "passThroughEnv": [
+        "HTTP_BACKEND_URL",
+        "WS_BACKEND_URL",
+        "WORKER_BACKEND_URL",
+        "CLOUD_NAME"
+      ]
+    },
+
+    "http-backend#dev": {
+      "cache": false,
+      "persistent": true,
+      "passThroughEnv": [
+        "JWT_SECRET",
+        "BCRYPT_SALT",
+        "MODEL",
+        "GROQ_API_KEY",
+        "RF_TOKEN_EXPIRY",
+        "AC_TOKEN_EXPIRY",
+        "GOOGLE_ID",
+        "GOOGLE_SECRET",
+        "GOOGLE_CALLBACK_URL",
+        "GITHUB_ID",
+        "GITHUB_SECRET",
+        "GITHUB_CALLBACK_URL",
+        "FRONTEND_URL",
+        "DATABASE_URL"
+      ]
     }
   }
 }
