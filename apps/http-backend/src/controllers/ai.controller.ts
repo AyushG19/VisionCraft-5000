@@ -3,10 +3,10 @@ import { AppError } from "../error";
 import { Request, Response } from "express";
 import env from "../env.js";
 import Groq from "groq-sdk";
-import { GoogleGenAI, GoogleTypeDate } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 import { getMermaidPrompt } from "../utils/getMermaidPrompt";
 const groq = new Groq({ apiKey: env.GROQ_API_KEY });
-const gemini = new GoogleGenAI({});
+const gemini = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
 
 export async function getGroqChatCompletion(
   userCommand: string,
