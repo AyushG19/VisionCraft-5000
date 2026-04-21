@@ -15,6 +15,7 @@ const envSchema = {
   BCRYPT_SALT: process.env.BCRYPT_SALT,
   MODEL: process.env.MODEL,
   GROQ_API_KEY: process.env.GROQ_API_KEY,
+  GEMINI_API_KEY: process.env.GEMINI_API_KEY,
   RF_TOKEN_EXPIRY: Number(process.env.RF_TOKEN_EXPIRY),
   AC_TOKEN_EXPIRY: Number(process.env.AC_TOKEN_EXPIRY),
   FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:3000",
