@@ -4,10 +4,10 @@
   "main": "index.ts",
   "types": "index.ts",
   "scripts": {
-    "build": "tsc -b",
+    "build": "tsup src/index.ts --dts --format esm,cjs",
     "start": "node ./dist/index.js",
     "dev": "tsx watch --env-file=.env src/index.ts",
-    "typecheck": "tsc --noEmit --watch"
+    "check-types": "tsc --noEmit --watch"
   },
   "devDependencies": {
     "@repo/backend-common": "workspace:*",
@@ -22,7 +22,10 @@
     "@types/passport-github2": "^1.2.9",
     "@types/passport-google-oauth20": "^2.0.17",
     "@types/serve-static": "^1.15.8",
-    "tsx": "^4.21.0"
+    "@types/cookie-parser": "^1.4.9",
+    "@types/cors": "^2.8.19",
+    "tsx": "^4.21.0",
+    "tsup": "^8.5.1"
   },
   "keywords": [],
   "author": "",
@@ -30,8 +33,6 @@
   "description": "",
   "dependencies": {
     "@google/genai": "^1.39.0",
-    "@types/cookie-parser": "^1.4.9",
-    "@types/cors": "^2.8.19",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

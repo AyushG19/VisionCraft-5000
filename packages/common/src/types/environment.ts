@@ -17,6 +17,7 @@ export const HttpEnv = z.object({
   BCRYPT_SALT: z.string(),
   MODEL: z.string(),
   GROQ_API_KEY: z.string(),
+  GEMINI_API_KEY: z.string(),
   RF_TOKEN_EXPIRY: z.number(),
   AC_TOKEN_EXPIRY: z.number(),
   FRONTEND_URL: z.string(),

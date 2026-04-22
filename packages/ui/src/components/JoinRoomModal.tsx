@@ -8,6 +8,8 @@ import {
 } from "@tabler/icons-react";
 import ChatButton from "./ui/ChatButton";
 import { AnimatePresence, motion } from "motion/react";
+import { useError } from "@repo/hooks";
+import { AppError } from "@repo/common";
 
 const JoinRoomModal = ({
   verifyJoin,
@@ -15,16 +17,46 @@ const JoinRoomModal = ({
   onChatToggle,
   isChatOpen,
 }: {
-  verifyJoin: (code: string) => void;
-  makeNewRoom: () => void;
+  verifyJoin: (code: string) => Promise<void>;
+  makeNewRoom: () => Promise<void>;
   onChatToggle: () => void;
   isChatOpen: boolean;
 }) => {
   const [showInputBox, setShowInputBox] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { setError } = useError();
 
-  const toggleShowInputBox = () => setShowInputBox((prev) => !prev);
-  const handleCreateRoom = () => makeNewRoom();
+  const toggleShowInputBox = async () => {
+    try {
+      setIsLoading(true);
+      await setShowInputBox((prev) => !prev);
+    } catch (error) {
+      if (error instanceof AppError) {
+        setError({ code: error.code, message: error.message });
+      } else {
+        //@ts-ignore
+        setError({ code: "UNKNOWN_ERROR", message: error.message });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  const handleCreateRoom = async () => {
+    try {
+      setIsLoading(true);
+      await makeNewRoom();
+    } catch (error) {
+      if (error instanceof AppError) {
+        setError({ code: error.code, message: error.message });
+      } else {
+        //@ts-ignore
+        setError({ code: "UNKNOWN_ERROR", message: error!.message });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <>
       <div
@@ -63,7 +95,7 @@ const JoinRoomModal = ({
             <div className="overflow-hidden flex flex-col">
               {/* New — flat all sides, sits flush against Room button */}
               <button
-                onClick={handleCreateRoom}
+                onClick={() => handleCreateRoom()}
                 className="
                   w-18 h-8 flex gap-1 items-center justify-center
                   bg-secondary text-black text-xs font-normal font-google-sans-code
@@ -72,10 +104,18 @@ const JoinRoomModal = ({
                   transition-all duration-150 cursor-pointer border-personal
                 "
               >
-                <span className="text-xs font-normal font-google-sans-code">
-                  New
-                </span>
-                <IconSquarePlus size={15} stroke={1.5} />
+                {isLoading ? (
+                  <span className="text-xs font-normal font-google-sans-code">
+                    Loading...
+                  </span>
+                ) : (
+                  <>
+                    <span className="text-xs font-normal font-google-sans-code">
+                      New
+                    </span>
+                    <IconSquarePlus size={15} stroke={1.5} />
+                  </>
+                )}
               </button>
 
               {/* Join — flat top, rounded-bl, flat right — closes the group */}

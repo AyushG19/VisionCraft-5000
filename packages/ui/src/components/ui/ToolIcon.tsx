@@ -6,13 +6,6 @@ import { AllToolTypes, ColorType } from "@repo/common";
 import { ColorSelector } from "./ColorSelector";
 import { Button } from "./button";
 
-const oklchToCssHsl = (l: number, c: number, h: number) => {
-  const hue = h;
-  const saturation = Math.min(100, c * 200);
-  const lightness = Math.min(100, l * 100);
-  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-};
-
 interface ToolIconProps extends React.ComponentProps<"div"> {
   onSelectTool: (toolname: AllToolTypes) => void;
   onSelectColor: (color: ColorType) => void;
@@ -38,16 +31,7 @@ const ToolIcon = React.forwardRef<HTMLInputElement, ToolIconProps>(
     },
     inputRef,
   ) => {
-    const [pickedColor, setPickedColor] = useState<{
-      l: number;
-      c: number;
-      h: number;
-    }>(initialColor); // Initial color for demonstration
     const [isHovered, setIsHovered] = useState(false);
-
-    // useEffect(() => {
-    //   onSelectColor(pickedColor);
-    // }, [pickedColor]);
 
     if (toolInfo.id === "image") {
       return (
@@ -84,7 +68,7 @@ const ToolIcon = React.forwardRef<HTMLInputElement, ToolIconProps>(
           >
             {toolInfo.id === "color" && isHovered && (
               <ColorSelector
-                selectedColor={pickedColor}
+                selectedColor={initialColor}
                 setSelectedColor={onSelectColor}
               />
             )}
@@ -92,7 +76,7 @@ const ToolIcon = React.forwardRef<HTMLInputElement, ToolIconProps>(
               color={"currentColor"}
               fill={
                 toolInfo.id === "color"
-                  ? `oklch(${pickedColor.l} ${pickedColor.c} ${pickedColor.h})`
+                  ? `oklch(${initialColor.l} ${initialColor.c} ${initialColor.h})`
                   : "none"
               }
               size={15}

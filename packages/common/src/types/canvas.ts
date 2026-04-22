@@ -1,4 +1,4 @@
-import { number, z } from "zod";
+import { z } from "zod";
 
 export const ModeSchema = z.enum(["select", "hand"]);
 export type Mode = z.infer<typeof ModeSchema>;
@@ -43,6 +43,7 @@ export const BaseElementSchema = z.object({
   strokeColor: ColorSchema,
   backgroundColor: ColorSchema.nullable(),
   isDeleted: z.boolean(),
+  isSelected: z.boolean(),
 });
 
 export type BaseElement = z.infer<typeof BaseElementSchema>;

@@ -4,11 +4,13 @@
   "main": "dist/index.js",
   "types": "src/index.ts",
   "scripts": {
-    "build": "tsc -b"
+    "build": "tsup src/index.ts --dts --format esm,cjs",
+    "check-types": "tsc --no-emit"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
-    "@types/node": "^24.3.3"
+    "@types/node": "^24.3.3",
+    "tsup": "^8.5.1"
   },
   "keywords": [],
   "author": "",

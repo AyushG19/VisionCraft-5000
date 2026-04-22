@@ -1,17 +1,22 @@
 {
   "name": "@repo/backend-common",
   "version": "1.0.0",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
-    "build": "tsc -b"
+    "build": "tsup src/index.ts -dts --fotmat esm,cjs",
+    "check-types": "tsc --no-emit"
   },
   "license": "ISC",
   "devDependencies": {
-    "@repo/typescript-config": "workspace:*",
     "@repo/common": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.14.1",
-    "@types/jsonwebtoken": "^9.0.9"
+    "tsup": "^8.5.1"
   },
   "dependencies": {
     "dotenv": "^16.5.0",

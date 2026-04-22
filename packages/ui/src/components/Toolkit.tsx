@@ -13,20 +13,15 @@ import {
   IconArrowBackUp,
   IconArrowForwardUp,
   IconCircle,
-  IconDropletFilled,
   IconPencilMinus,
   IconSquare,
   IconTrendingUp,
   IconHandStop,
   IconDroplet,
 } from "@tabler/icons-react";
-import type {
-  ToolKitType,
-  DrawElement,
-  AllToolTypes,
-  ColorType,
-} from "@repo/common";
+import type { ToolKitType, AllToolTypes, ColorType } from "@repo/common";
 import { Button } from "./ui/button";
+import oklchToCSS from "../utils/colorHelper";
 
 const tools: {
   id: AllToolTypes;
@@ -51,7 +46,7 @@ type toolkitProps = {
   toolKitState: ToolKitType;
   handleToolSelect: (toolname: AllToolTypes) => void;
   handleColorSelect: (color: ColorType) => void;
-  handleStrokeSelect: (size: number) => void;
+  currentColor: ColorType;
   handleUndo: () => void;
   handleRedo: () => void;
 };
@@ -63,7 +58,7 @@ const Toolkit = React.forwardRef<HTMLInputElement, toolkitProps>(
       toolKitState,
       handleToolSelect,
       handleColorSelect,
-      handleStrokeSelect,
+      currentColor,
       handleUndo,
       handleRedo,
     },
@@ -225,6 +220,7 @@ const Toolkit = React.forwardRef<HTMLInputElement, toolkitProps>(
           {tools.map((tool) => {
             return (
               <ToolIcon
+                style={{ color: oklchToCSS(currentColor) }}
                 ref={inputRef}
                 isSelected={toolKitState.currentTool === tool.id}
                 key={tool.id}

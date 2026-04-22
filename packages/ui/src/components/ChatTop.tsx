@@ -19,11 +19,11 @@ const ChatTop = ({ slug, avatars }: { slug: string; avatars: UserInfo[] }) => {
     showFeedBack();
   };
   return (
-    <div className=" w-full h-15 absolute top-0 left-0 z-30 p-2">
+    <div className=" w-full absolute top-0 left-0 z-30 p-2">
       {/* <div className="flex outline h-8 rounded-md"> */}
       {/* <h3 className="capitalize font-google-sans-code  ">code:</h3> */}
       {/* <h1 className="text-2xl font-google-sans-code px-2 ">{slug}</h1> */}
-      <div className="flex items-center justify-between bg-primary outline-1 outline-global-shadow px-6 py-4 rounded-lg h-20">
+      <div className="flex items-center justify-between bg-primary outline-1 outline-global-shadow px-6 py-2 rounded-lg h-fit">
         <div className="flex flex-col">
           <div
             className=" capitalize text-[10px]  "
