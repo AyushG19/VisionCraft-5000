@@ -7,7 +7,7 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "build": "tsup src/index.ts -dts --fotmat esm,cjs",
+    "build": "tsup src/index.ts --dts --format esm,cjs",
     "check-types": "tsc --no-emit"
   },
   "license": "ISC",
