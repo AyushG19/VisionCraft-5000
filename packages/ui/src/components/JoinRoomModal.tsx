@@ -1,15 +1,15 @@
 "use client";
 import { useState } from "react";
-import { CodeInputBox } from "./ui/CodeInputBox";
 import {
   IconSquareArrowRight,
   IconSquarePlus,
   IconUserShare,
 } from "@tabler/icons-react";
 import ChatButton from "./ui/ChatButton";
-import { AnimatePresence, motion } from "motion/react";
 import { useError } from "@repo/hooks";
 import { AppError } from "@repo/common";
+import { AnimatePresence, motion } from "motion/react";
+import { CodeInputBox } from "./ui/CodeInputBox";
 
 const JoinRoomModal = ({
   verifyJoin,
@@ -27,19 +27,7 @@ const JoinRoomModal = ({
   const { setError } = useError();
 
   const toggleShowInputBox = async () => {
-    try {
-      setIsLoading(true);
-      await setShowInputBox((prev) => !prev);
-    } catch (error) {
-      if (error instanceof AppError) {
-        setError({ code: error.code, message: error.message });
-      } else {
-        //@ts-ignore
-        setError({ code: "UNKNOWN_ERROR", message: error.message });
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    setShowInputBox((prev) => !prev);
   };
 
   const handleCreateRoom = async () => {
@@ -57,6 +45,23 @@ const JoinRoomModal = ({
       setIsLoading(false);
     }
   };
+
+  const handleJoinRoom = async (code: string) => {
+    try {
+      setIsLoading(true);
+      await verifyJoin(code);
+    } catch (error) {
+      if (error instanceof AppError) {
+        setError({ code: error.code, message: error.message });
+      } else {
+        //@ts-ignore
+        setError({ code: "UNKNOWN_ERROR", message: error!.message });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <>
       <div
@@ -74,7 +79,7 @@ const JoinRoomModal = ({
               rounded-l-lg rounded-r-none
               group-hover:rounded-bl-none
               transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]
-             hover:scale-105
+             group-hover:scale-105
               cursor-default p-0 outline-1 outline-global-shadow
             "
           >
@@ -90,6 +95,7 @@ const JoinRoomModal = ({
               grid
               grid-rows-[0fr] group-hover:grid-rows-[1fr]
               transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]
+              group opacity-70 group-hover:opacity-100
             "
           >
             <div className="overflow-hidden flex flex-col">
@@ -104,7 +110,7 @@ const JoinRoomModal = ({
                   transition-all duration-150 cursor-pointer border-personal
                 "
               >
-                {isLoading ? (
+                {isLoading && !showInputBox ? (
                   <span className="text-xs font-normal font-google-sans-code">
                     Loading...
                   </span>
@@ -151,11 +157,12 @@ const JoinRoomModal = ({
             animate={{ opacity: 1, scale: 1, x: "-50%", y: "-50%" }}
             exit={{ opacity: 0, scale: 0.95, x: "-50%", y: "-50%" }}
             transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
-            className="fixed top-1/2 left-1/2 z-50"
+            className="fixed top-1/2 left-1/2 z-50 bg-primary outline-1 outline-global-shadow rounded-md shadow-shinyprimary"
           >
             <CodeInputBox
-              verifyJoin={verifyJoin}
+              verifyJoin={handleJoinRoom}
               toggleFunction={toggleShowInputBox}
+              isLoading={isLoading}
             />
           </motion.div>
         )}

@@ -106,7 +106,7 @@ const Toolkit = React.forwardRef<HTMLInputElement, toolkitProps>(
         const toolIconContainer = toolIconRef.current;
         const naturalWidth = toolIconContainer.scrollWidth;
 
-        const totalMaxWidth = naturalWidth + 12 + 16 + 6;
+        const totalMaxWidth = naturalWidth + 12 + 16 + 4;
 
         setMaxWidth(totalMaxWidth);
         setCurrWidth(totalMaxWidth);
@@ -171,12 +171,34 @@ const Toolkit = React.forwardRef<HTMLInputElement, toolkitProps>(
             y: adjustedY,
           });
         } else if (resizeState.current.isResizing) {
-          const deltaX = x - resizeState.current.initialX;
-          const newWidth = resizeState.current.initialWidth + deltaX;
+          // Define these as constants at the top of the component (or outside it)
+          const ITEM_CHUNK = 36 + 8; // w-9 (36px) + gap-2 (8px)
+          const LEFT_PAD = 12; // p-3
+          const GRIP_WIDTH = 16; // w-4 (16px) + ml-1.5 (6px)
+          const CHROME = LEFT_PAD + GRIP_WIDTH;
 
-          // Constrain width between minimum (62px) and maximum (one row width)
-          const constrainedWidth = Math.max(62, Math.min(newWidth, maxWidth));
-          setCurrWidth(constrainedWidth);
+          const snapToColumns = (rawWidth: number) => {
+            const available = rawWidth - CHROME;
+            const cols = Math.max(1, Math.round(available / ITEM_CHUNK));
+            return cols * ITEM_CHUNK + CHROME;
+          };
+          const deltaX = x - resizeState.current.initialX;
+          const rawWidth = resizeState.current.initialWidth + deltaX;
+
+          // Clamp between 1-column min and full-row max
+          const minWidth = 1 * ITEM_CHUNK + CHROME;
+          const clamped = Math.max(minWidth, Math.min(rawWidth, maxWidth));
+
+          // Snap to the nearest whole column count — no leftover space
+          setCurrWidth(snapToColumns(clamped));
+          // const deltaX = x - resizeState.current.initialX;
+          // const newWidth = resizeState.current.initialWidth + deltaX;
+
+          // // Constrain width between minimum (62px) and maximum (one row width)
+          // const constrainedWidth = Math.max(62, Math.min(newWidth, maxWidth));
+          // const clampedConstrainedWidth =
+          //   constrainedWidth - (constrainedWidth % 30);
+          // setCurrWidth(constrainedWidth);
         }
       };
 
@@ -216,7 +238,7 @@ const Toolkit = React.forwardRef<HTMLInputElement, toolkitProps>(
           maxWidth: maxWidth > 0 ? `${maxWidth}px` : "none",
         }}
       >
-        <div ref={toolIconRef} className="flex flex-wrap w-auto gap-2.5 z-50">
+        <div ref={toolIconRef} className="flex flex-wrap gap-2 z-50 mr-1">
           {tools.map((tool) => {
             return (
               <ToolIcon
@@ -237,19 +259,19 @@ const Toolkit = React.forwardRef<HTMLInputElement, toolkitProps>(
             className="w-9 h-9 p-0 flex items-center justify-center cursor-pointer shadow-shinysecondary text-secondary-contrast button-press-active transition-all ease-in-out duration-100 outline-1 outline-global-shadow"
             onClick={handleUndo}
           >
-            <IconArrowBackUp size={15} stroke={1.5} />
+            <IconArrowBackUp size={15} stroke={1.6} />
           </Button>
           <Button
-            className="w-9 h-9 p-0 flex items-center justify-center cursor-pointer text-secondary-contrast shadow-shinysecondary bg-secondary button-press-active transition-all ease-in-out duration-100 outline-1 outline-global-shadow "
+            variant={"secondary"}
+            className="w-9 h-9 p-0 flex items-center justify-center cursor-pointer text-secondary-contrast shadow-shinysecondary bg-secondary button-press-active transition-all ease-in-out duration-100 outline-1 outline-global-shadow"
             onClick={handleRedo}
           >
-            <IconArrowForwardUp size={15} stroke={1.5} />
+            <IconArrowForwardUp size={15} stroke={1.6} />
           </Button>
         </div>
-
         <IconGripVertical
           ref={resizeRef}
-          className="cursor-e-resize w-4 h-4 shrink-0 ml-1.5"
+          className="cursor-e-resize w-4 h-4 shrink-0 "
         />
       </div>
     );

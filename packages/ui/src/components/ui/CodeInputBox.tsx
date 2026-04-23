@@ -1,14 +1,16 @@
 import React, { useRef, useState } from "react";
 import { Button } from "./button";
-import { IconArrowAutofitRight, IconX } from "@tabler/icons-react";
+import { IconClipboard } from "@tabler/icons-react";
 
 interface CodeInputBoxProps extends React.HTMLAttributes<HTMLDivElement> {
   toggleFunction: () => void;
-  verifyJoin: (code: string) => void;
+  verifyJoin: (code: string) => Promise<void>;
+  isLoading: boolean;
 }
 const CodeInputBox: React.FC<CodeInputBoxProps> = ({
   toggleFunction,
   verifyJoin,
+  isLoading,
 }) => {
   const [code, setCode] = useState(new Array(4).fill(""));
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
@@ -35,6 +37,17 @@ const CodeInputBox: React.FC<CodeInputBoxProps> = ({
     e: React.KeyboardEvent<HTMLInputElement>,
     idx: number,
   ) => {
+    if (e.ctrlKey && e.key === "v") {
+      handlePaste();
+      return;
+    }
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const sendCode = code.join("");
+      verifyJoin(sendCode);
+      return;
+    }
+
     if (e.key === "Backspace") {
       e.preventDefault(); // prevent default deletion weirdness
       setCode((prev) => {
@@ -57,39 +70,94 @@ const CodeInputBox: React.FC<CodeInputBoxProps> = ({
     }
   };
 
+  const handlePaste = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      const cleaned = text.trim().slice(0, 4);
+      const chars = cleaned.split("");
+      const next = Array(4).fill("");
+
+      chars.forEach((char, i) => {
+        next[i] = char;
+      });
+
+      setCode(next);
+
+      const focusIndex = Math.min(chars.length, 3);
+      inputRefs.current[focusIndex]?.focus();
+    } catch (err) {
+      console.error("Clipboard access failed");
+    }
+  };
+
   return (
-    <div className="font-[google_sans_code] flex items-center justify-center gap-2 m-4">
-      <Button
-        onClick={() => toggleFunction()}
-        size={"sm"}
-        variant={"destructive"}
-        className="p-2 rounded-full aspect-square outline-personal shadow-primary m-2 "
-      >
-        <IconX size={18} color="black" />
-      </Button>
-      {code.map((_, i) => (
-        <input
-          key={i}
-          ref={(el) => {
-            inputRefs.current[i] = el;
-          }}
-          type="text"
-          maxLength={1}
-          value={code[i]}
-          onChange={(e) => handleOnchange(e, i)}
-          onKeyDown={(e) => handleKeyDown(e, i)}
-          className="bg-canvas text-3xl text-white shadow-primary focus:drop-shadow-pressed outline-none w-20 h-20 text-center border rounded-lg "
-        />
-      ))}
-      <Button
-        onClick={() => verifyJoin(code.join(""))}
-        size={"sm"}
-        disabled={!code[3]}
-        variant={"secondary"}
-        className={`disabled:opacity-60 disabled:scale-100 p-2 rounded-full aspect-square outline-personal shadow-primary m-2`}
-      >
-        <IconArrowAutofitRight size={18} color="black" />
-      </Button>
+    <div
+      className={`font-google-sans-code relative flex flex-col items-center justify-center gap-3 p-6 ${isLoading ? "pointer-events-none" : "pointer-events-auto"}`}
+    >
+      {/* input boxes for code */}
+      <div className="flex gap-2">
+        {code.map((_, i) => (
+          <input
+            key={i}
+            ref={(el) => {
+              inputRefs.current[i] = el;
+            }}
+            type="text"
+            maxLength={1}
+            value={code[i]}
+            onChange={(e) => handleOnchange(e, i)}
+            onKeyDown={(e) => handleKeyDown(e, i)}
+            className="bg-secondary focus:bg-secondary-700 hover:bg-secondary-700 focus:shadow-shinyshadow-pressed text-3xl text-secondary-contrast w-20 h-20 text-center rounded-lg outline-1 outline-global-shadow "
+          />
+        ))}
+      </div>
+
+      {/* button to submit */}
+      <div className="flex gap-2.5 w-full h-8">
+        {/* button to cancel */}
+        <Button
+          onClick={() => toggleFunction()}
+          size={"sm"}
+          variant={"iconic"}
+          className=" scale-none font-light bg-red outline-1 outline-global-shadow shadow-pressed w-20 rounded-sm  button-press-active capitalize h-full group"
+        >
+          <p className="group-active:translate-x-0.5 group-active:translate-y-0.5 ">
+            cancel
+          </p>
+          {/* <IconX stroke={1.6} className="ml-1" size={18} color="black" /> */}
+        </Button>
+        <button
+          onClick={() => handlePaste()}
+          className="outline-1 outline-global-shadow bg-accent shadow-pressed flex flex-1 text-sm items-center justify-center px-2 rounded-sm capitalize  button-press-active cursor-pointer group"
+        >
+          <p className="group-active:translate-x-0.5 group-active:translate-y-0.5 ">
+            paste
+          </p>
+          <IconClipboard
+            stroke={1.6}
+            className="ml-1"
+            size={18}
+            color="black"
+          />
+        </button>
+        <Button
+          onClick={() => verifyJoin(code.join(""))}
+          size={"sm"}
+          disabled={!code[3]}
+          variant={"iconic"}
+          className={`disabled:cursor-not-allowed bg-secondary scale-100 shadow-pressed rounded-sm w-20 capitalize h-full button-press-active text-secondary-contrast font-light group`}
+        >
+          <p className="group-active:translate-x-0.5 group-active:translate-y-0.5 ">
+            {isLoading ? "wait..." : "join"}
+          </p>
+          {/* <IconDoorEnter
+            stroke={1.6}
+            className="ml-1"
+            size={18}
+            color="black"
+          /> */}
+        </Button>
+      </div>
     </div>
   );
 };
