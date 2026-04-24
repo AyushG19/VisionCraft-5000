@@ -23,6 +23,7 @@ export const drawGrid = (
   const startX = Math.floor(worldLeft / adjustedSpacing) * adjustedSpacing;
   const startY = Math.floor(worldTop / adjustedSpacing) * adjustedSpacing;
 
+  ctx.save();
   ctx.fillStyle = DOT_COLOR;
 
   for (let wx = startX; wx <= worldRight; wx += adjustedSpacing) {
@@ -32,4 +33,5 @@ export const drawGrid = (
       ctx.fill();
     }
   }
+  ctx.restore();
 };

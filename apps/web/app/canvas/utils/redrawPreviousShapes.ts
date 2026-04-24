@@ -10,6 +10,7 @@ export default function redrawPreviousShapes(
   camera: Camera,
   currentShape?: DrawElement,
   selectedShapeId?: string,
+  highlightColor?: string,
 ) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -29,6 +30,6 @@ export default function redrawPreviousShapes(
     drawShape(ctx, shape, camera, selectedShapeId);
   }
   if (currentShape) {
-    drawShape(ctx, currentShape, camera, selectedShapeId);
+    drawShape(ctx, currentShape, camera, selectedShapeId, highlightColor);
   }
 }

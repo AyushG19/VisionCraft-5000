@@ -20,6 +20,7 @@ import {
 import {
   AllowedFonts,
   AllToolTypes,
+  AppError,
   ClientShapeManipulation,
   ColorType,
   DrawElement,
@@ -49,6 +50,7 @@ import { screenToWorld } from "app/lib/math";
 import { useCamera } from "./useCamera";
 import useRafLoop from "./useRafLoop";
 import redrawPreviousShapes from "../utils/redrawPreviousShapes";
+import { debounce } from "../utils/rateLimiting";
 
 export const useSocketWithWhiteboard = (): {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
@@ -80,8 +82,8 @@ export const useSocketWithWhiteboard = (): {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   handleLeaveRoom: () => void;
-  handleJoinRoom: (code: string) => void;
-  handleCreateRoom: () => void;
+  handleJoinRoom: (code: string) => Promise<void>;
+  handleCreateRoom: () => Promise<void>;
   slug: string;
   handleElementDelete: (element: DrawElement) => void;
   handleStrokeStyle: (
@@ -124,6 +126,9 @@ export const useSocketWithWhiteboard = (): {
   } = useSocketContext();
 
   const { camera } = useCamera(canvasRef, canvasState.toolState.currentTool);
+  // Add these two refs near your other refs
+  const drawnShapesRef = useRef(canvasState.drawnShapes);
+  const cameraRef = useRef(camera);
 
   const { getScreenCoordinates } = useMousePosition(canvasRef);
 
@@ -178,6 +183,7 @@ export const useSocketWithWhiteboard = (): {
     } catch (error) {
       //@ts-ignore
       console.error("error in join room : ", error.message);
+      throw new AppError("Error joining a ROOM,Try agian!", "SERVER_ERROR");
     }
   };
 
@@ -186,9 +192,9 @@ export const useSocketWithWhiteboard = (): {
       const res = await createRoomService();
       if (!res) throw new Error("Error in ROOM creation.");
       console.log("joinig room now ");
-      handleJoinRoom(res.slug);
+      await handleJoinRoom(res.slug);
     } catch (error) {
-      console.error("Error in Room Creation.");
+      throw new Error("Error in handle Room create");
     }
   };
 
@@ -216,7 +222,9 @@ export const useSocketWithWhiteboard = (): {
           break;
 
         case "UPD_SHAPE":
-          send("UPD_SHAPE", action.payload);
+          const updFn = send;
+          const dbUpdate = debounce(updFn, 100);
+          dbUpdate("UPD_SHAPE", action.payload);
           break;
 
         case "DEL_SHAPE":
@@ -252,12 +260,13 @@ export const useSocketWithWhiteboard = (): {
     setTextEdit,
     sideToolkitRef.current,
     sendActiveElementUpdate,
+    activeElementMap.current,
   );
 
-  // Add these two refs near your other refs
-  const drawnShapesRef = useRef(canvasState.drawnShapes);
-  const cameraRef = useRef(camera);
-
+  useEffect(() => {
+    if (!selectedShape)
+      sendActiveElementUpdate({ type: "DESELECT", payload: {} });
+  }, [selectedShape]);
   // Keep them in sync on every render
   useEffect(() => {
     drawnShapesRef.current = canvasState.drawnShapes;
@@ -268,16 +277,17 @@ export const useSocketWithWhiteboard = (): {
   }, [camera]);
 
   // Now redrawForActiveElement always reads fresh values
-  const redrawForActiveElement = (element: DrawElement) => {
+  const redrawForActiveElement = (element: DrawElement, color: string) => {
     const ctx = canvasRef.current?.getContext("2d");
     if (!ctx) return;
 
     redrawPreviousShapes(
       ctx,
-      drawnShapesRef.current, // ✅ fresh
-      cameraRef.current, // ✅ fresh
+      drawnShapesRef.current,
+      cameraRef.current,
       element,
-      // element.id,
+      element.id,
+      color,
     );
   };
   useRafLoop({

@@ -114,4 +114,8 @@ export const incomingSocketHandlers: Record<
     });
   },
   INFO: () => null,
+  DESELECT: ({ event, activeElementMap }) => {
+    if (event.type !== "DESELECT") return;
+    activeElementMap.delete(event.payload.userId);
+  },
 };

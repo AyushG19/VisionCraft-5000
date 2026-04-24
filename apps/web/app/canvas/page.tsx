@@ -6,7 +6,6 @@ import {
   toolkitProps,
   SideCollapseChat,
   SideToolkit,
-  Loader,
   TextArea,
 } from "@repo/ui";
 import { useSocketWithWhiteboard } from "./hooks/useSocketWithWhiteboard";
@@ -57,17 +56,21 @@ const Page = () => {
     }
     console.log(typeof result);
     result.forEach((shape: DrawElement) => {
-      // drawShape(ctx, shape);
-      // const screenPos = worldToScreen(shape.startX, shape.startY, camera);
-      // const newShape = { ...shape, startX: screenPos.x, startY: screenPos.y };
-      wb.canvasDispatch({ type: "ADD_SHAPE", payload: shape });
+      if (wb.inRoom) {
+        wb.dispatchWithSocket({ type: "ADD_SHAPE", payload: shape });
+      } else {
+        // drawShape(ctx, shape);
+        // const screenPos = worldToScreen(shape.startX, shape.startY, camera);
+        // const newShape = { ...shape, startX: screenPos.x, startY: screenPos.y };
+        wb.canvasDispatch({ type: "ADD_SHAPE", payload: shape });
+      }
     });
   }, [result]);
 
   const toolkitProps: toolkitProps = {
     canvasRef: wb.canvasRef,
     handleColorSelect: wb.handleColorSelect,
-    handleStrokeSelect: wb.handleStrokeSelect,
+    currentColor: wb.canvasState.toolState.currentColor,
     handleToolSelect: wb.handleToolSelect,
     toolKitState: wb.canvasState.toolState,
     handleRedo: wb.handleRedo,
@@ -93,7 +96,6 @@ const Page = () => {
         ref={wb.canvasRef}
         className="w-full h-full bg-canvas text-white"
       ></canvas>
-      <Loader></Loader>
       <SideToolkit
         selectedShape={wb.selectedShape}
         tool={wb.canvasState.toolState.currentTool}

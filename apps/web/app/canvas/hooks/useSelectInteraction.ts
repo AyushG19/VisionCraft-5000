@@ -44,6 +44,14 @@ const useSelectInteraction = (
       worldPos: { x: number; y: number },
       currentSelected: DrawElement | undefined,
       canvasState: CanvasState,
+      activeElementMap: Map<
+        string,
+        {
+          isDirty: boolean;
+          element: DrawElement;
+          operation: "resize" | "drag";
+        }
+      >,
     ): DrawElement | undefined => {
       //Case 1: Something already selected
       if (currentSelected) {
@@ -79,7 +87,14 @@ const useSelectInteraction = (
         .reverse()
         .find((shape: DrawElement) => isClickOnShape(worldPos, shape));
 
-      if (clickedShape) {
+      if (!clickedShape) return undefined;
+
+      // Inside handleSelectMouseDown, before allowing selection of a shape:
+      const isLockedByOther = [...activeElementMap.values()].some(
+        (entry) => entry.element.id === clickedShape.id,
+      );
+
+      if (!isLockedByOther && !clickedShape.isDeleted) {
         // Immediately set up drag so click+drag works in one motion
         startDrag(clickedShape.id, worldPos, {
           x: clickedShape.startX,
@@ -163,7 +178,7 @@ const useSelectInteraction = (
   const handleSelectMouseUp = useCallback(
     (
       worldPos: { x: number; y: number },
-      currentSelected: ShapeType | undefined,
+      currentSelected: DrawElement | undefined,
     ) => {
       if (!currentSelected) {
         resetDragAndResize();

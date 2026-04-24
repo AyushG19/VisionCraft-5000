@@ -4,6 +4,7 @@ import { type MemberCursor } from "@repo/hooks";
 import { DrawElement } from "@repo/common";
 import { worldToScreen } from "app/lib/math";
 import { Camera } from "./useCamera";
+import { getUserColor } from "../helper/color.helper";
 
 const useRafLoop = ({
   cursorMap,
@@ -20,7 +21,7 @@ const useRafLoop = ({
       operation: "drag" | "resize";
     }
   >;
-  redrawForActiveElement: (element: DrawElement) => void;
+  redrawForActiveElement: (element: DrawElement, color: string) => void;
   camera: Camera;
 }) => {
   useEffect(() => {
@@ -39,7 +40,7 @@ const useRafLoop = ({
       activeElementArr.forEach((ele) => {
         if (ele[1].isDirty) {
           console.log("ele", ele);
-          redrawForActiveElement(ele[1].element);
+          redrawForActiveElement(ele[1].element, getUserColor(ele[0]));
           ele[1].isDirty = false;
         }
       });

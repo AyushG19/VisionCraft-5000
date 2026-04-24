@@ -58,7 +58,7 @@ const useDrawInteraction = (
 
       const tool = toolState.currentTool;
 
-      // ─── PENCIL tool (streaming) ──────────────────────────────
+      // PENCIL tool
       if (tool === "pencil") {
         if (!tempShape.current || tempShape.current.type !== "pencil") return;
 
@@ -79,7 +79,7 @@ const useDrawInteraction = (
         return;
       }
 
-      // ─── Regular shapes (preview from start→current) ─────────
+      // Regular shapes (preview from start→current)
       const previewShape = createNewShape(
         toolState,
         sideToolKit,

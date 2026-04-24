@@ -64,7 +64,7 @@ const useCanvasCursor = (
 
       if (tool === "select") {
         // Check selected shape first (higher priority)
-        if (selectedShape) {
+        if (selectedShape && !selectedShape.isDeleted) {
           const outlineBounds = getOutlineBounds(selectedShape);
           const handleBounds = getBoundsForHandles(selectedShape);
 

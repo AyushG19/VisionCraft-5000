@@ -84,11 +84,12 @@ const highlightShape = (
   shape: DrawElement,
   bounds: { x: number; y: number; width: number; height: number },
   zoom: number,
+  highlightColor: string,
 ) => {
   ctx.save();
   ctx.beginPath();
   ctx.setLineDash([6 / zoom, 2 / zoom]);
-  ctx.strokeStyle = "#00FFFF";
+  ctx.strokeStyle = highlightColor;
   ctx.lineWidth = 1 / zoom;
 
   ctx.strokeRect(
@@ -97,8 +98,6 @@ const highlightShape = (
     bounds.width + 10 / zoom,
     bounds.height + 10 / zoom,
   );
-
-  ctx.restore();
 
   // Draw resize handles
   drawHandles(
@@ -112,10 +111,11 @@ const highlightShape = (
     undefined,
     zoom,
   );
+  ctx.restore();
 };
 
 function drawText(ctx: CanvasRenderingContext2D, el: TextType) {
-  ctx.save();
+  // ctx.save();
 
   ctx.font = `${el.fontSize}px ${el.fontFamily}`;
   ctx.fillStyle = oklchToCSS(el.strokeColor);
@@ -148,11 +148,13 @@ export const drawShape = (
   shape: DrawElement,
   camera: Camera,
   selectedShapeId?: string,
+  highlightColor: string = "00FFFF",
 ): void => {
   if (!ctx || !shape || shape.isDeleted) return;
   const zoom = camera?.z ?? 1;
   const type = shape.type;
 
+  ctx.save();
   // convert color
   ctx.strokeStyle = shape.strokeColor
     ? oklchToCSS(shape.strokeColor)
@@ -163,7 +165,6 @@ export const drawShape = (
 
   handleStrokeType(ctx, shape, camera.z);
 
-  ctx.save();
   try {
     if (type === "pencil") {
       ctx.beginPath();
@@ -210,6 +211,7 @@ export const drawShape = (
       const height = shape.endY - shape.startY;
       const radius = Math.min(8, Math.abs(width) / 8, Math.abs(height) / 8);
 
+      ctx.beginPath();
       ctx.roundRect(shape.startX, shape.startY, width, height, 20);
 
       if (shape.label) {
@@ -273,7 +275,7 @@ export const drawShape = (
         width: shape.width,
         height: shape.height,
       };
-      highlightShape(ctx, shape, bounds, zoom);
+      highlightShape(ctx, shape, bounds, zoom, highlightColor);
       return;
     }
 
@@ -290,7 +292,7 @@ export const drawShape = (
         width: width,
         height: height,
       };
-      highlightShape(ctx, shape, bounds, zoom);
+      highlightShape(ctx, shape, bounds, zoom, highlightColor);
       return;
     }
 
@@ -305,7 +307,7 @@ export const drawShape = (
       const width = shape.endX - shape.startX;
       const height = shape.endY - shape.startY;
       const bounds = { x: shape.startX, y: shape.startY, width, height };
-      highlightShape(ctx, shape, bounds, zoom);
+      highlightShape(ctx, shape, bounds, zoom, highlightColor);
     }
   }
 };

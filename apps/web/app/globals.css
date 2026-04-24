@@ -16,6 +16,7 @@
   --secondary-contrast: #131313;
   --global-shadow: #000000;
   --canvas-contrast: #000000;
+  --red: #de0a26;
 }
 
 :root[data-theme="terra"] {
@@ -28,6 +29,7 @@
   --accent: #b83a2d;
   --primary-contrast: #051d08;
   --secondary-contrast: #000000;
+  --red: #de0a26;
 }
 :root[data-theme="punktown"] {
   --canvas-bg: #233d4d;
@@ -40,6 +42,7 @@
   --primary-contrast: #331403;
   --secondary-contrast: #000000;
   --global-shadow: #000000;
+  --red: #de0a26;
 }
 :root[data-theme="eyeburn"] {
   --canvas-bg: #fafafa;
@@ -52,6 +55,7 @@
   --secondary-contrast: #1f1f1f;
   --accent: #b83a2d;
   --global-shadow: #000000;
+  --red: #de0a26;
 }
 :root[data-theme="batman"] {
   --canvas-bg: #181818;
@@ -64,6 +68,7 @@
   --primary-contrast: #040405;
   --secondary-contrast: #ffffff;
   --global-shadow: #000000;
+  --red: #de0a26;
 }
 :root[data-theme="lowsun"] {
   --canvas-bg: #24150f;
@@ -76,10 +81,11 @@
   --primary-contrast: #eeddc6;
   --secondary-contrast: #000000;
   --global-shadow: #150c0c;
+  --red: #de0a26;
 }
 @theme {
   --shadow-primary: 5px 5px 0px black;
-  --shadow-pressed: 2px 2px 0px black;
+  --shadow-pressed: 3px 3px 0px black;
   --shadow-shinyprimary:
     inset 2px 2px 3px var(--color-primary-700),
     5px 5px var(--color-global-shadow);
@@ -87,6 +93,10 @@
   --shadow-shinysecondary:
     inset 2px 2px 3px var(--color-secondary-700),
     3px 3px var(--color-global-shadow);
+
+  --shadow-shinysecondary-5:
+    inset 2px 2px 3px var(--color-secondary-700),
+    5px 5px var(--color-global-shadow);
 
   --shadow-shinyshadow-pressed: inset 1px 1px var(--color-global-shadow);
 
@@ -97,6 +107,7 @@
 
 @theme inline {
   --color-canvas: var(--canvas-bg);
+  --color-red: var(--red);
   --color-primary: var(--primary);
   --color-primary-700: var(--primary-700);
   --color-secondary: var(--secondary);
@@ -140,7 +151,7 @@
   } */
   .button-press-active:active {
     @apply relative overflow-clip
-    transition-all duration-100 ease-in-out
+    transition-shadow duration-100 ease-in-out
     shadow-shinyshadow-pressed
     after:content-['']
     after:absolute
@@ -153,7 +164,7 @@
   }
   .button-press {
     @apply relative overflow-clip
-    transition-all duration-100 ease-in-out
+    transition-shadow duration-100 ease-in-out
     shadow-shinyshadow-pressed
     after:content-['']
     after:absolute

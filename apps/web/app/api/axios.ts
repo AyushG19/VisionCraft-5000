@@ -30,8 +30,6 @@ axiosInstance.interceptors.response.use(
     return res;
   },
   async (error: AxiosError) => {
-    console.log("0");
-
     const originalReq = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
     };
@@ -46,7 +44,9 @@ axiosInstance.interceptors.response.use(
     const { status } = error.response;
     if (status === 401 && originalReq && !originalReq._retry) {
       if (originalReq.url?.includes("auth/refresh-token")) {
-        throw new AppError("Session expired", "UNAUTHORIZED", 401);
+        return Promise.reject(
+          new AppError("Session expired", "UNAUTHORIZED", 401),
+        );
       }
       originalReq._retry = true;
 
@@ -70,10 +70,12 @@ axiosInstance.interceptors.response.use(
       } catch (err) {
         refreshSubscribers = [];
         //log the user out here
-        throw new AppError(
-          "Session expired. Please login again.",
-          "UNAUTHORIZED",
-          401,
+        return Promise.reject(
+          new AppError(
+            "Session expired. Please login again.",
+            "UNAUTHORIZED",
+            401,
+          ),
         );
       } finally {
         isRefreshing = false;
@@ -81,27 +83,31 @@ axiosInstance.interceptors.response.use(
     }
     switch (status) {
       case 400:
-        throw new AppError("Invalid request", "VALIDATION_ERROR", 400);
+        return Promise.reject(
+          new AppError("Invalid request", "VALIDATION_ERROR", 400),
+        );
 
       case 403:
-        throw new AppError(
-          "You do not have permission to perform this action.",
-          "UNAUTHORIZED",
-          403,
+        return Promise.reject(
+          new AppError(
+            "You do not have permission to perform this action.",
+            "UNAUTHORIZED",
+            403,
+          ),
         );
 
       case 500:
-        throw new AppError(
-          "Server error. Please try again later.",
-          "SERVER_ERROR",
-          500,
+        return Promise.reject(
+          new AppError(
+            "Server error. Please try again later.",
+            "SERVER_ERROR",
+            500,
+          ),
         );
 
       default:
-        throw new AppError(
-          "Unexpected error occurred.",
-          "UNKNOWN_ERROR",
-          status,
+        return Promise.reject(
+          new AppError("Unexpected error occurred.", "UNKNOWN_ERROR", status),
         );
     }
   },

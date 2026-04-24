@@ -1,3 +1,4 @@
+import { DrawElement } from "@repo/common";
 import { Action, CanvasState } from "../types/index";
 
 export const initialCanvasState: CanvasState = {
@@ -28,10 +29,20 @@ export default function canvasReducer(
   state: CanvasState,
   action: Action,
 ): CanvasState {
+  const pushHistory = (newCanvasState: DrawElement[]): Partial<CanvasState> => {
+    const previousHistory = state.history.slice(0, state.historyIndex + 1);
+    return {
+      drawnShapes: newCanvasState,
+      history: [...previousHistory, newCanvasState],
+      historyIndex: previousHistory.length,
+    };
+  };
   if (action.type === "INITIALIZE_BOARD") {
     return {
       ...state,
       drawnShapes: action.payload,
+      history: [action.payload],
+      historyIndex: 0,
     };
   }
   if (action.type === "DEL_SHAPE") {
@@ -42,15 +53,25 @@ export default function canvasReducer(
       ),
     };
   }
+  if (action.type === "UPD_SHAPE") {
+    const newCanvasState = state.drawnShapes.map((s) => {
+      if (s.id === action.payload.id)
+        return {
+          ...action.payload,
+          id: s.id,
+        };
+      return s;
+    });
+    return {
+      ...state,
+      ...pushHistory(newCanvasState),
+    };
+  }
   if (action.type === "ADD_SHAPE") {
-    const previousHistory = state.history.slice(0, state.historyIndex + 1);
-
     const newCanvasState = [...state.drawnShapes, action.payload];
     return {
       ...state,
-      drawnShapes: newCanvasState,
-      history: [...previousHistory, newCanvasState],
-      historyIndex: previousHistory.length,
+      ...pushHistory(newCanvasState),
     };
   }
 
@@ -94,19 +115,6 @@ export default function canvasReducer(
     return {
       ...state,
       toolState: { ...state.toolState, strokeSize: action.payload },
-    };
-  }
-  if (action.type === "UPD_SHAPE") {
-    return {
-      ...state,
-      drawnShapes: state.drawnShapes.map((s) => {
-        if (s.id === action.payload.id)
-          return {
-            ...action.payload,
-            id: s.id,
-          };
-        return s;
-      }),
     };
   }
   if (action.type === "UPD_EDITOR") {

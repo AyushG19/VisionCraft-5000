@@ -1,4 +1,4 @@
-import { newRoom, JoinRoomResponseType } from "@repo/common";
+import { JoinRoomResponseType, newRoom } from "@repo/common";
 import { axiosInstance } from "./axios";
 import { env } from "config";
 

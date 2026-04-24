@@ -36,6 +36,14 @@ const useCanvasInteraction = (
   setTextEdit: React.Dispatch<React.SetStateAction<TextEditState>>,
   sideToolkit: HTMLDivElement | null,
   sendActiveElementUpdate: (event: ClientShapeManipulation) => void,
+  activeElementMap: Map<
+    string,
+    {
+      isDirty: boolean;
+      element: DrawElement;
+      operation: "resize" | "drag";
+    }
+  >,
 ) => {
   const [selectedShape, setSelectedShape] = useState<DrawElement | undefined>(
     undefined,
@@ -133,6 +141,7 @@ const useCanvasInteraction = (
           pos,
           currentSelected,
           currentState,
+          activeElementMap,
         );
         if (newSelected?.type === "text") {
           setTextEdit({
@@ -142,7 +151,23 @@ const useCanvasInteraction = (
             y: newSelected.startY,
           });
         }
-        setSelectedShape(newSelected);
+        if (newSelected) {
+          setSelectedShape(newSelected);
+          canvasDispatch({
+            type: "UPD_SHAPE",
+            payload: newSelected,
+          });
+        } else {
+          setSelectedShape(undefined);
+        }
+        // } else {
+        //   if (selectedShape)
+        //     canvasDispatch({
+        //       type: "UPD_SHAPE",
+        //       payload: { ...selectedShape, isSelected: false },
+        //     });
+        //   setSelectedShape(undefined);
+        // }
       }
     };
     const onMouseDown = (e: MouseEvent) => {
@@ -158,6 +183,7 @@ const useCanvasInteraction = (
           screenToWorld(pos.x, pos.y, camera),
           currentSelected,
           currentState,
+          activeElementMap,
         );
         setSelectedShape(newSelected);
       } else if (tool === "text") {
@@ -234,7 +260,7 @@ const useCanvasInteraction = (
       if (tool === "select") {
         selectInteraction.handleSelectMouseUp(
           screenToWorld(pos.x, pos.y, camera),
-          currentSelected as ShapeType,
+          currentSelected,
         );
       } else if (tool === "hand") {
         onPanEnd();
