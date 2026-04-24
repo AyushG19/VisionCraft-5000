@@ -27,10 +27,9 @@ import {
   TextType,
 } from "@repo/common";
 import { Button } from "./ui/button";
-import ThemeSwitcher from "./ThemeSwitcher";
+import ThemeSwitcher from "./ui/ThemeSwitcher";
 import { isShape, isStokeElement, isText } from "../utils/sideToolHelper";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
+// types
 
 type FillMode = "fill" | "none" | "hatch";
 
@@ -72,7 +71,7 @@ export type SideToolkitProps = {
   };
 };
 type StrokeAllowedTypes = ShapeType | LinearType | PencilType;
-// ─── Constants ────────────────────────────────────────────────────────────────
+// Constants
 
 const QUICK_COLORS = [
   { l: 0, c: 0, h: 0 },
@@ -84,30 +83,7 @@ const QUICK_COLORS = [
   { l: 0.6225, c: 0.1666, h: 2.52 },
 ];
 
-const TOOL_CAPS: Record<
-  string,
-  { stroke: boolean; fill: boolean; roundness: boolean }
-> = {
-  rectangle: { stroke: true, fill: true, roundness: true },
-  ellipse: { stroke: true, fill: true, roundness: false },
-  diamond: { stroke: true, fill: true, roundness: false },
-  line: { stroke: true, fill: false, roundness: false },
-  arrow: { stroke: true, fill: false, roundness: false },
-  pencil: { stroke: true, fill: false, roundness: false },
-  text: { stroke: false, fill: false, roundness: false },
-  image: { stroke: false, fill: false, roundness: false },
-};
-
-// const DEFAULT_STATE: SideToolkit = {
-//   strokeColor: "oklch(0.6232 0.1502 284.72)",
-//   fillColor: "oklch(0.6232 0.1502 284.72)",
-//   strokeWidth: 2,
-//   roundness: 0,
-//   opacity: 100,
-//   strokeStyle: "normal",
-// };
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
+//  Sub-components
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
   <p className="text-xs tracking-[0.07em] text-global-shadow font-medium capitalize">
@@ -183,7 +159,7 @@ const SliderRow = ({
   </div>
 );
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+//-------- Main Component -----------------------------------
 
 export const SideToolkit = ({
   tool,
@@ -418,7 +394,7 @@ export const SideToolkit = ({
       ref={panelRef}
       onMouseDown={onHandleMouseDown}
       onTouchStart={onHandleTouchStart}
-      className="flex max-w-[250px] flex-col gap-3 items-start justify-center select-none px-2 py-3 absolute bg-primary rounded-lg outline-1 outline-global-shadow shadow-shinyprimary cursor-move"
+      className="flex max-w-[250px] flex-col gap-3 items-start justify-center select-none px-2 py-3 absolute bg-primary rounded-lg outline-1 outline-global-shadow shadow-shinyprimary cursor-move touch-none "
       style={{ top: pos.y, left: pos.x }}
     >
       {/* ── Stroke color ── */}
@@ -562,7 +538,6 @@ export const SideToolkit = ({
   return (
     <>
       {/* ── Desktop floating panel ── */}
-      <div>{panelContent}</div>
 
       {/* ── Mobile FAB ── */}
       <button
@@ -573,10 +548,12 @@ export const SideToolkit = ({
       </button>
 
       {/* ── Mobile bottom sheet ── */}
-      {mobileOpen && (
+      {mobileOpen ? (
         <div className="sm:hidden fixed bottom-20 left-3 right-3 bg-[var(--color-background-primary)] border-[0.5px] border-[var(--color-border-secondary)] rounded-[14px] p-[10px] z-[200] shadow-[0_-4px_24px_rgba(0,0,0,0.10)]">
           {panelContent}
         </div>
+      ) : (
+        panelContent
       )}
     </>
   );

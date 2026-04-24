@@ -26,9 +26,7 @@ const ChatButton = ({
         >
           <IconMessagePlus size={20} stroke={1.5} />
         </motion.div> */}
-        <span className="text-xs font-normal font-[google_sans_code]">
-          Chat
-        </span>
+        <span className="text-xs font-google-sans-code ">Chat</span>
         <IconMessagePlus
           size={15}
           stroke={1.5}

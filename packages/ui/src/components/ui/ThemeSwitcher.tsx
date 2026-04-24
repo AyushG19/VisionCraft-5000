@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Button } from "./ui/button";
+import { Button } from "./button";
 
 export default function ThemeSwitcher({
   theme,
