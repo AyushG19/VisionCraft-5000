@@ -1,5 +1,5 @@
 "use client";
-import { IconSend2, IconSlash } from "@tabler/icons-react";
+import { IconAi, IconSend2 } from "@tabler/icons-react";
 import React, { useRef, useState } from "react";
 import { Button } from "./ui/button";
 import { Virtuoso } from "react-virtuoso";
@@ -20,6 +20,7 @@ const SideCollapseChat = React.forwardRef<HTMLDivElement, SideChatPropsType>(
       messages,
       setMessages,
       isOpen,
+      handleChatToggle,
       fetchChartFromAi,
       isLoading,
       slug,
@@ -96,9 +97,14 @@ const SideCollapseChat = React.forwardRef<HTMLDivElement, SideChatPropsType>(
             exit={{ x: "100%" }}
             transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
             ref={ref}
-            className="absolute right-0 top-0 flex flex-col items-center justify-center h-full w-[360px] bg-priamry shadow-primary overflow-hidden outline-1 outline-global-shadow"
+            className="absolute right-0 top-0 flex flex-col items-center justify-center h-screen w-screen lg:w-[360px] bg-priamry shadow-primary overflow-hidden outline-1 outline-global-shadow z-40"
           >
-            {inRoom && <ChatTop slug={slug} avatars={roomInfo.users} />}
+            <ChatTop
+              handleChatToggle={handleChatToggle}
+              inRoom={inRoom}
+              slug={slug}
+              avatars={roomInfo.users}
+            />
             <div className="w-full relative !h-full bg-gradient-to-t from-primary via-secondary to-primary overflow-hidden">
               <div className="absolute inset-0 bg-[url('/pattern-2.svg')] bg-repeat bg-top-left opacity-20 pointer-events-none" />
 
@@ -156,9 +162,11 @@ const SideCollapseChat = React.forwardRef<HTMLDivElement, SideChatPropsType>(
               draggable={false}
               className="p-2 flex w-full h-14 gap-1.5 mt-auto items-center justify-center bg-primary"
             >
-              <div
+              <Button
                 onClick={handleShowOption}
-                className="outline-global-shadow outline-1 h-full aspect-square rounded-md cursor-pointer bg-primary-700 text-primary-contrast hover:bg-secondary hover:text-secondary-contrast flex items-center justify-center transition-colors"
+                aria-label="command"
+                variant={"outline"}
+                className="h-full p-0 aspect-square  rounded-md cursor-pointer text-primary-contrast hover:bg-accent flex items-center justify-center transition-colors"
               >
                 {isLoading ? (
                   // <svg
@@ -184,9 +192,9 @@ const SideCollapseChat = React.forwardRef<HTMLDivElement, SideChatPropsType>(
                   // </svg>
                   <Loader />
                 ) : (
-                  <IconSlash color={"currentColor"} size={25} />
+                  <IconAi color={"currentColor"} size={25} stroke={1.6} />
                 )}
-              </div>
+              </Button>
               <input
                 ref={inputRef}
                 value={inputText}
@@ -194,7 +202,7 @@ const SideCollapseChat = React.forwardRef<HTMLDivElement, SideChatPropsType>(
                 onInput={(e) => setInputText(e.currentTarget.value)}
                 disabled={!isOpen}
                 placeholder="/ for AI, say hAI"
-                className="font-google-sans-code text-secondary-contrast placeholder:text-xs text-sm min-w-40 max-w-200 h-full flex-1 rounded-md bg-white px-2 outline-1 outline-global-shadow"
+                className="font-google-sans-code text-secondary-contrast placeholder:text-xs text-sm min-w-40 max-w-200 h-full flex-1 rounded-md bg-white px-2 outline-1 outline-global-shadow "
               />
               <Button
                 onClick={() => {
@@ -205,7 +213,7 @@ const SideCollapseChat = React.forwardRef<HTMLDivElement, SideChatPropsType>(
                 }}
                 disabled={!isOpen}
                 variant={"secondary"}
-                className="translate-x-0 rounded-lg aspect-square p-0 h-full items-center justify-center flex shadow-shinyshadow button-press-active transition-all ease-in disabled:opacity-50 text-secondary-contrast outline-1 outline-global-shadow"
+                className="translate-x-0 rounded-lg aspect-square p-0 h-full items-center justify-center flex shadow-shinyshadow button-press-active transition-all ease-in disabled:opacity-50 text-secondary-contrast hover:text-accent outline-1 outline-global-shadow"
               >
                 <IconSend2 fill="currentColor" size={18} stroke={1} />
               </Button>

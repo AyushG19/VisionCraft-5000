@@ -13,6 +13,7 @@ export type SideChatPropsType = {
   isOpen: boolean;
   isLoading: boolean;
   slug: string;
+  handleChatToggle: () => void;
 };
 
 // Minimal generic skeleton to get autocomplete. Replace fields with concrete ones after inspecting runtime output.

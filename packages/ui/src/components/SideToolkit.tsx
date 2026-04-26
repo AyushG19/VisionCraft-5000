@@ -27,7 +27,6 @@ import {
   TextType,
 } from "@repo/common";
 import { Button } from "./ui/button";
-import ThemeSwitcher from "./ui/ThemeSwitcher";
 import { isShape, isStokeElement, isText } from "../utils/sideToolHelper";
 // types
 
@@ -165,8 +164,6 @@ export const SideToolkit = ({
   tool,
   selectedShape,
   panelRef,
-  theme,
-  setTheme,
   textState,
   setTextState,
   editorState,
@@ -528,24 +525,27 @@ export const SideToolkit = ({
         </div>
       )}
       {/* ── Themes ── */}
-      <div className="flex flex-col gap-1.5 cursor-default">
+      {/* <div className="flex flex-col gap-1.5 cursor-default">
         <SectionLabel>themes</SectionLabel>
         <ThemeSwitcher theme={theme ?? "default"} setTheme={setTheme} />
-      </div>
+      </div> */}
     </div>
   );
 
-  return (
+  return selectedShape ||
+    (activeTool !== "select" &&
+      activeTool !== "hand" &&
+      activeTool !== "color") ? (
     <>
       {/* ── Desktop floating panel ── */}
 
       {/* ── Mobile FAB ── */}
-      <button
+      {/* <button
         onClick={() => setMobileOpen((o) => !o)}
         className="sm:hidden fixed bottom-6 right-6 w-[46px] h-[46px] rounded-full bg-[#7F77DD] border-none text-white text-xl cursor-pointer flex items-center justify-center z-[200] shadow-[0_4px_16px_rgba(127,119,221,0.35)]"
       >
         ✦
-      </button>
+      </button> */}
 
       {/* ── Mobile bottom sheet ── */}
       {mobileOpen ? (
@@ -556,7 +556,7 @@ export const SideToolkit = ({
         panelContent
       )}
     </>
-  );
+  ) : null;
 };
 
 export default SideToolkit;

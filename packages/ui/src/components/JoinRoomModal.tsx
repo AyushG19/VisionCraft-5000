@@ -1,174 +1,227 @@
 "use client";
-import { useState } from "react";
-import {
-  IconSquareArrowRight,
-  IconSquarePlus,
-  IconUserShare,
-} from "@tabler/icons-react";
-import ChatButton from "./ui/ChatButton";
+
+import { useCallback, useState, useRef, useEffect } from "react";
+import { IconGridDots } from "@tabler/icons-react";
 import { useError } from "@repo/hooks";
 import { AppError } from "@repo/common";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, Variants } from "motion/react";
 import { CodeInputBox } from "./ui/CodeInputBox";
+import ThemeSwitcher from "./ui/ThemeSwitcher";
+import { OptionId, ROOM_OPTIONS } from "../lib/roomOptions";
 
-const JoinRoomModal = ({
-  verifyJoin,
-  makeNewRoom,
-  onChatToggle,
-  isChatOpen,
-}: {
+type Props = {
   verifyJoin: (code: string) => Promise<void>;
   makeNewRoom: () => Promise<void>;
   onChatToggle: () => void;
+  onExitRoom: () => void;
+  onLogout: () => void;
   isChatOpen: boolean;
-}) => {
-  const [showInputBox, setShowInputBox] = useState(false);
+  inRoom: boolean;
+  setTheme: (t: string) => void;
+};
+
+const containerVariants = {
+  hidden: {
+    opacity: 0,
+    height: 0,
+    width: 0,
+    transition: { staggerChildren: 0.05, staggerDirection: -1 },
+  },
+  show: {
+    opacity: 1,
+    height: "auto",
+    width: "auto",
+    transition: { staggerChildren: 0.05 },
+  },
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, x: -5 }, // Starts pushed to the right
+  show: { opacity: 1, x: 0, transition: { ease: "easeOut" } }, // Slides in beautifully
+};
+
+// ── Component ─────────────────────────────────────────────────────────────
+export default function JoinRoomModal({
+  verifyJoin,
+  makeNewRoom,
+  onChatToggle,
+  onExitRoom,
+  onLogout,
+  isChatOpen,
+  inRoom,
+  setTheme,
+}: Props) {
+  const [showCodeInput, setShowCodeInput] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { setError } = useError();
+  const menuRef = useRef<HTMLDivElement>(null);
 
-  const toggleShowInputBox = async () => {
-    setShowInputBox((prev) => !prev);
-  };
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node))
+        setIsMenuOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-  const handleCreateRoom = async () => {
+  // -- handlers
+  const withLoading = async (fn: () => Promise<void>) => {
     try {
       setIsLoading(true);
-      await makeNewRoom();
-    } catch (error) {
-      if (error instanceof AppError) {
-        setError({ code: error.code, message: error.message });
-      } else {
-        //@ts-ignore
-        setError({ code: "UNKNOWN_ERROR", message: error!.message });
-      }
+      await fn();
+    } catch (err) {
+      setError(
+        err instanceof AppError
+          ? { code: err.code, message: err.message }
+          : { code: "UNKNOWN_ERROR", message: String(err) },
+      );
     } finally {
       setIsLoading(false);
+      setIsMenuOpen(false);
     }
   };
 
-  const handleJoinRoom = async (code: string) => {
-    try {
-      setIsLoading(true);
-      await verifyJoin(code);
-    } catch (error) {
-      if (error instanceof AppError) {
-        setError({ code: error.code, message: error.message });
-      } else {
-        //@ts-ignore
-        setError({ code: "UNKNOWN_ERROR", message: error!.message });
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const handleAction = useCallback(
+    (id: OptionId) => {
+      const actions: Partial<Record<OptionId, () => void>> = {
+        create: () => withLoading(makeNewRoom),
+        join: () => {
+          setShowCodeInput(true);
+          setIsMenuOpen(false);
+        },
+        "room-chat": onChatToggle,
+        "ai-chat": onChatToggle,
+        "exit-room": onExitRoom,
+        logout: onLogout,
+      };
+      actions[id]?.();
+      setIsMenuOpen(false);
+    },
+    [makeNewRoom, onChatToggle, onExitRoom, onLogout],
+  );
+
+  const visibleOptions = ROOM_OPTIONS.filter(
+    (opt) => opt.mode === "both" || (opt.mode === "room") === inRoom,
+  );
 
   return (
     <>
+      {/* ── Main Menu Container ── */}
       <div
-        className={`fixed right-0 top-6 flex flex-col gap-2 transition-transform duration-250 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-          isChatOpen ? "-translate-x-[360px]" : "translate-x-0"
-        }`}
+        ref={menuRef}
+        className={`
+          fixed right-0 top-14 lg:top-6 z-40 flex flex-col items-end font-Google-Sans-Code font-light
+          transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
+          ${isChatOpen ? " lg:-translate-x-[360px]" : "translate-x-0"}
+        `}
       >
-        {/* ── Room button group ── */}
-        <div className="group flex flex-col">
-          {/* Room pill — rounded-tl + rounded-bl normally, loses rounded-bl on hover */}
-          <button
-            className="
-              w-18 h-8 flex gap-1 items-center justify-center
-              text-primary-contrast bg-primary text-xs font-normal font-google-sans-code
-              rounded-l-lg rounded-r-none
-              group-hover:rounded-bl-none
-              transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]
-             group-hover:scale-105
-              cursor-default p-0 outline-1 outline-global-shadow
-            "
+        {/* Trigger Button */}
+        <button
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className={`
+            flex items-center justify-center w-10 h-10
+            bg-primary text-primary-contrast rounded-l-xl outline-1 outline-global-shadow cursor-pointer
+            transition-all duration-300
+            ${isMenuOpen ? "!rounded-bl-none lg:w-full w-32 scale-[103%]" : ""}
+          `}
+        >
+          <span
+            className={`text-xs font-semibold capitalise hidden transition-all delay-300 ${isMenuOpen ? "!block opacity-100 -translate-x-0 mr-2" : "translate-x-5 opacity-0 "}`}
           >
-            <span className="text-xs font-normal font-google-sans-code">
-              Room
-            </span>
-            <IconUserShare color="currentColor" size={15} stroke={1.5} />
-          </button>
+            Options
+          </span>
+          <IconGridDots
+            className=" w-[10px] h-[10px] md:w-[15px] md:h-[15px]"
+            stroke={2}
+          />
+        </button>
 
-          {/* ── Expanding drawer — uses grid-rows trick so it takes real space ── */}
-          <div
-            className="
-              grid
-              grid-rows-[0fr] group-hover:grid-rows-[1fr]
-              transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]
-              group opacity-70 group-hover:opacity-100
-            "
-          >
-            <div className="overflow-hidden flex flex-col">
-              {/* New — flat all sides, sits flush against Room button */}
-              <button
-                onClick={() => handleCreateRoom()}
-                className="
-                  w-18 h-8 flex gap-1 items-center justify-center
-                  bg-secondary text-black text-xs font-normal font-google-sans-code
-                  rounded-none
-                  hover:bg-primary-700 hover:text-primary-contrast
-                  transition-all duration-150 cursor-pointer border-personal
-                "
-              >
-                {isLoading && !showInputBox ? (
-                  <span className="text-xs font-normal font-google-sans-code">
-                    Loading...
-                  </span>
-                ) : (
-                  <>
-                    <span className="text-xs font-normal font-google-sans-code">
-                      New
-                    </span>
-                    <IconSquarePlus size={15} stroke={1.5} />
-                  </>
-                )}
-              </button>
+        {/* Animated Drawer (Expands horizontally & slides items from right) */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="show"
+              exit="hidden"
+              className="flex flex-col items-end overflow-hidden"
+            >
+              {visibleOptions.map((opt) => {
+                const isTheme = opt.id === "themes";
+                const Comp = isTheme ? motion.div : motion.button; // Fix for hydration error!
 
-              {/* Join — flat top, rounded-bl, flat right — closes the group */}
-              <button
-                onClick={toggleShowInputBox}
-                className="
-                  w-18 h-8 flex gap-1 items-center justify-center
-                  bg-secondary text-black text-xs font-normal font-google-sans-code
-                  rounded-none rounded-bl-xl
-                  hover:bg-primary-700 hover:text-primary-contrast
-                  transition-all duration-150 cursor-pointer border-personal
-                "
-              >
-                <span className="text-xs font-normal font-google-sans-code">
-                  Join
-                </span>
-                <IconSquareArrowRight size={15} stroke={1.5} />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Chat button — pushed down naturally as drawer expands */}
-        <ChatButton isChatOpen={isChatOpen} onChatToggle={onChatToggle} />
+                return (
+                  <Comp
+                    key={opt.id}
+                    variants={itemVariants}
+                    onClick={() => !isTheme && handleAction(opt.id)}
+                    className={`
+                      flex flex-wrap items-center justify-center w-32 lg:w-full lg:h-auto h-10 py-3 
+                      bg-secondary text-secondary-contrast text-xs
+                     border-b border-black/10 last:border-b-0
+                      last:rounded-bl-xl hover:bg-primary hover:text-primary-contrast
+                      transition-colors cursor-pointer
+                    `}
+                  >
+                    {isTheme ? (
+                      <>
+                        <p
+                          className={`text-xs grow w-full text-center capitalize hidden pb-2 ${isMenuOpen ? "lg:block" : ""}`}
+                        >
+                          themes
+                        </p>
+                        <ThemeSwitcher setTheme={setTheme} />
+                      </>
+                    ) : (
+                      <>
+                        <p className={`mr-1.5 capitalize`}>
+                          {opt.id === "ai-chat" && isChatOpen
+                            ? "close chat"
+                            : opt.label}
+                        </p>
+                        <opt.icon
+                          className="w-[10px] h-[10px] md:w-[15px] md:h-[15px]"
+                          stroke={1.6}
+                        />
+                      </>
+                    )}
+                  </Comp>
+                );
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Code input overlay */}
+      {/* ── Code Input Modal ── */}
       <AnimatePresence>
-        {showInputBox && (
-          <motion.div
-            key="input-box"
-            initial={{ opacity: 0, scale: 0.95, x: "-50%", y: "-50%" }}
-            animate={{ opacity: 1, scale: 1, x: "-50%", y: "-50%" }}
-            exit={{ opacity: 0, scale: 0.95, x: "-50%", y: "-50%" }}
-            transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
-            className="fixed top-1/2 left-1/2 z-50 bg-primary outline-1 outline-global-shadow rounded-md shadow-shinyprimary"
-          >
-            <CodeInputBox
-              verifyJoin={handleJoinRoom}
-              toggleFunction={toggleShowInputBox}
-              isLoading={isLoading}
+        {showCodeInput && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowCodeInput(false)}
+              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
             />
-          </motion.div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, x: "-50%", y: "-50%" }}
+              animate={{ opacity: 1, scale: 1, x: "-50%", y: "-50%" }}
+              exit={{ opacity: 0, scale: 0.9, x: "-50%", y: "-50%" }}
+              className="fixed top-1/2 left-1/2 z-50 bg-primary outline-1 outline-global-shadow rounded-md shadow-xl w-[90vw] max-w-sm"
+            >
+              <CodeInputBox
+                verifyJoin={(code) => withLoading(() => verifyJoin(code))}
+                toggleFunction={() => setShowCodeInput(false)}
+                isLoading={isLoading}
+              />
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>
   );
-};
-
-export default JoinRoomModal;
+}

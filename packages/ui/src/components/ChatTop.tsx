@@ -1,9 +1,20 @@
-import { IconCheck, IconCopy } from "@tabler/icons-react";
+import { IconCheck, IconChevronLeft, IconCopy } from "@tabler/icons-react";
 import AvatarGroup from "./ui/AvatarGroup";
 import { useState } from "react";
 import { UserInfo } from "@repo/hooks";
+import { Button } from "./ui/button";
 
-const ChatTop = ({ slug, avatars }: { slug: string; avatars: UserInfo[] }) => {
+const ChatTop = ({
+  slug,
+  avatars,
+  inRoom,
+  handleChatToggle,
+}: {
+  slug: string;
+  avatars: UserInfo[];
+  inRoom: boolean;
+  handleChatToggle: () => void;
+}) => {
   const [isCopied, setIsCopied] = useState<boolean>(false);
 
   const showFeedBack = () => {
@@ -18,6 +29,18 @@ const ChatTop = ({ slug, avatars }: { slug: string; avatars: UserInfo[] }) => {
     await navigator.clipboard.writeText(slug);
     showFeedBack();
   };
+  if (!inRoom)
+    return (
+      <Button
+        aria-label="back"
+        onClick={() => handleChatToggle()}
+        variant={"outline"}
+        size={"sm"}
+        className="absolute p-0 top-0 left-0 z-30 m-2 aspect-square"
+      >
+        <IconChevronLeft />
+      </Button>
+    );
   return (
     <div className=" w-full absolute top-0 left-0 z-30 p-2">
       {/* <div className="flex outline h-8 rounded-md"> */}

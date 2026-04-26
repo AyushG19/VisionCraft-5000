@@ -1,7 +1,8 @@
+import { redisPub } from "@repo/redis";
 import { sendError, sendInfo } from "../helpers/ws.helper";
 import { touchRoom } from "../room/room.lifecycle";
 import { ElementRedisData } from "../services/element.service";
-import { HandlerContext } from "../types";
+import { HandlerContext, RedisData } from "../types";
 
 export async function ADD_SHAPE({
   ws,
@@ -70,4 +71,49 @@ export async function DEL_SHAPE({
   element.delete(roomId, event);
 
   sendInfo(ws, "Shape deleted");
+}
+
+export async function RESIZE({
+  ws,
+  roomId,
+  userId,
+  cleanData,
+  services,
+}: HandlerContext) {
+  if (cleanData.type !== "RESIZE") return;
+  const pubSubData: RedisData = {
+    userId: userId,
+    type: "RESIZE",
+    element: cleanData.payload,
+  };
+  redisPub.publish(`room:${roomId}:events`, JSON.stringify(pubSubData));
+  sendInfo(ws, "resize update sent");
+}
+
+export async function DRAG({
+  ws,
+  roomId,
+  userId,
+  cleanData,
+  services,
+}: HandlerContext) {
+  if (cleanData.type !== "DRAG") return;
+  const pubSubData: RedisData = {
+    userId: userId,
+    type: "DRAG",
+    element: cleanData.payload,
+  };
+  redisPub.publish(`room:${roomId}:events`, JSON.stringify(pubSubData));
+  sendInfo(ws, "Drag update sent");
+}
+
+export async function DESELECT({
+  ws,
+  roomId,
+  userId,
+  cleanData,
+}: HandlerContext) {
+  if (cleanData.type !== "DESELECT") return;
+  const pubSubData: RedisData = { type: "DESELECT", userId };
+  redisPub.publish(`room:${roomId}:events`, JSON.stringify(pubSubData));
 }

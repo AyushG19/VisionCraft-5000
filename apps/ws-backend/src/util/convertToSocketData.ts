@@ -35,5 +35,23 @@ export function convertToSocketData(data: RedisData): ServerSocketDataType {
     case "LEAVE": {
       return { type: "USER_LEFT", payload: { userId: data.userId } };
     }
+    case "RESIZE": {
+      return {
+        type: "RESIZE",
+        payload: { userId: data.userId, element: data.element },
+      };
+    }
+    case "DRAG": {
+      return {
+        type: "DRAG",
+        payload: { userId: data.userId, element: data.element },
+      };
+    }
+    case "DESELECT": {
+      return {
+        type: "DESELECT",
+        payload: { userId: data.userId },
+      };
+    }
   }
 }

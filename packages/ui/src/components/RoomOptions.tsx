@@ -15,9 +15,13 @@ const RoomOptions = ({
 }) => {
   return (
     <motion.div
-      animate={{ x: isChatOpen ? -360 : 0 }}
-      transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-      className="fixed right-0 top-6 flex flex-col gap-2"
+      // animate={{ x: isChatOpen ? -360 : 0 }}
+      // transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+      className={`
+    fixed right-0 top-6 flex flex-col gap-2 
+    transition-transform duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)]
+    ${isChatOpen ? "-translate-x-72 lg:-translate-x-[360px]" : "translate-x-0"}
+  `}
     >
       <Tooltip>
         <TooltipTrigger asChild>

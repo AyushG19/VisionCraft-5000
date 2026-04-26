@@ -15,18 +15,21 @@ import { WebSocket } from "ws";
  */
 export type RedisData =
   | {
-    userId: string;
-    type: "ADD" | "DEL" | "UPD";
-    element: DrawElement;
-  }
+      userId: string;
+      type: "ADD" | "DEL" | "UPD";
+      element: DrawElement;
+    }
   | {
-    userId: string;
-    type: "CHAT";
-    message: ServerMessageType;
-  }
+      userId: string;
+      type: "CHAT";
+      message: ServerMessageType;
+    }
   | { userId: string; type: "CURSOR"; coordinates: PointType }
   | { type: "LEAVE"; userId: string; time: number }
-  | { type: "JOIN"; userId: string; time: number };
+  | { type: "JOIN"; userId: string; time: number }
+  | { type: "RESIZE"; userId: string; element: DrawElement }
+  | { type: "DRAG"; userId: string; element: DrawElement }
+  | { type: "DESELECT"; userId: string };
 
 export type SendPropsType = ClientChatSchemaType | WebSocketShapeType;
 

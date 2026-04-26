@@ -6,11 +6,11 @@ export function sendJson(ws: WebSocket, payload: object): void {
 }
 
 export function sendError(ws: WebSocket, message: string): void {
-  sendJson(ws, { type: "ERROR", message });
+  sendJson(ws, { type: "ERROR", payload: message });
 }
 
 export function sendInfo(ws: WebSocket, message: string): void {
-  sendJson(ws, { type: "INFO", message });
+  sendJson(ws, { type: "INFO", payload: message });
 }
 
 export function broadcastToRoom(

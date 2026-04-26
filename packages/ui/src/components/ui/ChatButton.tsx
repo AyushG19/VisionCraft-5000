@@ -18,7 +18,7 @@ const ChatButton = ({
         transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
         onClick={onChatToggle}
         whileTap={{ scale: 0.95 }}
-        className={`w-18 h-8 p-0 cursor-pointer shadow-shinyshadow rounded-l-lg flex items-center justify-center gap-1 hover:bg-secondary hover:text-secondary-contrast transition-colors outline-1 outline-global-shadow group ${isChatOpen ? "bg-primary text-primary-contrast" : "bg-secondary text-secondary-contrast"}`}
+        className={`lg:w-18 lg:h-8 w-16 h-6 p-4 lg:p-0 cursor-pointer shadow-shinyshadow rounded-l-lg lg:rounded-l-lg flex items-center justify-center gap-1 hover:bg-secondary hover:text-secondary-contrast transition-colors outline-1 outline-global-shadow group ${isChatOpen ? "bg-primary text-primary-contrast" : "bg-secondary text-secondary-contrast"}`}
       >
         {/* <motion.div
           animate={{ rotate: isChatOpen ? 180 : 0 }}
@@ -26,11 +26,13 @@ const ChatButton = ({
         >
           <IconMessagePlus size={20} stroke={1.5} />
         </motion.div> */}
-        <span className="text-xs font-google-sans-code ">Chat</span>
+        <span className="text-xs font-google-sans-code ">
+          {isChatOpen ? "close" : "chat"}
+        </span>
         <IconMessagePlus
           size={15}
           stroke={1.5}
-          className="group-hover:scale-110 transition-all duration-200"
+          className="hidden lg:inline group-hover:scale-110 transition-all duration-200"
         />
       </motion.button>
     </>
