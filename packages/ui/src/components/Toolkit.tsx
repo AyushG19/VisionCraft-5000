@@ -163,14 +163,15 @@ const Toolkit = ({
       } else if (resizeState.current.isResizing) {
         // Define these as constants at the top of the component (or outside it)
         const windowWidth = window.innerWidth;
-        const ITEM_CHUNK = windowWidth > 1250 ? 36 + 8 : 28 + 4; // w-9 (36px) + gap-2 (8px)
-        const LEFT_PAD = windowWidth > 1250 ? 12 : 8; // p-3
-        const GRIP_WIDTH = 16; // w-4 (16px) + ml-1.5 (6px)
+        const ITEM_CHUNK = windowWidth < 1024 ? 28 + 4 : 36 + 5; // w-9 (36px) + gap-2 (8px)
+        const LEFT_PAD = windowWidth < 1024 ? 8 : 12;
+        const GRIP_WIDTH = 16 + 4; // w-4 (16px) + ml-1.5 (6px)
         const CHROME = LEFT_PAD + GRIP_WIDTH;
 
         const snapToColumns = (rawWidth: number) => {
           const available = rawWidth - CHROME;
           const cols = Math.max(1, Math.round(available / ITEM_CHUNK));
+          if (cols > 2) return cols * ITEM_CHUNK + CHROME + cols * 4;
           return cols * ITEM_CHUNK + CHROME;
         };
         const deltaX = e.clientX - resizeState.current.initialX;
@@ -227,7 +228,7 @@ const Toolkit = ({
       <div
         ref={toolkitRef}
         draggable={false}
-        className="lg:p-3 lg:pb-3.5 p-2 pb-2.5 pr-0 absolute top-0 left-0 rounded-lg flex items-center cursor-move bg-primary outline-1 outline-global-shadow shadow-shinyprimary "
+        className="lg:p-3 lg:pb-3.5 p-2 !pr-0 absolute top-0 left-0 rounded-lg flex items-center cursor-move bg-primary outline-1 outline-global-shadow shadow-shinyprimary "
       >
         <div ref={toolIconRef} className="flex flex-wrap gap-1 lg:gap-2 ">
           {tools.map((tool) => {

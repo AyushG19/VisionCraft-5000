@@ -159,6 +159,7 @@ describe("throttle", () => {
     it("preserves this on leading edge", () => {
       // ✅ 1. Create the spy separately
       const spy = vi.fn(function () {
+        //@ts-ignore
         return this.value;
       });
 

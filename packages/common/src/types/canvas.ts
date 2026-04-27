@@ -9,7 +9,7 @@ export type ShapeTool = z.infer<typeof ShapeToolSchema>;
 export const LineToolSchema = z.enum(["arrow", "line"]);
 export type LineTool = z.infer<typeof LineToolSchema>;
 
-export const PencilToolSchema = z.enum(["pencil"]);
+export const PencilToolSchema = z.literal(["pencil"]);
 export type PencilToolType = z.infer<typeof PencilToolSchema>;
 
 export const ActionToolSchema = z.enum(["text", "image", "color"]);
@@ -17,6 +17,9 @@ export type ActionTool = z.infer<typeof ActionToolSchema>;
 
 export const ModifierToolSchema = z.enum(["undo", "redo"]);
 export type ModifierTool = z.infer<typeof ModifierToolSchema>;
+
+export const EraserToolSchema = z.literal("eraser");
+export type EraserTool = z.infer<typeof EraserToolSchema>;
 
 export const LabelSchema = z.object({
   text: z.string(),

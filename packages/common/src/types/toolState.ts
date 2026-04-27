@@ -1,7 +1,8 @@
-import z, { number } from "zod";
+import z from "zod";
 import {
   ActionToolSchema,
   ColorSchema,
+  EraserToolSchema,
   LineToolSchema,
   ModeSchema,
   PencilToolSchema,
@@ -30,6 +31,7 @@ export const AllToolSchema = z.union([
   ShapeToolSchema,
   ActionToolSchema,
   PencilToolSchema,
+  EraserToolSchema,
 ]);
 
 export type AllToolTypes = z.infer<typeof AllToolSchema>;

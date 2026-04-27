@@ -4,6 +4,7 @@ type MessageBubbleProps = {
   message: ServerMessageType;
   isOwn: boolean;
   positionInBlock: "single" | "first" | "middle" | "last";
+  color?: string;
 };
 
 function getTimeString(timestamp: number) {
@@ -31,10 +32,11 @@ const MessageBubble = ({
   message,
   isOwn,
   positionInBlock,
+  color = "black",
 }: MessageBubbleProps) => {
   // Base classes
   let base =
-    "w-fit max-w-4/5 px-3 py-2 whitespace-pre-wrap break-words max-w-[80%] m-0.5";
+    "w-fit max-w-4/5 px-3 py-2 whitespace-pre-wrap break-words max-w-[80%] font-handlee outline-1 outline-global-shadow rounded-lg";
 
   // Determine which corners should be “lg” vs which “xs”
   let radiusClasses = "";
@@ -43,19 +45,19 @@ const MessageBubble = ({
     // for your "own" messages (right side)
     switch (positionInBlock) {
       case "single":
-        radiusClasses = "rounded-2xl rounded-br-xs"; // full rounding with small bottom-right
+        radiusClasses = " rounded-br-xs mb-1"; // full rounding with small bottom-right
         break;
       case "first":
-        radiusClasses = "rounded-2xl rounded-br-xs"; // full rounding with small bottom-right
+        radiusClasses = " rounded-br-xs"; // full rounding with small bottom-right
         break;
       case "middle":
-        radiusClasses = "rounded-2xl rounded-r-xs "; // small rounding on right side
+        radiusClasses = " rounded-r-xs "; // small rounding on right side
         break;
       case "last":
-        radiusClasses = "rounded-2xl rounded-r-xs "; // small rounding on top-right only
+        radiusClasses = " rounded-r-xs mb-1"; // small rounding on top-right only
         break;
     }
-    base += " ml-auto bg-white";
+    base += " ml-auto bg-[#FCFAED]";
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 8 }}
@@ -67,7 +69,7 @@ const MessageBubble = ({
         className={`${base} ${radiusClasses}`}
       >
         <div className="relative pb-0.5">
-          <p className="font-sans " style={{ lineHeight: "1.2rem" }}>
+          <p className=" " style={{ lineHeight: "1.2rem" }}>
             {message.content}
             <span className="w-8 inline-block"></span>
             <span className="absolute right-0 bottom-0 -mb-1 text-[10px] font-semibold opacity-50">
@@ -81,24 +83,27 @@ const MessageBubble = ({
     // for messages from others (left side)
     switch (positionInBlock) {
       case "single":
-        radiusClasses = "rounded-lg rounded-bl-xs "; // full rounding with small bottom-left
+        radiusClasses = " rounded-bl-xs mb-1"; // full rounding with small bottom-left
         break;
       case "first":
-        radiusClasses = "rounded-lg rounded-bl-xs "; // full rounding with small bottom-left
+        radiusClasses = " rounded-bl-xs "; // full rounding with small bottom-left
         break;
       case "middle":
-        radiusClasses = "rounded-lg rounded-l-xs "; // small rounding on left side
+        radiusClasses = " rounded-l-xs "; // small rounding on left side
         break;
       case "last":
-        radiusClasses = "rounded-lg rounded-l-xs"; // small rounding on top-left only
+        radiusClasses = " rounded-l-xs mb-1"; // small rounding on top-left only
         break;
     }
-    base += " bg-light_sky_blue-800 mr-auto ";
+    base += " bg-secondary text-secondary-contrast mr-auto ";
   }
   return (
     <div className="flex items-end gap-1.5 ">
       {positionInBlock === "last" || positionInBlock === "single" ? (
-        <div className="size-7 bg-amber-400 rounded-full border flex justify-center items-center capitalize text-xs ">
+        <div
+          className="size-7 rounded-full border flex justify-center items-center capitalize text-xs font-krona-one  "
+          style={{ background: color }}
+        >
           {message.name[0]}
         </div>
       ) : (
@@ -113,9 +118,10 @@ const MessageBubble = ({
           ease: "easeOut",
         }}
         className={`${base} ${radiusClasses} `}
+        // style={{ background: color }}
       >
         <div className="relative pb-0.5">
-          <p className="font-sans " style={{ lineHeight: "1.2rem" }}>
+          <p className=" " style={{ lineHeight: "1.2rem" }}>
             {message.content}
             <span className="w-8 inline-block"></span>
             <span className="absolute right-0 bottom-0 -mb-1 text-[10px] font-semibold opacity-50">

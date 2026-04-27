@@ -49,7 +49,7 @@ const ToolIcon = ({
             accept="image/*"
           ></input>
         </label>
-        <span className="absolute right-1 bottom-1 opacity-50 text-xs font-handlee">
+        <span className="hidden lg:inline absolute right-[3px] bottom-1 opacity-50 text-xs font-handlee">
           {toolInfo.keyBind}
         </span>
         <toolInfo.icon
@@ -78,7 +78,7 @@ const ToolIcon = ({
               setSelectedColor={onSelectColor}
             />
           )}
-          <span className="absolute right-1.5 bottom-1 opacity-50 text-xs font-handlee">
+          <span className="hidden lg:inline absolute right-[3px] bottom-1 opacity-50 text-xs font-handlee">
             {toolInfo.keyBind}
           </span>
           <toolInfo.icon

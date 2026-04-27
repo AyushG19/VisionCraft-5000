@@ -1,6 +1,5 @@
 "use client";
 import {
-  RoomOptions,
   JoinRoomModal,
   Toolkit,
   toolkitProps,
@@ -11,10 +10,8 @@ import {
 import { useSocketWithWhiteboard } from "./hooks/useSocketWithWhiteboard";
 import useAi from "./hooks/useAi";
 import { ErrorModal } from "@workspace/ui/components/ErrorModal";
-import UsersCursor from "@workspace/ui/components/ui/UsersCursor";
 import { useTheme } from "next-themes";
 import { DrawElement } from "@repo/common";
-import { useCamera } from "./hooks/useCamera";
 import { useEffect } from "react";
 import { useUser } from "@repo/hooks";
 
@@ -23,15 +20,11 @@ const Page = () => {
   // useRafLoop({ cursorMap: memberCursor.current });
   const { currentUser } = useUser();
   const wb = useSocketWithWhiteboard();
-  const { camera } = useCamera(
-    wb.canvasRef,
-    wb.canvasState.toolState.currentTool,
-  );
 
   const { loading, result, handleDrawRequest } = useAi(
     wb.canvasRef,
     wb.canvasDispatch,
-    camera,
+    wb.camera,
   );
 
   const sendReqToAi = (command: string) => {
@@ -68,18 +61,18 @@ const Page = () => {
   }, [result]);
 
   const toolkitProps: toolkitProps = {
-    canvasRef: wb.canvasRef,
     handleColorSelect: wb.handleColorSelect,
     currentColor: wb.canvasState.toolState.currentColor,
     handleToolSelect: wb.handleToolSelect,
     toolKitState: wb.canvasState.toolState,
     handleRedo: wb.handleRedo,
     handleUndo: wb.handleUndo,
+    inputRef: wb.inputRef,
   };
 
   return (
-    <div className={`relative h-screen w-screen duration-300`}>
-      <Toolkit {...toolkitProps} ref={wb.inputRef} />
+    <div className={`relative h-screen w-screen duration-300 touch-none`}>
+      <Toolkit {...toolkitProps} />
 
       {wb.textEdit && (
         <TextArea
@@ -94,7 +87,7 @@ const Page = () => {
       )}
       <canvas
         ref={wb.canvasRef}
-        className="w-full h-full bg-canvas text-white"
+        className="w-full h-full bg-canvas touch-none "
       ></canvas>
       <SideToolkit
         selectedShape={wb.selectedShape}
@@ -119,7 +112,7 @@ const Page = () => {
         }}
       ></SideToolkit>
 
-      {wb.inRoom ? (
+      {/* {wb.inRoom ? (
         <>
           <RoomOptions
             onChatToggle={handleChatToggle}
@@ -143,27 +136,32 @@ const Page = () => {
             slug={wb.slug}
           />
         </>
-      ) : (
-        <>
-          <JoinRoomModal
-            makeNewRoom={wb.handleCreateRoom}
-            verifyJoin={wb.handleJoinRoom}
-            onChatToggle={handleChatToggle}
-            isChatOpen={wb.isOpen}
-          />
+      ) : ( */}
+      <>
+        <JoinRoomModal
+          makeNewRoom={wb.handleCreateRoom}
+          verifyJoin={wb.handleJoinRoom}
+          onChatToggle={handleChatToggle}
+          isChatOpen={wb.isOpen}
+          setTheme={setTheme}
+          onExitRoom={() => {}}
+          onLogout={() => {}}
+          inRoom={wb.inRoom}
+        />
 
-          <SideCollapseChat
-            inRoom={wb.inRoom}
-            send={wb.send}
-            messages={wb.messages}
-            setMessages={wb.setMessages}
-            fetchChartFromAi={sendReqToAi}
-            isOpen={wb.isOpen}
-            isLoading={loading}
-            slug={wb.slug}
-          />
-        </>
-      )}
+        <SideCollapseChat
+          inRoom={wb.inRoom}
+          send={wb.send}
+          messages={wb.messages}
+          setMessages={wb.setMessages}
+          fetchChartFromAi={sendReqToAi}
+          isOpen={wb.isOpen}
+          isLoading={loading}
+          slug={wb.slug}
+          handleChatToggle={handleChatToggle}
+        />
+      </>
+      {/* )} */}
       <ErrorModal />
     </div>
   );

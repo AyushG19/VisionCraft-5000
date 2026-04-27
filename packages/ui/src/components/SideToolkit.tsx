@@ -59,7 +59,7 @@ export type SideToolkitProps = {
       style: "dash" | "dotted" | "normal",
       element?: ShapeType | LinearType | PencilType,
     ) => void;
-    handleFillSelect: (color: ColorType, shape?: ShapeType) => void;
+    handleFillSelect: (color?: ColorType, shape?: ShapeType) => void;
     handleColorSelect: (
       color: { l: number; c: number; h: number },
       shape?: StrokeAllowedTypes,
@@ -72,16 +72,28 @@ export type SideToolkitProps = {
 type StrokeAllowedTypes = ShapeType | LinearType | PencilType;
 // Constants
 
+// const QUICK_COLORS = [
+//   { l: 60, c: 93, h: 354 }, // Red
+//   { l: 84, c: 90, h: 255 }, // Light Purple
+//   { l: 84, c: 73, h: 162 }, // Mint Green
+//   { l: 72, c: 99, h: 44 }, // Yellow
+//   { l: 72, c: 92, h: 225 }, // Blue
+//   { l: 80, c: 100, h: 356 }, // Pink
+//   { l: 72, c: 96, h: 164 }, // Cyan
+//   { l: 76, c: 80, h: 257 }, // Purple
+// ];
 const QUICK_COLORS = [
   { l: 0, c: 0, h: 0 },
-  { l: 1, c: 0, h: 0 },
-  { l: 0.6223, c: 0.1563, h: 131.49 },
-  { l: 0.6231, c: 0.1232, h: 165.5 },
-  { l: 0.6232, c: 0.1486, h: 251.5 },
-  { l: 0.6232, c: 0.1502, h: 284.72 },
-  { l: 0.6225, c: 0.1666, h: 2.52 },
+  { l: 1, c: 0, h: 1 },
+  { l: 0.6449, c: 0.2236, h: 21.34 },
+  // { l: 0.9215, c: 0.0654, h: 174.39 },
+  { l: 0.9336, c: 0.0657, h: 97.1 },
+  { l: 0.8673, c: 0.0617, h: 270.92 },
+  { l: 0.7901, c: 0.1224, h: 15.82 },
+  { l: 0.9048, c: 0.1313, h: 173.43 },
+  // { l: 0.7185, c: 0.1428, h: 295.61 },
+  { l: 0.8047, c: 0.1032, h: 295.3 },
 ];
-
 //  Sub-components
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
@@ -102,22 +114,26 @@ const ColorSwatches = ({
   ) => void;
   selectedShape?: DrawElement;
 }) => (
-  <div className="flex items-center flex-wrap">
+  <>
     {QUICK_COLORS.map((c, i) => (
-      <button
+      <Button
+        variant={"outline"}
         key={i}
         onClick={() => {
           if (selectedShape && isShape(selectedShape.type))
             onOklchChange(c, selectedShape as ShapeType);
         }}
-        className="w-5 h-5 rounded-sm outline-1 outline-global-shadow cursor-pointer shrink-0 transition-transform duration-75 hover:scale-100 scale-80"
+        className=" w-4 h-4 p-0 rounded-sm outline-1 outline-global-shadow cursor-pointer transition-transform duration-75 "
         style={{ background: `oklch(${c.l} ${c.c} ${c.h})` }}
       />
     ))}
     <IconMinusVertical className="-mx-1" stroke={1} />
     {/* Custom hex color picker — converts to oklch before calling handler */}
-    <div className="w-[18px] h-[18px] rounded-full overflow-hidden border-[1.5px] border-[var(--color-border-secondary)] shrink-0 relative">
-      <input
+    <div
+      className="w-4 h-4 rounded-sm overflow-hidden outline-1 outline-global-shadow relative p-0"
+      style={{ background: value }}
+    >
+      {/* <input
         type="color"
         value={value}
         onChange={(e) => {
@@ -127,9 +143,9 @@ const ColorSwatches = ({
           console.log("hex picked:", e.target.value);
         }}
         className="border-none cursor-pointer p-0"
-      />
+      /> */}
     </div>
-  </div>
+  </>
 );
 
 const SliderRow = ({
@@ -229,7 +245,6 @@ export const SideToolkit = ({
 
   const handleStrokeColorChange = useCallback(
     (c: { l: number; c: number; h: number }) => {
-      if (selectedShape && !isStokeElement(selectedShape.type)) return;
       shapeEditHelpers.handleColorSelect(
         c,
         selectedShape as StrokeAllowedTypes,
@@ -240,7 +255,11 @@ export const SideToolkit = ({
   );
 
   const handleFillColorChange = useCallback(
-    (c: { l: number; c: number; h: number }, shape?: ShapeType) => {
+    (c?: { l: number; c: number; h: number }, shape?: ShapeType) => {
+      if (!c) {
+        shapeEditHelpers.handleFillSelect(c, shape);
+        return;
+      }
       // handleFillSelect expects ColorType — pass the oklch object directly
       shapeEditHelpers.handleFillSelect(c as unknown as ColorType, shape);
       setEditorState({ fillColor: `oklch(${c.l} ${c.c} ${c.h})` });
@@ -398,7 +417,7 @@ export const SideToolkit = ({
       {isStokeElement(activeTool) && (
         <div className="flex flex-col gap-1.5 w-full cursor-default">
           <SectionLabel>stroke color</SectionLabel>
-          <div className="bg-secondary gap-1 rounded-sm p-1.5 flex flex-col w-full">
+          <div className="bg-secondary rounded-sm p-1.5 flex items-center gap-1 flex-wrap w-full">
             <ColorSwatches
               value={editorState.strokeColor}
               selectedShape={selectedShape}
@@ -412,7 +431,16 @@ export const SideToolkit = ({
       {isShape(activeTool) && (
         <div className="flex flex-col w-full gap-1.5 rounded-sm cursor-default">
           <SectionLabel>background</SectionLabel>
-          <div className="bg-secondary p-1.5 rounded-sm w-full">
+          <div className="bg-secondary flex items-center gap-1 flex-wrap p-1.5 rounded-sm w-full">
+            <button
+              // key={i}
+              onClick={() => {
+                handleFillColorChange(undefined, selectedShape as ShapeType);
+                // if (selectedShape && isShape(selectedShape.type));
+                // onOklchChange(c, selectedShape as ShapeType);
+              }}
+              className=" w-4 h-4 p-0 bg-white relative rounded-sm outline-1 outline-global-shadow cursor-pointer transition-transform duration-75 before:content-[''] before:bg-red before:top-1/2 before:left-1/2 before:absolute before:w-[1.4px] before:h-full before:rotate-45 before:-translate-1/2 "
+            />
             <ColorSwatches
               value={editorState.fillColor}
               selectedShape={selectedShape}

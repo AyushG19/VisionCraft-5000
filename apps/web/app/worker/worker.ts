@@ -7,7 +7,7 @@ self.onmessage = async function (message: MessageEvent<WorkerMessage>) {
   const { imgBitmap } = message.data;
   console.log("imgbitmap:", imgBitmap);
 
-  const MAX_DIMENTION = 1950;
+  const MAX_DIMENTION = 400;
 
   let w = imgBitmap.width;
   let h = imgBitmap.height;
@@ -22,7 +22,7 @@ self.onmessage = async function (message: MessageEvent<WorkerMessage>) {
     const offScrCanvas = new OffscreenCanvas(w, h);
     const ctx = offScrCanvas.getContext("2d");
     if (!ctx) return;
-
+    ctx.drawImage(imgBitmap, 0, 0, w, h);
     const compressedBlob = await offScrCanvas.convertToBlob({
       type: "image/webp",
       quality: 0.7,

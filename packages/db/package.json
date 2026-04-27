@@ -10,7 +10,7 @@
     "generate": "prisma generate",
     "postinstall": "prisma generate",
     "build": "tsup src/index.ts --dts --format esm,cjs",
-    "check-types": "tsc --no-emit"
+    "check-types": "tsc --noEmit"
   },
   "devDependencies": {
     "@repo/common": "workspace:*",

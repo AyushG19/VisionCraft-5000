@@ -34,7 +34,7 @@ const AvatarGroup: React.FC<AvatarGroupProps> = ({
 
   return (
     <div
-      className="relative flex items-center"
+      className="relative flex items-center mt-0.5 "
       style={{
         height: size,
         width: baseWidth,
@@ -48,7 +48,7 @@ const AvatarGroup: React.FC<AvatarGroupProps> = ({
         return (
           <motion.div
             key={avatar.userId}
-            className="absolute cursor-pointer font-krona-one outline-1 outline-global-shadow rounded-full  "
+            className="absolute cursor-pointer font-krona-one outline-1 outline-global-shadow rounded-full text-white "
             initial={false}
             animate={{
               x: isHovered ? baseOffset - slideDistance : baseOffset,

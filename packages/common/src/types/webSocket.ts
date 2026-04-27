@@ -36,19 +36,37 @@ const SocketShapePayload = z.object({
 
 export type WebSocketShapeType = z.infer<typeof SocketShapePayload>;
 
-export const ServerShapeManipulationSchema = z.object({
+const ServerElementEditSchema = z.object({
   type: z.enum(["RESIZE", "DRAG"]),
   payload: z.object({ userId: z.string(), element: DrawSchema }),
 });
+const ServerDeselectSchema = z.object({
+  type: z.enum(["DESELECT"]),
+  payload: z.object({ userId: z.string() }),
+});
+
+export const ServerShapeManipulationSchema = z.discriminatedUnion("type", [
+  ServerElementEditSchema,
+  ServerDeselectSchema,
+]);
 
 export type ServerShapeManipulation = z.infer<
   typeof ServerShapeManipulationSchema
 >;
 
-export const ClientShapeManipulationSchema = z.object({
+const ClientElementEditSchema = z.object({
   type: z.enum(["RESIZE", "DRAG"]),
   payload: DrawSchema,
 });
+
+const ClientElementDeselectSchema = z.object({
+  type: z.literal("DESELECT"),
+  payload: z.object({}),
+});
+export const ClientShapeManipulationSchema = z.discriminatedUnion("type", [
+  ClientElementEditSchema,
+  ClientElementDeselectSchema,
+]);
 
 export type ClientShapeManipulation = z.infer<
   typeof ClientShapeManipulationSchema
@@ -77,7 +95,8 @@ export const ServerSocketData = z.discriminatedUnion("type", [
   ServerChatSchema,
   ServerRoomSchema,
   ServerCursorSchema,
-  ServerShapeManipulationSchema,
+  ServerElementEditSchema,
+  ServerDeselectSchema,
   ServerInfoSchema,
 ]);
 
@@ -88,7 +107,8 @@ export const ClientSocketData = z.discriminatedUnion("type", [
   ClientChatSchema,
   ClientRoomSchema,
   ClientCursorSchema,
-  ClientShapeManipulationSchema,
+  ClientElementEditSchema,
+  ClientElementDeselectSchema,
 ]);
 
 export type ClientSocketDataType = z.infer<typeof ClientSocketData>;

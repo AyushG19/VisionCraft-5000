@@ -1,9 +1,243 @@
-@import url("https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&family=Handlee&family=Krona+One&display=swap");
+/* @import url("https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&family=Handlee&family=Krona+One&display=swap"); */
 
 @import "tailwindcss";
-
 @import "tw-animate-css";
 @source "../../../packages/ui/src/**/*.{tsx}";
+
+@font-face {
+  font-family: "Krona One";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("../public/fonts/Krona_One/KronaOne-Regular.ttf");
+}
+
+@font-face {
+  font-family: "Handlee";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("../public/fonts/Handlee/Handlee-Regular.ttf");
+}
+
+/* Google Sans Code - Proportional */
+
+@font-face {
+  font-family: "Google Sans Code Proportional";
+  src: url("/fonts/Google_Sans_Code/GoogleSansCode_Proportional-Light.ttf")
+    format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Google Sans Code Proportional";
+  src: url("/fonts/Google_Sans_Code/GoogleSansCode_Proportional-LightItalic.ttf")
+    format("truetype");
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Google Sans Code Proportional";
+  src: url("/fonts/Google_Sans_Code/GoogleSansCode_Proportional-Regular.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Google Sans Code Proportional";
+  src: url("/fonts/Google_Sans_Code/GoogleSansCode_Proportional-Italic.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Google Sans Code Proportional";
+  src: url("/fonts/Google_Sans_Code/GoogleSansCode_Proportional-Medium.ttf")
+    format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Google Sans Code Proportional";
+  src: url("/fonts/Google_Sans_Code/GoogleSansCode_Proportional-MediumItalic.ttf")
+    format("truetype");
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Google Sans Code Proportional";
+  src: url("/fonts/Google_Sans_Code/GoogleSansCode_Proportional-SemiBold.ttf")
+    format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Google Sans Code Proportional";
+  src: url("/fonts/Google_Sans_Code/GoogleSansCode_Proportional-SemiBoldItalic.ttf")
+    format("truetype");
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Google Sans Code Proportional";
+  src: url("/fonts/Google_Sans_Code/GoogleSansCode_Proportional-Bold.ttf")
+    format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Google Sans Code Proportional";
+  src: url("/fonts/Google_Sans_Code/GoogleSansCode_Proportional-BoldItalic.ttf")
+    format("truetype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Google Sans Code Proportional";
+  src: url("/fonts/Google_Sans_Code/GoogleSansCode_Proportional-ExtraBold.ttf")
+    format("truetype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Google Sans Code Proportional";
+  src: url("/fonts/Google_Sans_Code/GoogleSansCode_Proportional-ExtraBoldItalic.ttf")
+    format("truetype");
+  font-weight: 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Google Sans Code - Mono */
+
+@font-face {
+  font-family: "Google Sans Code";
+  src: url("/fonts/Google_Sans_Code/GoogleSansCode-Light.ttf")
+    format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Google Sans Code";
+  src: url("/fonts/Google_Sans_Code/GoogleSansCode-LightItalic.ttf")
+    format("truetype");
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Google Sans Code";
+  src: url("/fonts/Google_Sans_Code/GoogleSansCode-Regular.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Google Sans Code";
+  src: url("/fonts/Google_Sans_Code/GoogleSansCode-Italic.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Google Sans Code";
+  src: url("/fonts/Google_Sans_Code/GoogleSansCode-Medium.ttf")
+    format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Google Sans Code";
+  src: url("/fonts/Google_Sans_Code/GoogleSansCode-MediumItalic.ttf")
+    format("truetype");
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Google Sans Code";
+  src: url("/fonts/Google_Sans_Code/GoogleSansCode-SemiBold.ttf")
+    format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Google Sans Code";
+  src: url("/fonts/Google_Sans_Code/GoogleSansCode-SemiBoldItalic.ttf")
+    format("truetype");
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Google Sans Code";
+  src: url("/fonts/Google_Sans_Code/GoogleSansCode-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Google Sans Code";
+  src: url("/fonts/Google_Sans_Code/GoogleSansCode-BoldItalic.ttf")
+    format("truetype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Google Sans Code";
+  src: url("/fonts/Google_Sans_Code/GoogleSansCode-ExtraBold.ttf")
+    format("truetype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Google Sans Code";
+  src: url("/fonts/Google_Sans_Code/GoogleSansCode-ExtraBoldItalic.ttf")
+    format("truetype");
+  font-weight: 800;
+  font-style: italic;
+  font-display: swap;
+}
 
 :root {
   --canvas-bg: #300b43;
@@ -11,7 +245,7 @@
   --primary-700: #c8e4ff;
   --secondary: #bde0fe;
   --secondary-700: #d3e9fd;
-  --accent: #b83a2d;
+  --accent: #3c88ec;
   --primary-contrast: #000000;
   --secondary-contrast: #131313;
   --global-shadow: #000000;
@@ -38,7 +272,7 @@
   --secondary: #fff2df;
   --secondary-700: #fcfbf9;
   --text: #000000;
-  --accent: #158853;
+  --accent: #19b96f;
   --primary-contrast: #331403;
   --secondary-contrast: #000000;
   --global-shadow: #000000;
@@ -53,7 +287,7 @@
   --text: #000000;
   --primary-contrast: #000000;
   --secondary-contrast: #1f1f1f;
-  --accent: #b83a2d;
+  --accent: #f3a1d8;
   --global-shadow: #000000;
   --red: #de0a26;
 }
@@ -76,7 +310,7 @@
   --primary-700: #92502a;
   --secondary: #d39858;
   --secondary-700: #eeb06e;
-  --accent: #ef4444;
+  --accent: #7ecaf7;
   --text: #000000;
   --primary-contrast: #eeddc6;
   --secondary-contrast: #000000;
@@ -94,13 +328,17 @@
     inset 2px 2px 3px var(--color-secondary-700),
     3px 3px var(--color-global-shadow);
 
+  --shadow-shinysecondary-mobile:
+    inset 2px 2px 3px var(--color-secondary-700),
+    2px 2px var(--color-global-shadow);
+
   --shadow-shinysecondary-5:
     inset 2px 2px 3px var(--color-secondary-700),
     5px 5px var(--color-global-shadow);
 
   --shadow-shinyshadow-pressed: inset 1px 1px var(--color-global-shadow);
 
-  --font-google-sans-code: "Google Sans Code", ui-monospace, monospace;
+  --font-Google-Sans-Code: "Google Sans Code", ui-monospace, monospace;
   --font-krona-one: "Krona One", sans-serif;
   --font-handlee: "Handlee", cursive;
 }

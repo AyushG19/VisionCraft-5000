@@ -5,7 +5,7 @@
   "types": "src/index.ts",
   "scripts": {
     "build": "tsup src/index.ts --dts --format esm,cjs",
-    "check-types": "tsc --no-emit"
+    "check-types": "tsc --noEmit"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",

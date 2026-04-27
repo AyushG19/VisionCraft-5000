@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ClientShapeManipulation,
   DrawElement,
@@ -23,7 +23,8 @@ import { useCamera } from "./useCamera";
 import { screenToWorld } from "app/lib/math";
 import { storeImg } from "app/services/canvas.service";
 import { set } from "idb-keyval";
-import { createNewImage } from "../utils/createNewShape";
+import { createNewImage, createNewText } from "../utils/createNewShape";
+import { measureText } from "../helper/canvas.helper";
 
 const useCanvasInteraction = (
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
@@ -33,7 +34,6 @@ const useCanvasInteraction = (
   dispatchWithSocket: (action: Action) => void,
   sendCursorState: (pos: PointType) => void,
   inRoom: boolean,
-  setTextEdit: React.Dispatch<React.SetStateAction<TextEditState>>,
   sideToolkit: HTMLDivElement | null,
   sendActiveElementUpdate: (event: ClientShapeManipulation) => void,
   activeElementMap: Map<
@@ -48,11 +48,44 @@ const useCanvasInteraction = (
   const [selectedShape, setSelectedShape] = useState<DrawElement | undefined>(
     undefined,
   );
-
+  const [textEdit, setTextEdit] = useState<TextEditState>(null);
   const interactionState = useInteractionState();
   const cursor = useCanvasCursor(canvasRef);
   const { camera, onPanStart, onPanMove, onPanEnd, isPanning, onWheel } =
     useCamera(canvasRef, canvasState.toolState.currentTool);
+
+  const finishText = useCallback(() => {
+    if (!textEdit || !canvasRef.current) return;
+    const textState = canvasState.textState;
+    const ctx = canvasRef.current.getContext("2d");
+    if (!ctx) return;
+
+    const { width, height } = measureText(
+      ctx,
+      textEdit.text,
+      textState.fontSize,
+      textState.fontFamily,
+    );
+
+    const element = createNewText(
+      canvasState.toolState,
+      textState,
+      screenToWorld(textEdit.x, textEdit.y, camera),
+      textEdit.text,
+      width / camera.z,
+      height / camera.z,
+    );
+
+    dispatchWithSocket({ type: "ADD_SHAPE", payload: element });
+    dispatchWithSocket({ type: "CHANGE_TOOL", payload: "select" });
+    setTextEdit(null);
+
+    console.log("cameraera;", camera);
+  }, [textEdit, canvasState.textState]);
+
+  const cancelText = useCallback(() => {
+    setTextEdit(null);
+  }, []);
 
   const selectInteraction = useSelectInteraction(
     interactionState,
@@ -77,6 +110,24 @@ const useCanvasInteraction = (
     inRoom,
     camera,
   );
+
+  useEffect(() => {
+    const tool = canvasState.toolState.currentTool;
+
+    if (tool === "image") {
+      inputRef.current?.click();
+    }
+    cursor.updateCursor(
+      tool,
+      screenToWorld(0, 0, camera),
+      selectedShape as ShapeType,
+      canvasState.drawnShapes,
+      isPanning.current,
+      false,
+      interactionState.interaction.current.isDragging,
+      interactionState.interaction.current.isResizing,
+    );
+  }, [canvasState.toolState.currentTool]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -108,6 +159,7 @@ const useCanvasInteraction = (
     };
 
     const onKeyDown = (e: KeyboardEvent) => {
+      if (inputRef.current) return;
       if (
         (e.key === "Delete" || e.key === "Backspace") &&
         selectedShapeRef.current
@@ -120,6 +172,54 @@ const useCanvasInteraction = (
         setSelectedShape(undefined);
       }
 
+      if (canvasState.toolState.currentTool === "text") return null;
+      if (e.key === "q") {
+        canvasDispatch({ type: "CHANGE_TOOL", payload: "select" });
+      }
+
+      if (e.key === "w") {
+        canvasDispatch({ type: "CHANGE_TOOL", payload: "hand" });
+      }
+
+      if (e.key === "e") {
+        canvasDispatch({ type: "CHANGE_TOOL", payload: "ellipse" });
+      }
+
+      if (e.key === "r") {
+        canvasDispatch({ type: "CHANGE_TOOL", payload: "rectangle" });
+      }
+
+      if (e.key === "a") {
+        canvasDispatch({ type: "CHANGE_TOOL", payload: "diamond" });
+      }
+
+      if (e.key === "s") {
+        canvasDispatch({ type: "CHANGE_TOOL", payload: "line" });
+      }
+
+      if (e.key === "d") {
+        canvasDispatch({ type: "CHANGE_TOOL", payload: "arrow" });
+      }
+
+      if (e.key === "f") {
+        canvasDispatch({ type: "CHANGE_TOOL", payload: "pencil" });
+      }
+
+      if (e.key === "z") {
+        canvasDispatch({ type: "CHANGE_TOOL", payload: "eraser" });
+      }
+
+      if (e.key === "x") {
+        canvasDispatch({ type: "CHANGE_TOOL", payload: "text" });
+      }
+
+      if (e.key === "c") {
+        canvasDispatch({ type: "CHANGE_TOOL", payload: "image" });
+      }
+
+      if (e.key === "v") {
+        canvasDispatch({ type: "CHANGE_TOOL", payload: "color" });
+      }
       if ((e.metaKey || e.ctrlKey) && e.key === "z" && !e.shiftKey) {
         e.preventDefault();
         canvasDispatch({ type: "UNDO" });
@@ -171,7 +271,6 @@ const useCanvasInteraction = (
       }
     };
     const onMouseDown = (e: MouseEvent) => {
-      if (e.button !== 0) return;
       const pos = getMousePos(canvasRef, { x: e.clientX, y: e.clientY });
       const currentState = canvasStateRef.current;
       const currentSelected = selectedShapeRef.current;
@@ -299,20 +398,23 @@ const useCanvasInteraction = (
         new URL("../../worker/worker.ts", import.meta.url),
       );
       const imgBitmap = await createImageBitmap(lastImg);
-      const newImage = createNewImage(
-        imgBitmap.width,
-        imgBitmap.height,
-        camera,
-        canvasState.toolState.currentColor,
-        canvasState.toolState.strokeSize,
-      );
-      console.log("newimg", newImage);
+
+      // console.log("newimg", newImage);
 
       worker.postMessage({ imgBitmap });
       worker.onmessage = async (message) => {
         const compressedBlob = message.data;
+
+        const compressedBitmap = await createImageBitmap(compressedBlob);
+        const newImage = createNewImage(
+          compressedBitmap.width / camera.z,
+          compressedBitmap.height / camera.z,
+          camera,
+          canvasState.toolState.currentColor,
+          canvasState.toolState.strokeSize,
+        );
         await set(newImage.id, compressedBlob);
-        imageCache.set(newImage.id, imgBitmap);
+        imageCache.set(newImage.id, compressedBitmap);
         dispatchWithSocket({ type: "ADD_SHAPE", payload: newImage });
 
         if (inRoom) {
@@ -329,11 +431,11 @@ const useCanvasInteraction = (
       //   "http://res.cloudinary.com/dg6spymhq/image/upload/v1775821766/djv9uk6ksl2s344mnpqu.webp";
     };
 
-    canvas.addEventListener("mousedown", onMouseDown);
+    canvas.addEventListener("pointerdown", onMouseDown);
     canvas.addEventListener("dblclick", handleDoubleClick);
     canvas.addEventListener("wheel", handleWheel);
-    canvas.addEventListener("mousemove", onMouseMove);
-    canvas.addEventListener("mouseup", onMouseUp);
+    canvas.addEventListener("pointermove", onMouseMove);
+    canvas.addEventListener("pointerup", onMouseUp);
     window.addEventListener("resize", handleResize);
     window.addEventListener("keydown", onKeyDown);
     fileInput.addEventListener("change", handleFileInput);
@@ -347,11 +449,11 @@ const useCanvasInteraction = (
     );
 
     return () => {
-      canvas.removeEventListener("mousedown", onMouseDown);
+      canvas.removeEventListener("pointerdown", onMouseDown);
       canvas.removeEventListener("dblclick", handleDoubleClick);
       canvas.removeEventListener("wheel", handleWheel);
-      canvas.removeEventListener("mousemove", onMouseMove);
-      canvas.removeEventListener("mouseup", onMouseUp);
+      canvas.removeEventListener("pointermove", onMouseMove);
+      canvas.removeEventListener("pointerup", onMouseUp);
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("keydown", onKeyDown);
       fileInput.removeEventListener("change", handleFileInput);
@@ -387,6 +489,11 @@ const useCanvasInteraction = (
   return {
     selectedShape,
     setSelectedShape,
+    camera,
+    cancelText,
+    finishText,
+    textEdit,
+    setTextEdit,
   };
 };
 

@@ -12,7 +12,7 @@ import {
 export const ROOM_OPTIONS = [
   {
     id: "create",
-    label: "Create Room",
+    label: "new Room",
     mode: "normal",
     icon: IconSquareRoundedPlus,
   },

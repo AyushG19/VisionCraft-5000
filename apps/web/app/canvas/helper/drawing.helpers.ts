@@ -23,12 +23,10 @@ export const drawHandles = (
 ): Handle[] => {
   const handles = getHandles(bounds, handleSize / zoom);
 
-  ctx.strokeStyle = "#00FFFF";
-  ctx.lineWidth = 1 / zoom;
   ctx.setLineDash([]);
   handles.forEach(({ x, y, size }) => {
     ctx.beginPath();
-    ctx.rect(x, y, size, size);
+    ctx.roundRect(x, y, size, size, 1);
     ctx.fillStyle = "black";
     ctx.fill();
     ctx.stroke();

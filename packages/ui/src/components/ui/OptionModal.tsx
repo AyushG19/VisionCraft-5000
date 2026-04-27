@@ -14,19 +14,17 @@ const OptionModal = ({
   return (
     <div
       id="option"
-      className={` absolute bg-light_sky_blue bottom-0 transform  left-0 w-full h-auto border-t rounded-t-md transition-transform duration-300 text-sm ${open ? "translate-y-0" : "translate-y-full"} `}
+      className={` absolute bg-primary border-t bottom-0 transform  left-0 w-full h-auto rounded-t-md transition-transform duration-300 text-sm ${open ? "translate-y-0" : "translate-y-full"} `}
     >
       <ul>
-        {OPTIONS.map((ob) => (
+        {OPTIONS.map((ob, i) => (
           <li
             key={ob.name}
-            className="px-2 py-2 font-semibold font-handlee even:bg-light_sky_blue-600 cursor-pointer flex gap-3 hover:bg-light_sky_blue-700 hover:rounded-t-md"
+            className={`px-4 py-2 font-semibold font-Google-Sans-Code even:bg-primary-700 hover:bg-secondary transition-colors ease-in-out duration-200 cursor-pointer capitalize flex justify-between gap-3 hover:bg-light_sky_blue-700 rounded-md `}
             onClick={() => handleOptionSelect(ob.name)}
           >
             /{ob.name}
-            <span className="font-google-sans-code text-xs font-normal ">
-              {ob.desc}
-            </span>
+            <span className="font-handlee text-sm font-normal ">{ob.desc}</span>
           </li>
         ))}
       </ul>

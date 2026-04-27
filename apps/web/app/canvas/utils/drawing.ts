@@ -148,7 +148,7 @@ export const drawShape = (
   shape: DrawElement,
   camera: Camera,
   selectedShapeId?: string,
-  highlightColor: string = "00FFFF",
+  highlightColor: string = "#00FFFF",
 ): void => {
   if (!ctx || !shape || shape.isDeleted) return;
   const zoom = camera?.z ?? 1;
@@ -323,7 +323,7 @@ export const drawImageShape = (
   const cached = imageCache.get(shape.id);
   ctx.lineWidth = shape.strokeWidth || 5;
   ctx.strokeStyle = oklchToCSS(shape.strokeColor) || "white";
-  // ✅ Already ready — draw immediately
+  //Already ready — draw immediately
   if (cached instanceof ImageBitmap) {
     ctx.drawImage(
       cached,
@@ -335,10 +335,10 @@ export const drawImageShape = (
     return;
   }
 
-  // ⏳ Already loading — do nothing, wait for resolve
+  // Already loading — do nothing, wait for resolve
   if (cached instanceof Promise) return;
 
-  // 🔴 Not in cache yet — if has cloudinary link, load from URL
+  // Not in cache yet — if has cloudinary link, load from URL
   if (shape.link) {
     const promise = fetch(shape.link)
       .then((r) => r.blob())

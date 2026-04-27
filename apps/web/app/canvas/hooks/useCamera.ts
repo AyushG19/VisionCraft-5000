@@ -2,8 +2,8 @@ import { RefObject, useCallback, useEffect, useRef, useState } from "react";
 
 export type Camera = { x: number; y: number; z: number };
 
-const WORLD_LIMIT = 50000;
-const PADDING = 150;
+const WORLD_LIMIT = 5000;
+const PADDING = 50;
 const SNAP_SPEED = 0.15;
 
 export function useCamera(
@@ -111,7 +111,7 @@ export function useCamera(
   const onPanEnd = useCallback(() => {
     if (!isPanning.current) return;
     isPanning.current = false;
-    startSnapBack(); // spring back if dragged past bounds
+    //startSnapBack(); // spring back if dragged past bounds
   }, [startSnapBack]);
 
   // --- WHEEL HANDLER ---
@@ -130,6 +130,7 @@ export function useCamera(
         setCamera((prev) => {
           const delta = -e.deltaY * 0.001;
           const newZoom = Math.min(Math.max(prev.z + delta, 0.1), 5);
+          console.log("zoom:", newZoom);
           return {
             x: cursorX - ((cursorX - prev.x) / prev.z) * newZoom,
             y: cursorY - ((cursorY - prev.y) / prev.z) * newZoom,

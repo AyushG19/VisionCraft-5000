@@ -105,10 +105,10 @@ const SideCollapseChat = React.forwardRef<HTMLDivElement, SideChatPropsType>(
               slug={slug}
               avatars={roomInfo.users}
             />
-            <div className="w-full relative !h-full bg-gradient-to-t from-primary via-secondary to-primary overflow-hidden">
-              <div className="absolute inset-0 bg-[url('/pattern-2.svg')] bg-repeat bg-top-left opacity-20 pointer-events-none" />
+            <div className="w-full relative !h-full bg-gradient-to-t from-primary via-secondary to-primary overflow-hidden ">
+              <div className="absolute inset-0 bg-[url('/pattern-2.svg')] bg-repeat bg-top-left opacity-20 pointer-events-none " />
 
-              <div className="absolute h-full inset-0 bottom-14 p-2">
+              <div className="absolute h-full inset-0 bottom-14 p-2 pt-20">
                 <Virtuoso
                   data={messages}
                   initialTopMostItemIndex={messages.length - 1}
@@ -145,6 +145,11 @@ const SideCollapseChat = React.forwardRef<HTMLDivElement, SideChatPropsType>(
                         key={`${message.sender_id}-${message.timeStamp_ms}-${index}`}
                         message={message}
                         isOwn={isOwn}
+                        color={
+                          roomInfo.users.find(
+                            (user) => user.userId === message.sender_id,
+                          )?.color
+                        }
                         positionInBlock={position}
                       />
                     );

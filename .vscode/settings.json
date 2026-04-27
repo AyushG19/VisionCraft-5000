@@ -6,5 +6,9 @@
   ],
   "prismaERDPreviewer.preferredTheme": "dark",
   "postman.settings.dotenv-detection-notification-visibility": false,
-  "tailwindCSS.experimental.configFile": null
+  "tailwindCSS.experimental.configFile": null,
+
+  "editor.codeActionsOnSave": {
+    "source.removeUnusedImports": "explicit"
+  }
 }

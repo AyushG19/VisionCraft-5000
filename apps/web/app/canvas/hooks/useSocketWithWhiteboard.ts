@@ -34,23 +34,20 @@ import {
   TextType,
 } from "@repo/common";
 import { useCanvasSocket } from "./useCanvasSocket";
-import { createNewText } from "../utils/createNewShape";
 import {
   createRoomService,
   joinRoomService,
 } from "app/services/canvas.service";
 import { RoomInfo, useSocketContext } from "@repo/hooks";
-import { measureText } from "app/canvas/helper/canvas.helper";
 import useMousePosition from "./useMousePosition";
 import {
   generateUserObject,
   incomingSocketHandlers,
 } from "app/canvas/helper/socketMessage.helper";
-import { screenToWorld } from "app/lib/math";
-import { useCamera } from "./useCamera";
 import useRafLoop from "./useRafLoop";
 import redrawPreviousShapes from "../utils/redrawPreviousShapes";
 import { debounce } from "../utils/rateLimiting";
+import { Camera } from "./useCamera";
 
 export const useSocketWithWhiteboard = (): {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
@@ -75,7 +72,7 @@ export const useSocketWithWhiteboard = (): {
   ) => void;
   textEdit: TextEditState;
   setTextEdit: React.Dispatch<React.SetStateAction<TextEditState>>;
-  finalizeText: () => void;
+  // finalizeText: () => void;
   finishText: () => void;
   cancelText: () => void;
   inRoom: boolean;
@@ -90,13 +87,14 @@ export const useSocketWithWhiteboard = (): {
     style: "dash" | "dotted" | "normal",
     element?: ShapeType | LinearType | PencilType,
   ) => void;
-  handleFillSelect: (color: ColorType, shape?: ShapeType) => void;
+  handleFillSelect: (color?: ColorType, shape?: ShapeType) => void;
   setEditorState: (partial: Partial<SideToolKitState>) => void;
   setTextState: (partial: Partial<TextStateType>) => void;
   handleFontSelect: (font: FontTypes, shape: ShapeType | TextType) => void;
   handleFontSize: (size: number, shape?: TextType) => void;
   handleFontFamily: (font: AllowedFonts, shape?: TextType) => void;
   users: RoomInfo["users"];
+  camera: Camera;
 } => {
   const [canvasState, canvasDispatch] = useReducer(
     canvasReducer,
@@ -105,7 +103,6 @@ export const useSocketWithWhiteboard = (): {
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [messages, setMessages] = useState<ServerMessageType[]>([]);
-  const [textEdit, setTextEdit] = useState<TextEditState>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const sideToolkitRef = useRef<HTMLDivElement | null>(null);
   const activeElementMap = useRef<
@@ -125,10 +122,10 @@ export const useSocketWithWhiteboard = (): {
     memberCursor,
   } = useSocketContext();
 
-  const { camera } = useCamera(canvasRef, canvasState.toolState.currentTool);
+  // const { camera } = useCamera(canvasRef, canvasState.toolState.currentTool);
   // Add these two refs near your other refs
   const drawnShapesRef = useRef(canvasState.drawnShapes);
-  const cameraRef = useRef(camera);
+  // const cameraRef = useRef(camera);
 
   const { getScreenCoordinates } = useMousePosition(canvasRef);
 
@@ -249,7 +246,15 @@ export const useSocketWithWhiteboard = (): {
     [send],
   );
 
-  const { selectedShape, setSelectedShape } = useCanvasInteraction(
+  const {
+    selectedShape,
+    setSelectedShape,
+    camera,
+    finishText,
+    cancelText,
+    textEdit,
+    setTextEdit,
+  } = useCanvasInteraction(
     canvasRef,
     inputRef,
     canvasState,
@@ -257,7 +262,6 @@ export const useSocketWithWhiteboard = (): {
     dispatchWithSocket,
     sendCursorState,
     inRoom,
-    setTextEdit,
     sideToolkitRef.current,
     sendActiveElementUpdate,
     activeElementMap.current,
@@ -272,10 +276,6 @@ export const useSocketWithWhiteboard = (): {
     drawnShapesRef.current = canvasState.drawnShapes;
   }, [canvasState.drawnShapes]);
 
-  useEffect(() => {
-    cameraRef.current = camera;
-  }, [camera]);
-
   // Now redrawForActiveElement always reads fresh values
   const redrawForActiveElement = (element: DrawElement, color: string) => {
     const ctx = canvasRef.current?.getContext("2d");
@@ -284,7 +284,7 @@ export const useSocketWithWhiteboard = (): {
     redrawPreviousShapes(
       ctx,
       drawnShapesRef.current,
-      cameraRef.current,
+      camera,
       element,
       element.id,
       color,
@@ -294,48 +294,16 @@ export const useSocketWithWhiteboard = (): {
     cursorMap: memberCursor.current,
     activeElementMap: activeElementMap.current,
     redrawForActiveElement,
-    camera: cameraRef.current,
+    camera: camera,
   });
 
   const handleToolSelect = (toolName: AllToolTypes) => {
+    if (toolName === "color") return;
     canvasDispatch({ type: "CHANGE_TOOL", payload: toolName });
 
     if (toolName !== "select" && selectedShape) {
       setSelectedShape(undefined);
     }
-  };
-
-  const finalizeText = () => {
-    if (!textEdit || !canvasRef.current) return;
-
-    const ctx = canvasRef.current.getContext("2d");
-    if (!ctx) return;
-    const { width, height } = measureText(
-      ctx,
-      textEdit.text,
-      canvasState.textState.fontSize,
-      canvasState.textState.fontFamily,
-    );
-    const element = createNewText(
-      canvasState.toolState,
-      canvasState.textState,
-      screenToWorld(textEdit.x, textEdit.y, camera),
-      textEdit.text,
-      width,
-      height,
-    );
-    console.log("text: ", textEdit.text);
-    dispatchWithSocket({ type: "ADD_SHAPE", payload: element });
-    dispatchWithSocket({ type: "CHANGE_TOOL", payload: "select" });
-    setTextEdit(null);
-  };
-
-  const finishText = () => {
-    finalizeText();
-  };
-
-  const cancelText = () => {
-    setTextEdit(null);
   };
 
   /**Handling color of stroke */
@@ -376,7 +344,7 @@ export const useSocketWithWhiteboard = (): {
   };
 
   /**Handling background color of shapes */
-  const handleFillSelect = (color: ColorType, shape?: ShapeType) => {
+  const handleFillSelect = (color?: ColorType, shape?: ShapeType) => {
     console.log("handle fill select");
     if (shape) {
       console.log("shape", shape);
@@ -468,9 +436,9 @@ export const useSocketWithWhiteboard = (): {
     messages,
     setMessages,
     send,
+    camera,
     textEdit,
     setTextEdit,
-    finalizeText,
     finishText,
     cancelText,
     inRoom,
