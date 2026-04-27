@@ -18,8 +18,6 @@ const envInput = {
 
   WORKER_BACKEND_URL:
     process.env.NEXT_PUBLIC_WORKER_BACKEND_URL ?? "http://localhost:3002",
-  CLOUD_API_KEY: process.env.NEXT_PUBLIC_CLOUD_API_KEY,
-  CLOUD_SECRET: process.env.NEXT_PUBLIC_CLOUD_SECRET,
   CLOUD_NAME: process.env.NEXT_PUBLIC_CLOUD_NAME,
 };
 

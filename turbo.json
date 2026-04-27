@@ -8,7 +8,7 @@
       "outputs": []
     },
     "build": {
-      "dependsOn": ["^build", "check-types"],
+      "dependsOn": ["^build", "^check-types"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
@@ -51,8 +51,6 @@
         "PORT",
         "JWT_SECRET",
         "BCRYPT_SALT",
-        "MODEL",
-        "GROQ_API_KEY",
         "RS_HOST",
         "RS_PORT",
         "RS_USERNAME",

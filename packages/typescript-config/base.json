@@ -20,7 +20,8 @@
       "@repo/db": ["packages/db/src/index.ts"],
       "@repo/redis": ["packages/redis/src/index.ts"],
       "@repo/queue": ["packages/queue/src/index.ts"],
-      "@repo/hooks": ["packages/hooks/src/index.ts"]
+      "@repo/hooks": ["packages/hooks/src/index.ts"],
+      "@repo/backend-common": ["packages/backend-common/src/index.ts"]
     }
   }
 }

@@ -5,7 +5,7 @@ import { Button } from "./ui/button";
 import { Virtuoso } from "react-virtuoso";
 import MessageBubble from "./ui/MessageBubble";
 import { SideChatPropsType } from "./types";
-import { useError, useSocketContext, useUser } from "@repo/hooks";
+import { useError, UserInfo, useSocketContext, useUser } from "@repo/hooks";
 import OptionModal, { selected } from "./ui/OptionModal";
 import { AnimatePresence, motion } from "motion/react";
 import ChatTop from "./ChatTop";
@@ -147,7 +147,8 @@ const SideCollapseChat = React.forwardRef<HTMLDivElement, SideChatPropsType>(
                         isOwn={isOwn}
                         color={
                           roomInfo.users.find(
-                            (user) => user.userId === message.sender_id,
+                            (user: UserInfo) =>
+                              user.userId === message.sender_id,
                           )?.color
                         }
                         positionInBlock={position}
