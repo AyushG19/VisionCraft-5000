@@ -113,7 +113,7 @@ export default function JoinRoomModal({
       <div
         ref={menuRef}
         className={`
-          fixed right-0 top-14 lg:top-6 z-40 flex flex-col items-end font-Google-Sans-Code font-light
+          fixed right-0 top-14 lg:top-6 z-40 flex flex-col items-end font-Google-Sans-Code
           transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
           ${isChatOpen ? " lg:-translate-x-[360px]" : "translate-x-0"}
         `}
@@ -122,14 +122,14 @@ export default function JoinRoomModal({
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           className={`
-            flex items-center justify-center w-10 h-10
+            flex items-center justify-end w-10 h-10 ${isMenuOpen ? "px-6" : "pr-2"}
             bg-primary text-primary-contrast rounded-l-xl outline-1 outline-global-shadow cursor-pointer
             transition-all duration-300
             ${isMenuOpen ? "!rounded-bl-none lg:w-full w-32 scale-[103%]" : ""}
           `}
         >
           <span
-            className={`text-xs font-semibold capitalise hidden transition-all delay-300 ${isMenuOpen ? "!block opacity-100 -translate-x-0 mr-2" : "translate-x-5 opacity-0 "}`}
+            className={`text-xs font-semibold capitalise whitespace-nowrap overflow-hidden transition-all delay-100 ${isMenuOpen ? " opacity-100 translate-x-0 mr-2 max-w-full" : "max-w-0 translate-x-10 opacity-0 "}`}
           >
             Options
           </span>
@@ -159,8 +159,8 @@ export default function JoinRoomModal({
                     variants={itemVariants}
                     onClick={() => !isTheme && handleAction(opt.id)}
                     className={`
-                      flex flex-wrap items-center justify-center w-32 lg:w-full lg:h-auto h-10 py-3 
-                      bg-secondary text-secondary-contrast text-xs
+                      flex items-center ${isTheme ? "flex-col items-end" : "justify-end"} w-32 lg:w-full lg:h-auto h-10 py-3 px-6
+                      ${(opt.id === "exit-room" || opt.id === "logout") && "hover:bg-red text-global-shadow"} bg-secondary text-secondary-contrast text-xs
                      border-b border-black/10 last:border-b-0
                       last:rounded-bl-xl hover:bg-primary hover:text-primary-contrast
                       transition-colors cursor-pointer
@@ -168,9 +168,7 @@ export default function JoinRoomModal({
                   >
                     {isTheme ? (
                       <>
-                        <p
-                          className={`text-xs grow w-full text-center capitalize hidden pb-2 ${isMenuOpen ? "lg:block" : ""}`}
-                        >
+                        <p className={`text-xs text-end capitalize block pb-2`}>
                           themes
                         </p>
                         <ThemeSwitcher setTheme={setTheme} />
@@ -183,7 +181,7 @@ export default function JoinRoomModal({
                             : opt.label}
                         </p>
                         <opt.icon
-                          className="w-[10px] h-[10px] md:w-[15px] md:h-[15px]"
+                          className="w-[14px] h-[14px] lg:w-[16px] lg:h-[16px]"
                           stroke={1.6}
                         />
                       </>

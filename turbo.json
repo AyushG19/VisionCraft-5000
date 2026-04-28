@@ -72,6 +72,12 @@
       ]
     },
 
+    "worker#start": {
+      "cache": false,
+      "persistent": true,
+      "passThroughEnv": ["REDIS_URL"]
+    },
+
     "http-backend#dev": {
       "cache": false,
       "persistent": true,

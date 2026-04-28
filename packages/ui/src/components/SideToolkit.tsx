@@ -97,7 +97,7 @@ const QUICK_COLORS = [
 //  Sub-components
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <p className="text-xs tracking-[0.07em] text-global-shadow font-medium capitalize">
+  <p className="text-xs tracking-[0.07em] text-global-shadow capitalize">
     {children}
   </p>
 );
@@ -110,7 +110,7 @@ const ColorSwatches = ({
   value: string;
   onOklchChange: (
     c: { l: number; c: number; h: number },
-    shape?: ShapeType,
+    shape?: DrawElement,
   ) => void;
   selectedShape?: DrawElement;
 }) => (
@@ -120,8 +120,11 @@ const ColorSwatches = ({
         variant={"outline"}
         key={i}
         onClick={() => {
-          if (selectedShape && isShape(selectedShape.type))
+          if (selectedShape && isShape(selectedShape.type)) {
             onOklchChange(c, selectedShape as ShapeType);
+          } else if (selectedShape && isStokeElement(selectedShape.type)) {
+            onOklchChange(c, selectedShape as StrokeAllowedTypes);
+          }
         }}
         className=" w-4 h-4 p-0 rounded-sm outline-1 outline-global-shadow cursor-pointer transition-transform duration-75 "
         style={{ background: `oklch(${c.l} ${c.c} ${c.h})` }}
@@ -161,7 +164,7 @@ const SliderRow = ({
   value: number;
   onChange: (v: number) => void;
 }) => (
-  <div className="flex items-center py-2">
+  <div className="flex w-full items-center py-2">
     <input
       type="range"
       min={min}
@@ -169,7 +172,41 @@ const SliderRow = ({
       step={step}
       value={value}
       onChange={(e) => onChange(+e.target.value)}
-      className="flex-1 h-1 bg-accent text-accent w-full hover:cursor-grab active:cursor-grab accent-accent appearance-auto overflow-hidden"
+      className="w-full cursor-pointer appearance-none
+
+    [&::-webkit-slider-runnable-track]:h-1
+    [&::-webkit-slider-runnable-track]:rounded-full
+    [&::-webkit-slider-runnable-track]:bg-accent
+    [&::-webkit-slider-runnable-track]:outline-1
+
+
+    [&::-webkit-slider-thumb]:appearance-none
+    [&::-webkit-slider-thumb]:size-[18px]
+    [&::-webkit-slider-thumb]:rounded-full
+    [&::-webkit-slider-thumb]:-mt-[7px]  
+    [&::-webkit-slider-thumb]:bg-white
+    [&::-webkit-slider-thumb]:border-2
+    [&::-webkit-slider-thumb]:border-global-shadow
+    [&::-webkit-slider-thumb]:cursor-grab
+    [&::-webkit-slider-thumb]:transition-transform
+    [&::-webkit-slider-thumb]:active:scale-110
+    [&::-webkit-slider-thumb]:active:cursor-grabbing
+
+    [&::-moz-range-track]:h-1
+    [&::-moz-range-track]:rounded-full
+    [&::-moz-range-track]:outline-1
+    [&::-moz-range-track]:bg-accent
+
+    [&::-moz-range-thumb]:size-[14px]
+    [&::-moz-range-thumb]:rounded-full
+    [&::-moz-range-thumb]:bg-white
+    [&::-moz-range-thumb]:border-2
+    [&::-moz-range-thumb]:border-global-shadow
+    [&::-moz-range-thumb]:cursor-grab
+
+    focus-visible:[&::-webkit-slider-thumb]:ring-2
+    focus-visible:[&::-webkit-slider-thumb]:ring-violet-400
+    focus-visible:[&::-webkit-slider-thumb]:ring-offset-2"
     />
   </div>
 );
@@ -255,13 +292,17 @@ export const SideToolkit = ({
   );
 
   const handleFillColorChange = useCallback(
-    (c?: { l: number; c: number; h: number }, shape?: ShapeType) => {
-      if (!c) {
-        shapeEditHelpers.handleFillSelect(c, shape);
+    (c?: { l: number; c: number; h: number }, shape?: DrawElement) => {
+      if (!c || (shape && isShape(shape.type))) {
+        shapeEditHelpers.handleFillSelect(c, shape as ShapeType);
         return;
       }
       // handleFillSelect expects ColorType — pass the oklch object directly
-      shapeEditHelpers.handleFillSelect(c as unknown as ColorType, shape);
+      if (shape && !isShape(shape.type)) return;
+      shapeEditHelpers.handleFillSelect(
+        c as unknown as ColorType,
+        shape as ShapeType,
+      );
       setEditorState({ fillColor: `oklch(${c.l} ${c.c} ${c.h})` });
     },
     [shapeEditHelpers, selectedShape],
@@ -476,7 +517,7 @@ export const SideToolkit = ({
               {AllowedFontsArr.map((f) => (
                 <Button
                   key={f}
-                  className={`font-${f.split(" ").join("-")}`}
+                  className={`font-${f.split(" ").join("-")} focus:button-press button-press-active`}
                   variant={"secondary"}
                   size={"sm"}
                   onClick={() => handleFontFamilySelect(f)}

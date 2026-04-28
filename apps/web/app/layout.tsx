@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description:
     "Realtime AI-powered collaborative drawing and diagramming platform.",
   icons: {
-    icon: "./logo.ico",
+    icon: "/favicon.ico",
   },
 };
 

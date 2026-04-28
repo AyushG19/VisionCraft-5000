@@ -245,7 +245,7 @@
   --primary-700: #c8e4ff;
   --secondary: #bde0fe;
   --secondary-700: #d3e9fd;
-  --accent: #3c88ec;
+  --accent: #5796e7;
   --primary-contrast: #000000;
   --secondary-contrast: #131313;
   --global-shadow: #000000;
@@ -263,7 +263,7 @@
   --accent: #b83a2d;
   --primary-contrast: #051d08;
   --secondary-contrast: #000000;
-  --red: #de0a26;
+  --red: #cc1e35;
 }
 :root[data-theme="punktown"] {
   --canvas-bg: #233d4d;
@@ -289,7 +289,7 @@
   --secondary-contrast: #1f1f1f;
   --accent: #f3a1d8;
   --global-shadow: #000000;
-  --red: #de0a26;
+  --red: #f01734;
 }
 :root[data-theme="batman"] {
   --canvas-bg: #181818;
@@ -302,7 +302,7 @@
   --primary-contrast: #040405;
   --secondary-contrast: #ffffff;
   --global-shadow: #000000;
-  --red: #de0a26;
+  --red: #f72a45;
 }
 :root[data-theme="lowsun"] {
   --canvas-bg: #24150f;
@@ -315,8 +315,9 @@
   --primary-contrast: #eeddc6;
   --secondary-contrast: #000000;
   --global-shadow: #150c0c;
-  --red: #de0a26;
+  --red: #ff0325;
 }
+
 @theme {
   --shadow-primary: 5px 5px 0px black;
   --shadow-pressed: 3px 3px 0px black;

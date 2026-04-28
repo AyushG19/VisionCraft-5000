@@ -78,7 +78,7 @@ const ToolIcon = ({
               setSelectedColor={onSelectColor}
             />
           )}
-          <span className="hidden lg:inline absolute right-[3px] bottom-1 opacity-50 text-xs font-handlee">
+          <span className="hidden lg:inline absolute right-[3px] bottom-1 opacity-50 text-xs font-handlee cursor-event-none">
             {toolInfo.keyBind}
           </span>
           <toolInfo.icon

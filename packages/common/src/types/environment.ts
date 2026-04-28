@@ -36,8 +36,6 @@ export const wsEnv = z.object({
   PORT: z.number(),
   JWT_SECRET: z.string(),
   BCRYPT_SALT: z.string(),
-  MODEL: z.string(),
-  GROQ_API_KEY: z.string(),
   RS_HOST: z.string(), //rs for redis
   RS_PORT: z.number(),
   RS_USERNAME: z.string(),
