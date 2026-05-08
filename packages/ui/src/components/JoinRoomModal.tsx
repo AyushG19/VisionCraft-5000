@@ -6,8 +6,8 @@ import { useError } from "@repo/hooks";
 import { AppError } from "@repo/common";
 import { AnimatePresence, motion, Variants } from "motion/react";
 import { CodeInputBox } from "./ui/CodeInputBox";
+import { OptionId, ROOM_OPTION_SECTIONS } from "../lib/roomOptions";
 import ThemeSwitcher from "./ui/ThemeSwitcher";
-import { OptionId, ROOM_OPTIONS } from "../lib/roomOptions";
 
 type Props = {
   verifyJoin: (code: string) => Promise<void>;
@@ -81,6 +81,7 @@ export default function JoinRoomModal({
     } finally {
       setIsLoading(false);
       setIsMenuOpen(false);
+      setShowCodeInput(false);
     }
   };
 
@@ -95,16 +96,19 @@ export default function JoinRoomModal({
         "room-chat": onChatToggle,
         "ai-chat": onChatToggle,
         "exit-room": onExitRoom,
-        logout: onLogout,
+        // "clear-canvas":clearCanvas,
+        // "commands":showCommands,
+        github: () => {
+          window.open("https://github.com/AyushG19/VisionCraft.git", "_blank");
+        },
+        x: () => {
+          window.open("https://x.com/AyushTE", "_blank");
+        },
       };
       actions[id]?.();
       setIsMenuOpen(false);
     },
     [makeNewRoom, onChatToggle, onExitRoom, onLogout],
-  );
-
-  const visibleOptions = ROOM_OPTIONS.filter(
-    (opt) => opt.mode === "both" || (opt.mode === "room") === inRoom,
   );
 
   return (
@@ -113,7 +117,7 @@ export default function JoinRoomModal({
       <div
         ref={menuRef}
         className={`
-          fixed right-0 top-14 lg:top-6 z-40 flex flex-col items-end font-google-sans-code
+          fixed right-0 top-14 lg:top-6 z-40 flex flex-col items-end font-google-sans-code 
           transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
           ${isChatOpen ? " lg:-translate-x-[360px]" : "translate-x-0"}
         `}
@@ -122,10 +126,10 @@ export default function JoinRoomModal({
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           className={`
-            flex items-center justify-end w-8 h-8 lg:w-10 lg:h-10 ${isMenuOpen ? "px-6" : "pr-2"}
+            flex items-center justify-end w-8 h-8 
             bg-primary text-primary-contrast rounded-l-xl outline-1 outline-global-shadow cursor-pointer
             transition-all duration-300
-            ${isMenuOpen ? "!rounded-bl-none lg:w-full w-32 scale-[103%]" : ""}
+            ${isMenuOpen ? "!rounded-bl-none px-4 md:h-10 md:w-full " : "pr-2 md:h-10 md:w-10"}
           `}
         >
           <span
@@ -147,48 +151,50 @@ export default function JoinRoomModal({
               initial="hidden"
               animate="show"
               exit="hidden"
-              className="flex flex-col items-end overflow-hidden"
+              className="flex flex-col items-end overflow-hidden w-full outline-1 outline-global-shadow rounded-bl-xl bg-secondary"
             >
-              {visibleOptions.map((opt) => {
-                const isTheme = opt.id === "themes";
-                const Comp = isTheme ? motion.div : motion.button; // Fix for hydration error!
-
+              {ROOM_OPTION_SECTIONS.map((section, i) => {
+                if (!inRoom && section.label === "room") return null;
                 return (
-                  <Comp
-                    key={opt.id}
-                    variants={itemVariants}
-                    onClick={() => !isTheme && handleAction(opt.id)}
-                    className={`
-                      flex items-center ${isTheme ? "flex-col items-end" : "justify-end"} w-32 lg:w-full h-auto py-2 lg:py-3 lg:px-6 px-4
-                      ${(opt.id === "exit-room" || opt.id === "logout") && "hover:bg-red text-global-shadow"} bg-secondary text-secondary-contrast text-xs
-                     border-b border-black/10 last:border-b-0
-                      last:rounded-bl-xl hover:bg-primary hover:text-primary-contrast
-                      transition-colors cursor-pointer
+                  <>
+                    {section.items.map((item, i) => {
+                      return (
+                        <motion.button
+                          key={item.id}
+                          variants={itemVariants}
+                          onClick={() => handleAction(item.id)}
+                          className={`
+                      flex items-center justify-end w-32 md:w-full h-auto py-2 md:py-2.5 px-3
+                      ${item.id === "exit-room" && "hover:bg-red text-global-shadow"} 
+                      bg-secondary text-secondary-contrast text-xs
+                      last:border-b-0
+                      last:rounded-bl-xl hover:bg-secondary-700 hover:text-primary-contrast
+                      transition-colors duration-100 ease-in-out cursor-pointer
                     `}
-                  >
-                    {isTheme ? (
-                      <>
-                        <p className={`text-xs text-end capitalize block pb-2`}>
-                          themes
-                        </p>
-                        <ThemeSwitcher setTheme={setTheme} />
-                      </>
-                    ) : (
-                      <>
-                        <p className={`mr-1.5 capitalize text-xs lg:text-base`}>
-                          {opt.id === "ai-chat" && isChatOpen
-                            ? "close chat"
-                            : opt.label}
-                        </p>
-                        <opt.icon
-                          className="w-[14px] h-[14px] lg:w-[16px] lg:h-[16px]"
-                          stroke={1.6}
-                        />
-                      </>
-                    )}
-                  </Comp>
+                        >
+                          <p className={`mr-2 text-xs capitalize `}>
+                            {item.id === "ai-chat" && isChatOpen
+                              ? "close chat"
+                              : item.label}
+                          </p>
+                          <item.icon
+                            className="w-[14px] h-[14px] lg:w-[16px] lg:h-[16px]"
+                            stroke={1.6}
+                          />
+                        </motion.button>
+                      );
+                    })}
+                    <div className="w-full h-[1px] bg-primary/30 my-1"></div>
+                  </>
                 );
               })}
+              <motion.div
+                variants={itemVariants}
+                className="flex flex-col gap-2.5 justify-end text-secondary-contrast bg-secondary mt-1 mx-3 mb-3"
+              >
+                <p className={`text-xs capitalize text-end`}>canvas themes</p>
+                <ThemeSwitcher setTheme={setTheme} />
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>

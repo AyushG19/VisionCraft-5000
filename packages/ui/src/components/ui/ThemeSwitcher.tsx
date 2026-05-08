@@ -47,13 +47,13 @@ export default function ThemeSwitcher({
   setTheme: (t: ThemeName) => void;
 }) {
   return (
-    <div className="grid grid-rows-2 grid-cols-3 gap-1.5 ">
+    <div className="grid grid-rows-1 grid-cols-6 gap-1.5">
       {THEMES.map(({ name, canvas, primary, secondary }) => (
         <button
           key={name}
           aria-label={`${name} theme`}
           onClick={() => setTheme(name)}
-          className="w-6 h-6 grid grid-cols-2 grid-rows-2 overflow-clip rounded-sm
+          className="w-5 h-5 grid grid-cols-2 grid-rows-2 overflow-clip rounded-sm
             outline-1 hover:outline-2 outline-global-shadow cursor-pointer
             transition-transform duration-100 hover:bg-secondary "
         >

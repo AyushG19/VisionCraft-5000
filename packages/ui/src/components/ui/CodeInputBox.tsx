@@ -149,7 +149,7 @@ const CodeInputBox: React.FC<CodeInputBoxProps> = ({
           className={`in-disabled:cursor-not-allowed bg-secondary font-google-sans-code font-light shadow-pressed rounded-sm w-20 capitalize h-full button-press-active text-secondary-contrast group`}
         >
           <p className="group-active:translate-x-0.5 group-active:translate-y-0.5 ">
-            {isLoading ? "wait..." : "join"}
+            {isLoading ? "..." : "join"}
           </p>
           {/* <IconDoorEnter
             stroke={1.6}
