@@ -10,7 +10,7 @@ export const server = http.createServer((req, res) => {
     return;
   }
 
-  if (req.url === "/health" || req.url === "/") {
+  if (req.url === "/ping" || req.url === "/") {
     res.writeHead(200, { "content-type": "text/plain" });
     res.end("Worker is Running");
   } else {
