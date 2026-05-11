@@ -53,8 +53,8 @@ const tools: {
   },
   { id: "eraser" as const, icon: IconEraser, label: "eraser", keyBind: "z" },
   { id: "text" as const, icon: IconTextSize, label: "text", keyBind: "x" },
-  { id: "image" as const, icon: IconPhoto, label: "image", keyBind: "c" },
   { id: "color" as const, icon: IconDroplet, label: "color", keyBind: "v" },
+  { id: "image" as const, icon: IconPhoto, label: "image", keyBind: "c" },
 ];
 
 type toolkitProps = {
@@ -125,8 +125,10 @@ const Toolkit = ({
   }, []);
 
   const onMouseDown = useCallback(
-    (e: MouseEvent) => {
-      if (!toolkitRef.current) return;
+    (e: PointerEvent) => {
+      if (!toolkitRef.current || !resizeRef.current) return;
+      if (e.target !== toolkitRef.current && e.target !== resizeRef.current)
+        return;
       if (e.target !== resizeRef.current) {
         dragState.current = {
           isDraging: true,
@@ -145,7 +147,7 @@ const Toolkit = ({
   );
 
   const onMouseMove = useCallback(
-    (e: MouseEvent) => {
+    (e: PointerEvent) => {
       if (!toolkitRef.current) return;
 
       if (dragState.current.isDraging) {
@@ -221,7 +223,7 @@ const Toolkit = ({
       window.removeEventListener("pointermove", onMouseMove);
       window.removeEventListener("pointerup", onMouseUp);
     };
-  }, [currWidth, maxWidth]);
+  }, []);
 
   return (
     <>

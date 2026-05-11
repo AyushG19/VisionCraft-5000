@@ -74,7 +74,7 @@ type StrokeAllowedTypes = ShapeType | LinearType | PencilType;
 const QUICK_COLORS = [
   { l: 0, c: 0, h: 0 },
   { l: 1, c: 0, h: 1 },
-  { l: 0.6449, c: 0.2236, h: 21.34 },
+  // { l: 0.6449, c: 0.2236, h: 21.34 },
   // { l: 0.9215, c: 0.0654, h: 174.39 },
   { l: 0.9336, c: 0.0657, h: 97.1 },
   { l: 0.8673, c: 0.0617, h: 270.92 },
@@ -151,10 +151,10 @@ const SliderRow = ({
       onChange={(e) => onChange(+e.target.value)}
       className="w-full cursor-pointer appearance-none
 
-    [&::-webkit-slider-runnable-track]:h-1
+    [&::-webkit-slider-runnable-track]:h-1.5
     [&::-webkit-slider-runnable-track]:rounded-full
     [&::-webkit-slider-runnable-track]:bg-accent
-    [&::-webkit-slider-runnable-track]:outline-1
+    [&::-webkit-slider-runnable-track]:border-1
 
 
     [&::-webkit-slider-thumb]:appearance-none
@@ -335,12 +335,16 @@ export const SideToolkit = ({
 
   const getButtonCss = (style: "dash" | "dotted" | "normal"): string => {
     // shape selected — read active style from the actual shape
-    if (selectedShape && isStokeElement(selectedShape.type)) {
+    if (selectedShape) {
       const s = selectedShape as StrokeAllowedTypes;
-      return s.strokeType === style ? "button-press" : "";
+      return s.strokeType === style
+        ? "shadow-shinyshadow-pressed button-active"
+        : "button-press ";
     }
     // no shape selected — read from editorState (default styles)
-    return editorState.strokeType === style ? "button-press" : "";
+    return editorState.strokeType === style
+      ? "shadow-shinyshadow-pressed button-active "
+      : "button-press";
   };
   // ─── Drag (mouse) ────────────────────────────────────────────────────────
 
@@ -533,7 +537,7 @@ export const SideToolkit = ({
           <SectionLabel>stroke style</SectionLabel>
           <div className="w-full mt-1.5 flex gap-1.5">
             <Button
-              className={`button-press-active ${getButtonCss("normal")}`}
+              className={` ${getButtonCss("normal")}`}
               variant={"secondary"}
               size={"sm"}
               onClick={() => handleStrokeStyleChange("normal")}
@@ -541,7 +545,7 @@ export const SideToolkit = ({
               <IconMinus />
             </Button>
             <Button
-              className={`button-press-active ${getButtonCss("dash")}`}
+              className={`${getButtonCss("dash")}`}
               variant={"secondary"}
               size={"sm"}
               onClick={() => handleStrokeStyleChange("dash")}
@@ -549,7 +553,7 @@ export const SideToolkit = ({
               <IconLineDashed />
             </Button>
             <Button
-              className={`button-press-active ${getButtonCss("dotted")}`}
+              className={`${getButtonCss("dotted")}`}
               variant={"secondary"}
               size={"sm"}
               onClick={() => handleStrokeStyleChange("dotted")}

@@ -23,15 +23,15 @@ type Props = {
 const containerVariants = {
   hidden: {
     opacity: 0,
-    height: 0,
-    width: 0,
-    transition: { staggerChildren: 0.05, staggerDirection: -1 },
+    height: 20,
+    width: 20,
+    transition: { staggerChildren: 0.05, staggerDirection: -1, duration: 0.3 },
   },
   show: {
     opacity: 1,
     height: "auto",
     width: "auto",
-    transition: { staggerChildren: 0.05 },
+    transition: { staggerChildren: 0.05, duration: 0.3 },
   },
 };
 

@@ -38,7 +38,7 @@ const ToolIcon = ({
   if (toolInfo.id === "image") {
     return (
       <div
-        className={`w-6 h-6 lg:w-9 lg:h-9 relative flex items-center justify-center z-10 shadow-shinysecondary-mobile lg:shadow-shinysecondary rounded-md lg:rounded-lg bg-secondary pointer-events-none outline-1 outline-global-shadow scale-[97%] hover:scale-100 ${currTool === toolInfo.id && "button-press"} button-press-active transition-transform ease-in-out duration-100 text-secondary-contrast`}
+        className={`w-6 h-6 lg:w-9 lg:h-9 relative flex items-center justify-center shadow-shinysecondary-mobile lg:shadow-shinysecondary rounded-md lg:rounded-lg bg-secondary pointer-events-none outline-1 outline-global-shadow scale-[97%] hover:scale-100 ${currTool === toolInfo.id ? "shadow-shinyshadow-pressed button-active" : "button-press"}  text-secondary-contrast`}
       >
         <label>
           <input
@@ -70,7 +70,11 @@ const ToolIcon = ({
           onClick={() => onSelectTool(toolInfo.id)}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          className={`w-6 h-6 lg:w-9 lg:h-9 p-0 relative cursor-pointer z-10 outline-1 outline-global-shadow shadow-shinysecondary-mobile lg:shadow-shinysecondary rounded-md lg:rounded-lg scale-[97%] hover:scale-100 ${toolInfo.id !== "color" && currTool === toolInfo.id && "pointer-events-none button-press"} button-press-active transition-all ease-in-out duration-100 text-secondary-contrast`}
+          className={`w-6 h-6 lg:w-9 lg:h-9 p-0 relative cursor-pointer z-10 outline-1 outline-global-shadow shadow-shinysecondary-mobile lg:shadow-shinysecondary rounded-md lg:rounded-lg scale-[97%] hover:scale-100 ${
+            toolInfo.id !== "color" && currTool === toolInfo.id
+              ? "shadow-shinyshadow-pressed button-active"
+              : "button-press "
+          } text-secondary-contrast`}
         >
           {toolInfo.id === "color" && isHovered && (
             <ColorSelector
