@@ -15,6 +15,10 @@ const useInteractionState = () => {
   });
 
   const tempShapeRef = useRef<DrawElement | null>(null);
+  const eraseStateRef = useRef<{
+    isErasing: boolean;
+    elementsToDelete: string[];
+  }>({ isErasing: false, elementsToDelete: [] });
 
   //here we write
   const startDrag = useCallback(
@@ -97,6 +101,7 @@ const useInteractionState = () => {
     stopDrawing,
     getDragState,
     getResizeState,
+    eraseStateRef,
   };
 };
 

@@ -47,6 +47,7 @@ export const BaseElementSchema = z.object({
   backgroundColor: ColorSchema.nullable(),
   isDeleted: z.boolean(),
   isSelected: z.boolean(),
+  opacity: z.number().min(0).max(1),
 });
 
 export type BaseElement = z.infer<typeof BaseElementSchema>;

@@ -162,6 +162,7 @@ export const drawShape = (
   ctx.lineWidth = shape.strokeWidth / zoom || 2 / zoom;
   ctx.lineJoin = "round";
   ctx.lineCap = "round";
+  ctx.globalAlpha = shape.opacity ?? 1;
 
   handleStrokeType(ctx, shape, camera.z);
 

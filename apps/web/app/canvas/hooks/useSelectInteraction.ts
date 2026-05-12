@@ -35,7 +35,6 @@ const useSelectInteraction = (
     resetDragAndResize,
   } = interactionState;
 
-  // ═══ MOUSEDOWN ═════════════════════════════════════════════
   // Determines what was clicked and sets up the interaction mode.
   // Returns the shape that should become selected (or undefined).
 
@@ -103,13 +102,13 @@ const useSelectInteraction = (
         return clickedShape;
       }
 
-      // ─── Case 3: Clicked empty space → Deselect ──────────────
+      //  Case 3: Clicked empty space → Deselect
       return undefined;
     },
     [startDrag, startResize],
   );
 
-  // ═══ MOUSEMOVE ═════════════════════════════════════════════
+  //  MOUSEMOVE
   // Handles drag and resize previews.
   // Returns true if it consumed the event (did a redraw).
 
@@ -124,7 +123,7 @@ const useSelectInteraction = (
     ): boolean => {
       if (!currentSelected) return false;
 
-      // ─── Drag preview ─────────────────────────────────────────
+      //  Drag preview
       if (interaction.current.isDragging) {
         const dragState = getDragState();
         const previewShape = createDraggedShape(
@@ -144,7 +143,7 @@ const useSelectInteraction = (
         return true;
       }
 
-      // ─── Resize preview ───────────────────────────────────────
+      //  Resize preview
       if (
         interaction.current.isResizing &&
         interaction.current.resizeDirection !== null
@@ -172,7 +171,7 @@ const useSelectInteraction = (
     [interaction, getDragState, getResizeState],
   );
 
-  // ═══ MOUSEUP ═══════════════════════════════════════════════
+  //  MOUSEUP
   // Commits drag or resize, updates selected shape, resets flags.
 
   const handleSelectMouseUp = useCallback(

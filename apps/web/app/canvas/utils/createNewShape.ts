@@ -41,6 +41,7 @@ export function createNewShape(
       type: type,
       strokeType: "normal",
       isSelected: false,
+      opacity: 1,
     } as LinearType;
   } else if (type === "line") {
     return {
@@ -59,6 +60,7 @@ export function createNewShape(
       type: type,
       strokeType: sideToolKitState.strokeType,
       isSelected: false,
+      opacity: 1,
     } as LinearType;
   } else if (type === "rectangle" || type === "ellipse" || type === "diamond") {
     return {
@@ -76,6 +78,7 @@ export function createNewShape(
       // label?:
       // fillColor?:
       isSelected: false,
+      opacity: 1,
     } as ShapeType;
   } else {
     return {
@@ -91,6 +94,8 @@ export function createNewShape(
       type: "pencil",
       points: [currentPos],
       strokeType: sideToolKitState.strokeType,
+      opacity: 1,
+
       // startBinding?: any;
       // endBinding?: any;
     } as PencilType;
@@ -135,6 +140,7 @@ export function createNewText(
     textAlign: textState.alignment,
     type: "text",
     isSelected: false,
+    opacity: 1,
   } as TextType;
 }
 
@@ -158,6 +164,8 @@ export function createNewLinear(
     points: [currentPos],
     strokeType: sideToolKitState.strokeType,
     isSelected: false,
+    opacity: 1,
+
     // startBinding?: any;
     // endBinding?: any;
   };
@@ -183,6 +191,8 @@ export function createNewPencil(
     points: [currentPos],
     strokeType: "normal",
     isSelected: false,
+    opacity: 1,
+
     // startBinding?: any;
     // endBinding?: any;
   };
@@ -285,5 +295,6 @@ export function createNewImage(
     strokeColor: strokeColor,
     strokeWidth: strokeWidth,
     isSelected: false,
+    opacity: 1,
   };
 }

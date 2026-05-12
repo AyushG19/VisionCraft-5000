@@ -186,7 +186,7 @@ export const useSocketWithWhiteboard = (): {
       const res = await createRoomService();
       if (!res) throw new Error("Error in ROOM creation.");
       console.log("joinig room now ");
-      await handleJoinRoom(res.slug);
+      return await handleJoinRoom(res.slug);
     } catch (error) {
       throw new Error("Error in handle Room create");
     }

@@ -29,10 +29,13 @@ const ClientChatSchema = z.object({
 
 export type ClientChatSchemaType = z.infer<typeof ClientChatSchema>;
 
-const SocketShapePayload = z.object({
-  type: z.enum(["ADD_SHAPE", "DEL_SHAPE", "UPD_SHAPE"]),
-  payload: DrawSchema,
-});
+const SocketShapePayload = z.discriminatedUnion("type", [
+  z.object({
+    type: z.enum(["ADD_SHAPE", "UPD_SHAPE"]),
+    payload: DrawSchema,
+  }),
+  z.object({ type: z.literal("DEL_SHAPE"), payload: z.string() }),
+]);
 
 export type WebSocketShapeType = z.infer<typeof SocketShapePayload>;
 

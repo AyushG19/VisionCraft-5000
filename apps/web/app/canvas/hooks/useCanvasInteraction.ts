@@ -25,6 +25,7 @@ import { storeImg } from "../../services/canvas.service";
 import { set } from "idb-keyval";
 import { createNewImage, createNewText } from "../utils/createNewShape";
 import { measureText } from "../helper/canvas.helper";
+import { isClickOnShape } from "../utils/isPointInShape";
 
 const useCanvasInteraction = (
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
@@ -169,7 +170,7 @@ const useCanvasInteraction = (
         e.preventDefault();
         dispatchWithSocket({
           type: "DEL_SHAPE",
-          payload: selectedShapeRef.current,
+          payload: selectedShapeRef.current.id,
         });
         setSelectedShape(undefined);
       }
@@ -298,6 +299,8 @@ const useCanvasInteraction = (
         }));
       } else if (tool === "hand") {
         onPanStart(e);
+      } else if (tool === "eraser") {
+        interactionState.eraseStateRef.current.isErasing = true;
       } else {
         drawInteraction.handleDrawMouseDown(
           screenToWorld(pos.x, pos.y, camera),
@@ -325,6 +328,33 @@ const useCanvasInteraction = (
         );
       } else if (tool === "hand") {
         onPanMove(e);
+      } else if (tool === "eraser") {
+        if (!interactionState.eraseStateRef.current.isErasing) return;
+        const worldPos = screenToWorld(pos.x, pos.y, camera);
+        console.log(worldPos);
+        const clickedShape = [...currentState.drawnShapes].find(
+          (shape: DrawElement) => isClickOnShape(worldPos, shape),
+        );
+
+        console.log(clickedShape);
+        if (!clickedShape) return;
+
+        // Inside handleSelectMouseDown, before allowing selection of a shape:
+        const isLockedByOther = [...activeElementMap.values()].some(
+          (entry) => entry.element.id === clickedShape.id,
+        );
+
+        if (!isLockedByOther && !clickedShape.isDeleted) {
+          canvasDispatch({
+            type: "UPD_SHAPE",
+            payload: { ...clickedShape, opacity: 0.2 },
+          });
+          interactionState.eraseStateRef.current.elementsToDelete.push(
+            clickedShape.id,
+          );
+        }
+
+        return;
       } else {
         drawInteraction.handleDrawMouseMove(
           screenToWorld(pos.x, pos.y, camera),
@@ -366,6 +396,16 @@ const useCanvasInteraction = (
         );
       } else if (tool === "hand") {
         onPanEnd();
+      } else if (tool === "eraser") {
+        interactionState.eraseStateRef.current.elementsToDelete.forEach(
+          (ele) => {
+            canvasDispatch({ type: "DEL_SHAPE", payload: ele });
+          },
+        );
+        interactionState.eraseStateRef.current = {
+          isErasing: false,
+          elementsToDelete: [],
+        };
       } else {
         drawInteraction.handleDrawMouseUp(
           screenToWorld(pos.x, pos.y, camera),

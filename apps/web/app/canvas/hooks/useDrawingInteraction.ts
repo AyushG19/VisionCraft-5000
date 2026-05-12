@@ -20,7 +20,6 @@ const useDrawInteraction = (
   const { interaction, tempShape, startDrawing, setTempShape, stopDrawing } =
     interactionState;
 
-  // ═══ MOUSEDOWN ═════════════════════════════════════════════
   // Initializes drawing. For pencil, creates the temp shape immediately.
 
   const handleDrawMouseDown = useCallback(
@@ -41,8 +40,7 @@ const useDrawInteraction = (
     [startDrawing, setTempShape],
   );
 
-  // ═══ MOUSEMOVE ═════════════════════════════════════════════
-  // Updates preview for regular shapes or streams points for pencil.
+  //  MOUSEMOVE Updates preview for regular shapes or streams points for pencil.
 
   const handleDrawMouseMove = useCallback(
     (
@@ -111,7 +109,7 @@ const useDrawInteraction = (
 
       const tool = toolKitState.currentTool;
 
-      // ─── PENCIL tool (finalize) ───────────────────────────────
+      // ─── PENCIL tool (finalize)
       if (tool === "pencil") {
         stopDrawing();
         if (tempShape.current && tempShape.current.type === "pencil") {
@@ -125,7 +123,7 @@ const useDrawInteraction = (
         return;
       }
 
-      // ─── Regular shapes (finalize from start→end) ────────────
+      //  Regular shapes (finalize from start→end)
       const finalShape = createNewShape(
         toolKitState,
         sideTookKitState,

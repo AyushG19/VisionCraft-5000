@@ -10,8 +10,11 @@ import {
   getBoundsForHandles,
   getOutlineBounds,
 } from "../utils/getBoundsHelpers";
-import { getCursorSvg, getPencilSvg } from "../utils/getCustonSvg";
-import { getVariableValue } from "../utils/getCssColor";
+import {
+  getCursorSvg,
+  getEraserSvg,
+  getPencilSvg,
+} from "../utils/getCustonSvg";
 
 const HANDLE_CURSORS: Record<HandleName, string> = {
   TOP: "n-resize",
@@ -47,7 +50,7 @@ const useCanvasCursor = (
         canvas.style.cursor = "grabbing";
         return;
       }
-      if (spaceHeld) {
+      if (tool === "hand") {
         canvas.style.cursor = "grab";
         return;
       }
@@ -99,7 +102,7 @@ const useCanvasCursor = (
         }
 
         // Nothing hovered
-        canvas.style.cursor = `${getCursorSvg("#FFFFFF")} 20 3, auto`;
+        canvas.style.cursor = `${getCursorSvg()} 20 3, auto`;
         return;
       }
 
@@ -109,9 +112,13 @@ const useCanvasCursor = (
         return;
       }
 
+      if (tool === "eraser") {
+        canvas.style.cursor = `${getEraserSvg()} 5 20, auto`;
+        return;
+      }
+
       if (tool === "pencil") {
-        const color = getVariableValue("--canvas-contrast");
-        canvas.style.cursor = `${getPencilSvg(color)} 3 16, auto`;
+        canvas.style.cursor = `${getPencilSvg()} 0 24, auto`;
         return;
       }
 

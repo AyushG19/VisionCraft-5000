@@ -165,7 +165,6 @@ const Page = () => {
           setTheme={setTheme}
           onExitRoom={wb.handleLeaveRoom}
           onLogout={logout}
-          inRoom={wb.inRoom}
         />
 
         <SideCollapseChat

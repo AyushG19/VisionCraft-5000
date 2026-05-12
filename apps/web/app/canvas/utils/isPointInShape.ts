@@ -35,6 +35,7 @@ export function isClickOnShape(
   shape: DrawElement,
   zoom: number = 1, // 👈 Pass your camera.z here!
 ): boolean {
+  if (shape.isDeleted) return false;
   // no matter how zoomed in or out you are.
   const SCREEN_PADDING = 8;
   const hitTolerance = (shape.strokeWidth || 2) / 2 + SCREEN_PADDING / zoom;

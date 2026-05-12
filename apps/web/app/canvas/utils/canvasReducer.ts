@@ -49,7 +49,7 @@ export default function canvasReducer(
     return {
       ...state,
       drawnShapes: state.drawnShapes.filter(
-        (shape) => shape.id !== action.payload.id,
+        (shape) => shape.id !== action.payload,
       ),
     };
   }

@@ -249,7 +249,7 @@
   --primary-contrast: #000000;
   --secondary-contrast: #131313;
   --global-shadow: #000000;
-  --canvas-contrast: #000000;
+  --canvas-contrast: #a6f2ff;
   --red: #de0a26;
 }
 
@@ -263,6 +263,7 @@
   --accent: #b83a2d;
   --primary-contrast: #051d08;
   --secondary-contrast: #000000;
+  --canvas-contrast: #a6f2ff;
   --red: #cc1e35;
 }
 :root[data-theme="punktown"] {
@@ -276,6 +277,7 @@
   --primary-contrast: #331403;
   --secondary-contrast: #000000;
   --global-shadow: #000000;
+  --canvas-contrast: #a6f2ff;
   --red: #de0a26;
 }
 :root[data-theme="eyeburn"] {
@@ -289,6 +291,7 @@
   --secondary-contrast: #1f1f1f;
   --accent: #f3a1d8;
   --global-shadow: #000000;
+  --canvas-contrast: #a6f2ff;
   --red: #f01734;
 }
 :root[data-theme="batman"] {
@@ -302,6 +305,7 @@
   --primary-contrast: #040405;
   --secondary-contrast: #dbd6d6;
   --global-shadow: #000000;
+  --canvas-contrast: #a6f2ff;
   --red: #f72a45;
 }
 :root[data-theme="lowsun"] {
@@ -315,6 +319,7 @@
   --primary-contrast: #eeddc6;
   --secondary-contrast: #000000;
   --global-shadow: #150c0c;
+  --canvas-contrast: #a6f2ff;
   --red: #ff0325;
 }
 
@@ -337,7 +342,7 @@
     inset 2px 2px 3px var(--color-secondary-700),
     5px 5px var(--color-global-shadow);
 
-  --shadow-shinyshadow-pressed: inset 2px 2px var(--color-global-shadow);
+  --shadow-shinyshadow-pressed: inset 1px 1px var(--color-global-shadow);
 
   --font-google-sans-code: "Google Sans Code", ui-monospace, monospace;
   --font-krona-one: "Krona One", sans-serif;
@@ -367,14 +372,15 @@
   --color-easy-light-blue: #b0caf8;
   --color-easy-purple-muted: #9681d5;
 }
-/* @layer components {
+@layer components {
   .shadow-primary {
     box-shadow: 5px 5px 0px black;
   }
   .shadow-pressed {
     box-shadow: 2px 2px 0px black;
   }
-} */
+}
+
 @layer utilities {
   /* .outline-personal {
     @apply outline outline-black;
@@ -388,7 +394,7 @@
   .shadow-pressed {
     box-shadow: 2px 2px 0px black;
   } */
-  .button-press-active:active {
+  /* .button-press-active:active {
     @apply relative overflow-clip
     transition-shadow duration-100 ease-in-out
     shadow-shinyshadow-pressed
@@ -400,21 +406,54 @@
     after:rounded-md
     after:bg-primary
     after:opacity-20;
-  }
+  } */
   .button-press {
-    @apply relative overflow-clip
-    transition-shadow duration-100 ease-in-out
-    shadow-shinyshadow-pressed
-    after:content-['']
-    after:absolute
-    after:inset-0
-    after:w-full
-    after:h-full
-    after:rounded-md
-    after:bg-primary
-    after:opacity-20;
+    position: relative;
+    transition:
+      box-shadow 60ms linear forwards,
+      transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    &:active {
+      box-shadow: var(--shadow-shinyshadow-pressed);
+    }
   }
 }
+.button-active {
+  box-shadow: var(--shadow-shinyshadow-pressed);
+  &:after {
+    content: "";
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    /* transform: translate(50%, 50%); */
+    width: 100%;
+    height: 100%;
+    border-radius: 6px;
+    background-color: var(--primary-700);
+    opacity: 30%;
+  }
+}
+
+/* @layer utility {
+  .button-press {
+    position: relative;
+    overflow: clip;
+    box-shadow: var(
+      --shadow-shinyshadow-pressed
+    ); 
+    transition:
+      box-shadow 60ms linear,
+      transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    &:active {
+      box-shadow: var(--shadow-shinyshadow-pressed); 
+      transform: scale(0.97) translateY(1px);
+      transition:
+        box-shadow 60ms linear,
+        transform 60ms linear;
+    }
+  }
+} */
+
 @keyframes fade {
   0% {
     opacity: 0.2;
