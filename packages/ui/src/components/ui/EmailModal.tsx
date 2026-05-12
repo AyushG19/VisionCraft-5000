@@ -125,6 +125,8 @@ const EmailModal = ({
             <div className="flex items-center w-full h-full ">
               {currStage && (
                 <Input
+                  aria-label={currStage.label}
+                  name={currStage.label}
                   type={
                     currStage.label === "password" ||
                     currStage.label === "confirm password"

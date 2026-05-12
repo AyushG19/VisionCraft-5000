@@ -2,7 +2,7 @@
 
 import { useCallback, useState, useRef, useEffect } from "react";
 import { IconGridDots } from "@tabler/icons-react";
-import { useError } from "@repo/hooks";
+import { useError, useSocketContext } from "@repo/hooks";
 import { AppError } from "@repo/common";
 import { AnimatePresence, motion, Variants } from "motion/react";
 import { CodeInputBox } from "./ui/CodeInputBox";
@@ -16,7 +16,7 @@ type Props = {
   onExitRoom: () => void;
   onLogout: () => void;
   isChatOpen: boolean;
-  inRoom: boolean;
+  // inRoom: boolean;
   setTheme: (t: string) => void;
 };
 
@@ -48,7 +48,6 @@ export default function JoinRoomModal({
   onExitRoom,
   onLogout,
   isChatOpen,
-  inRoom,
   setTheme,
 }: Props) {
   const [showCodeInput, setShowCodeInput] = useState(false);
@@ -56,6 +55,7 @@ export default function JoinRoomModal({
   const [isLoading, setIsLoading] = useState(false);
   const { setError } = useError();
   const menuRef = useRef<HTMLDivElement>(null);
+  const { inRoom } = useSocketContext();
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -128,8 +128,8 @@ export default function JoinRoomModal({
           className={`
             flex items-center justify-end w-8 h-8 
             bg-primary text-primary-contrast rounded-l-xl outline-1 outline-global-shadow cursor-pointer
-            transition-all duration-300
-            ${isMenuOpen ? "!rounded-bl-none px-4 md:h-10 md:w-full " : "pr-2 md:h-10 md:w-10"}
+            transition-all 
+            ${isMenuOpen ? "!rounded-bl-none px-4 md:h-10 md:w-full " : "pr-2 md:h-10 md:w-10 delay-75"}
           `}
         >
           <span
