@@ -155,6 +155,7 @@ export default function JoinRoomModal({
             >
               {ROOM_OPTION_SECTIONS.map((section, i) => {
                 if (!inRoom && section.label === "room") return null;
+                if (inRoom && section.label === "default") return null;
                 return (
                   <>
                     {section.items.map((item, i) => {

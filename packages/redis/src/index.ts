@@ -1,6 +1,4 @@
 import { createClient, RedisClientType } from "redis";
-import dotenv from "dotenv";
-dotenv.config();
 
 export type RedisClient = RedisClientType;
 
@@ -32,8 +30,8 @@ try {
   (async () => {
     await redisPub.connect();
     await redisSub.connect();
-    console.log("Connected to Redis");
+    console.log("[Redis] Connected to Redis");
   })();
 } catch (err) {
-  console.error("Failed to connect to Redis:", err);
+  console.error("[Redis] Failed to connect to Redis:", err);
 }

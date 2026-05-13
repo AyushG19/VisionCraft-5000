@@ -27,6 +27,7 @@ const server = http.createServer((req, res) => {
   }
 
   if (req.method === "GET" && (req.url === "/ping" || req.url === "/")) {
+    console.log("pinging back!");
     res.writeHead(200, { "content-type": "text/plain" });
     res.end("Ws server is running");
     return;

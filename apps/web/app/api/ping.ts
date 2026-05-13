@@ -11,19 +11,20 @@ async function ping(URL: string) {
 }
 
 async function pingHttp() {
-  await ping(`${env.HTTP_BACKEND_URL}/api/health/ping`);
+  ping(`${env.HTTP_BACKEND_URL}/api/health/ping`);
+  console.log("pinged http server");
 }
 
 async function pingWs() {
-  await ping(`${env.WS_BACKEND_URL}/ping`);
+  ping(`${env.WS_BACKEND_URL}/ping`);
+  console.log("pinged ws server");
 }
 
 async function pingWorker() {
-  await ping(`${env.WORKER_BACKEND_URL}/ping`);
+  ping(`${env.WORKER_BACKEND_URL}/ping`);
+  console.log("pinged worker server");
 }
 
 export async function pingAllBackend() {
-  await pingHttp();
-  await pingWorker();
-  await pingWs();
+  return Promise.all([pingHttp(), pingWorker(), pingWs()]);
 }

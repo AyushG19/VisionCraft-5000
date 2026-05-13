@@ -16,8 +16,13 @@ import { WebSocket } from "ws";
 export type RedisData =
   | {
       userId: string;
-      type: "ADD" | "DEL" | "UPD";
+      type: "ADD" | "UPD";
       element: DrawElement;
+    }
+  | {
+      userId: string;
+      type: "DEL";
+      element: string;
     }
   | {
       userId: string;

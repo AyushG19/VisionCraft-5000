@@ -1,6 +1,5 @@
 import type { RedisClient } from "@repo/redis/dist";
 import { ELEMENT_JOBS, type AppQueueType } from "@repo/queue";
-import { WebSocketShapeType } from "@repo/common";
 import { RedisData } from "../types";
 
 export type ElementRedisData = Extract<
@@ -14,6 +13,8 @@ export class ElementService {
   ) {}
 
   async add(roomId: string, event: ElementRedisData): Promise<void> {
+    if (event.type !== "ADD") return;
+
     await Promise.all([
       this.queue.add(
         ELEMENT_JOBS.UPSERT,
@@ -25,6 +26,8 @@ export class ElementService {
   }
 
   async update(roomId: string, event: ElementRedisData): Promise<void> {
+    if (event.type !== "UPD") return;
+
     await Promise.all([
       this.queue.add(
         ELEMENT_JOBS.UPSERT,
@@ -35,14 +38,15 @@ export class ElementService {
     ]);
   }
   async delete(roomId: string, event: ElementRedisData): Promise<void> {
+    if (event.type !== "DEL") return;
     await Promise.all([
       this.queue.add(
         ELEMENT_JOBS.DELETE,
         {
           roomId,
-          elementId: event.element.id,
+          elementId: event.element,
         },
-        { jobId: `element-${event.element.id}` },
+        { jobId: `element-${event.element}` },
       ),
       this.pub.publish(`room:${roomId}:events`, JSON.stringify(event)),
     ]);

@@ -1,4 +1,8 @@
-import { ErrorContextProvider, UserProvider } from "@repo/hooks";
+import {
+  ErrorContextProvider,
+  SocketContextProvider,
+  UserProvider,
+} from "@repo/hooks";
 import { PingProvider } from "./PingProvider";
 import { ThemeProvider } from "./ThemeProvider";
 //@ts-ignore
@@ -34,7 +38,7 @@ export default function RootLayout({
           <ErrorContextProvider>
             <UserProvider>
               <PingProvider />
-              {children}
+              <SocketContextProvider>{children}</SocketContextProvider>
             </UserProvider>
           </ErrorContextProvider>
         </ThemeProvider>

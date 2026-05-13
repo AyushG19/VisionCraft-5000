@@ -5,7 +5,6 @@ import { acTokenExpiry, authConfig, rfTokenExpiry } from "../config";
 import { accessJwtService, refreshJwtService } from "../utils/jwtInstance";
 
 const sendAuth201Res = (res: Response, user: UserType) => {
-  res.redirect(`${env.FRONTEND_URL}/canvas`);
   res
     .status(201)
     .cookie(
@@ -18,7 +17,7 @@ const sendAuth201Res = (res: Response, user: UserType) => {
       accessJwtService.sign({ userId: user.userId }, acTokenExpiry),
       authConfig.accessCookies,
     )
-    .json(user);
+    .redirect(`${env.FRONTEND_URL}/canvas`);
 };
 
 export const handleProviderCallback = async (req: Request, res: Response) => {

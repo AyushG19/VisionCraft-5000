@@ -29,6 +29,7 @@ authRouter.get(
   }),
   handleProviderCallback,
 );
+
 authRouter.get(
   "/github",
   passport.authenticate("github", {

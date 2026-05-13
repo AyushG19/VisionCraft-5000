@@ -18,3 +18,40 @@ export const checkAuth = (req: Request, res: Response, next: NextFunction) => {
     throw new AppError(401, "Error validating token.");
   }
 };
+export const checkAuthAndCreate = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { accessToken, refreshToken } = req.cookies;
+
+  if (accessToken) {
+    try {
+      const parsed = JwtPayloadSchema.safeParse(
+        accessJwtService.verify<JwtPayloadType>(accessToken),
+      );
+      if (parsed.success) {
+        req.user = parsed.data;
+        return next();
+      }
+    } catch {
+      // expired or malformed — fall through to refresh token
+    }
+  }
+
+  if (refreshToken) {
+    try {
+      const parsed = JwtPayloadSchema.safeParse(
+        accessJwtService.verify<JwtPayloadType>(refreshToken),
+      );
+      if (parsed.success) {
+        req.user = parsed.data;
+        return next();
+      }
+    } catch {
+      // refresh token also expired/invalid
+    }
+  }
+
+  throw new AppError(400, "Invalid or missing tokens.");
+};

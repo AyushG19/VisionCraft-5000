@@ -43,7 +43,7 @@ axiosInstance.interceptors.response.use(
     console.log("1");
     const { status } = error.response;
     if (status === 401 && originalReq && !originalReq._retry) {
-      if (originalReq.url?.includes("auth/refresh-token")) {
+      if (originalReq.url?.includes("user/profile")) {
         return Promise.reject(
           new AppError("Session expired", "UNAUTHORIZED", 401),
         );
@@ -64,7 +64,9 @@ axiosInstance.interceptors.response.use(
       try {
         console.log("Refreshing");
         //clg
-        const res = await refreshInstance.post("api/auth/refresh-token");
+        const res = await axiosInstance.get(
+          `${env.HTTP_BACKEND_URL}/api/user/profile`,
+        );
         subscribersCallback();
         return axiosInstance(originalReq);
       } catch (err) {
