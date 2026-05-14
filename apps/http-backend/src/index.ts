@@ -21,6 +21,8 @@ app.use(cookieParser());
 configureGoogle(passport);
 configureGithub(passport);
 
+app.set("trust proxy", 1);
+
 app.use("/api/auth", authRouter);
 app.use("/api/rooms", roomRouter);
 app.use("/api/ai", aiRouter);
