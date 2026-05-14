@@ -2,18 +2,21 @@
   "name": "@repo/hooks",
   "version": "0.1.0",
   "main": "./src/index.ts",
-  "types": "./dist/index.d.ts",
-  "scripts": {
-    "build": "tsc -b",
-    "check-types": "tsc --noEmit"
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
   },
-  "dependencies": {
-    "@repo/common": "workspace:*"
+  "scripts": {
+    "check-types": "tsc --noEmit"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*"
   },
   "peerDependencies": {
+    "@repo/common": "workspace:*",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "@types/react": "19.1.0",

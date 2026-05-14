@@ -1,16 +1,11 @@
 "use client";
-import { start } from "repl";
 import {
   reducer,
   ResizableDivProps,
   State,
 } from "../../utils/resizableDivReducer";
-import React, { useEffect, useReducer, useRef } from "react";
-import {
-  IconDots,
-  IconDotsVertical,
-  IconGripHorizontal,
-} from "@tabler/icons-react";
+import { useEffect, useReducer, useRef } from "react";
+import { IconDots, IconDotsVertical } from "@tabler/icons-react";
 
 const ResizableDiv = (props: ResizableDivProps) => {
   const mainContainerRef = useRef<HTMLDivElement | null>(null);

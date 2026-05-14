@@ -1,8 +1,7 @@
 {
   "name": "http-backend",
   "version": "1.0.0",
-  "main": "index.ts",
-  "types": "index.ts",
+  "main": "src/index.ts",
   "scripts": {
     "build": "tsup src/index.ts --dts --format esm,cjs",
     "start": "node ./dist/index.js",
@@ -21,7 +20,6 @@
     "@types/passport": "^1.0.17",
     "@types/passport-github2": "^1.2.9",
     "@types/passport-google-oauth20": "^2.0.17",
-    "@types/serve-static": "^1.15.8",
     "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.19",
     "tsx": "^4.21.0",
@@ -36,7 +34,6 @@
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
-    "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "groq-sdk": "^0.33.0",
     "passport": "^0.7.0",

@@ -59,7 +59,7 @@ export async function evictRoom(roomId: string, reason: string): Promise<void> {
 /**
  * Called when the last user leaves.  Starts a grace-period timer
  */
-export function scheduleEmptyRoomEviction(roomId: string): void {
+function scheduleEmptyRoomEviction(roomId: string): void {
   const meta = roomMeta.get(roomId);
   if (!meta || meta.emptyTimer) return;
 

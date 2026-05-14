@@ -1,6 +1,5 @@
 import { ZodTypeAny } from "@repo/common";
-import { Request, Response } from "express";
-import { NextFunction } from "express-serve-static-core";
+import { Request, Response, NextFunction } from "express";
 
 export const validate =
   (schema: ZodTypeAny) => (req: Request, res: Response, next: NextFunction) => {

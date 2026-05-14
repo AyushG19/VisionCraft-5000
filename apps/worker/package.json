@@ -1,7 +1,7 @@
 {
   "name": "worker",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "./src/index.js",
   "scripts": {
     "build": "tsc -b",
     "start": "node ./dist/index.js",
@@ -18,8 +18,5 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "dotenv": "^16.5.0"
-  }
+  "description": ""
 }

@@ -1,8 +1,7 @@
 {
   "name": "@repo/backend-common",
   "version": "1.0.0",
-  "main": "./dist/index.js",
-  "types": "./src/index.d.ts",
+  "main": "./src/index.ts",
   "exports": {
     ".": {
       "types": "./src/index.ts",
@@ -16,14 +15,12 @@
   },
   "license": "ISC",
   "devDependencies": {
-    "@repo/common": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.14.1",
     "tsup": "^8.5.1"
   },
   "dependencies": {
-    "dotenv": "^16.5.0",
     "jsonwebtoken": "^9.0.2"
   }
 }

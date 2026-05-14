@@ -17,7 +17,6 @@
   "description": "",
   "dependencies": {
     "bullmq": "^5.71.0",
-    "dotenv": "^16.5.0",
     "ioredis": "5.9.3"
   }
 }

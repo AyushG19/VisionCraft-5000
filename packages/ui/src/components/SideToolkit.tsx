@@ -586,5 +586,3 @@ export const SideToolkit = ({
     ? panelContent
     : null;
 };
-
-export default SideToolkit;
