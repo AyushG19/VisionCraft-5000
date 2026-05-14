@@ -43,9 +43,9 @@ axiosInstance.interceptors.response.use(
     console.log("1");
     const { status } = error.response;
     if (status === 401 && originalReq && !originalReq._retry) {
-      if (originalReq.url?.includes("user/profile")) {
+      if (originalReq.url?.includes("api/user/profile")) {
         return Promise.reject(
-          new AppError("Session expired", "UNAUTHORIZED", 401),
+          new AppError("Session expired / Invalid tokens", "UNAUTHORIZED", 401),
         );
       }
       originalReq._retry = true;

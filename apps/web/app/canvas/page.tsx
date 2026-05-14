@@ -16,11 +16,12 @@ import { useEffect } from "react";
 // import { useUser } from "@repo/hooks";
 import { logout } from "../services/auth.service";
 import UsersCursor from "@workspace/ui/components/ui/UsersCursor";
-import { useUser } from "@repo/hooks";
+import { useError, useUser } from "@repo/hooks";
 import { getProfile } from "../services/user.service";
 
 const Page = () => {
   const { theme, setTheme } = useTheme();
+  const { setError } = useError();
   // useRafLoop({ cursorMap: memberCursor.current });
   const { currentUser, setCurrentUser } = useUser();
   const wb = useSocketWithWhiteboard();
@@ -68,8 +69,15 @@ const Page = () => {
 
   useEffect(() => {
     async function getUserProfile() {
-      const user = await getProfile();
-      setCurrentUser({ avatar: "", ...user });
+      try {
+        const user = await getProfile();
+        setCurrentUser({ avatar: "", ...user });
+      } catch (err: any) {
+        setError({
+          code: "SERVER_ERROR",
+          message: err.message ?? "Error from server",
+        });
+      }
     }
     getUserProfile();
   }, []);

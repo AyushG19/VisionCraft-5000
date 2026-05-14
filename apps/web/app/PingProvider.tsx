@@ -2,12 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 import { pingAllBackend } from "./api/ping";
+import { useError } from "@repo/hooks";
 
 export function PingProvider() {
   const [loading, setLoading] = useState(true);
   const [showDescription, setShowDescription] = useState(false);
   const textRef = useRef<HTMLDivElement | null>(null);
-  const intervalIdRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { setError } = useError();
+  const intervalIdRef = useRef<ReturnType<typeof setInterval> | undefined>(
+    undefined,
+  );
 
   function startInterval() {
     let limit = 3;
@@ -23,13 +27,21 @@ export function PingProvider() {
     }, 1000);
   }
   useEffect(() => {
-    const promise = pingAllBackend();
     startInterval();
     setLoading(true);
-    promise.then(() => {
-      if (intervalIdRef.current) clearInterval(intervalIdRef.current);
-      setLoading(false);
-    });
+    pingAllBackend()
+      .then(() => {
+        if (intervalIdRef.current) clearInterval(intervalIdRef.current);
+      })
+      .catch((err) => {
+        setError({ code: "SERVER_ERROR", message: err.message });
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+    return () => {
+      clearInterval(intervalIdRef.current);
+    };
   }, []);
 
   if (loading)

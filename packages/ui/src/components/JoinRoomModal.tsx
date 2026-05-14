@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useCallback, useState, useRef, useEffect } from "react";
 import { IconGridDots } from "@tabler/icons-react";
 import { useError, useSocketContext } from "@repo/hooks";
@@ -157,7 +158,7 @@ export default function JoinRoomModal({
                 if (!inRoom && section.label === "room") return null;
                 if (inRoom && section.label === "default") return null;
                 return (
-                  <>
+                  <React.Fragment key={i}>
                     {section.items.map((item, i) => {
                       return (
                         <motion.button
@@ -165,7 +166,7 @@ export default function JoinRoomModal({
                           variants={itemVariants}
                           onClick={() => handleAction(item.id)}
                           className={`
-                      flex items-center justify-end w-32 md:w-full h-auto py-2 md:py-2.5 px-3
+                            flex items-center justify-end w-32 md:w-full h-auto py-2 md:py-2.5 px-3
                       ${item.id === "exit-room" && "hover:bg-red text-global-shadow"} 
                       bg-secondary text-secondary-contrast text-xs
                       last:border-b-0
@@ -186,7 +187,7 @@ export default function JoinRoomModal({
                       );
                     })}
                     <div className="w-full h-[1px] bg-primary/30 my-1"></div>
-                  </>
+                  </React.Fragment>
                 );
               })}
               <motion.div
