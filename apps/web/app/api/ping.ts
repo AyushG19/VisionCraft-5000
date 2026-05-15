@@ -15,7 +15,7 @@ async function ping(url: string) {
 }
 
 async function pingHttp() {
-  await ping(`${env.HTTP_BACKEND_URL}/api/health/ping`);
+  await ping(`/api/health/ping`);
   console.log("pinged http server");
 }
 

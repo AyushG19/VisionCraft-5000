@@ -4,7 +4,7 @@ import { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { AppError } from "./error";
 
 export const axiosInstance = axios.create({
-  baseURL: env.HTTP_BACKEND_URL,
+  baseURL: "/",
   timeout: 8000,
   headers: {
     "Content-Type": "application/json",
@@ -64,9 +64,7 @@ axiosInstance.interceptors.response.use(
       try {
         console.log("Refreshing");
         //clg
-        const res = await axiosInstance.get(
-          `${env.HTTP_BACKEND_URL}/api/user/profile`,
-        );
+        const res = await axiosInstance.get(`/api/user/profile`);
         subscribersCallback();
         return axiosInstance(originalReq);
       } catch (err) {

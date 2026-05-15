@@ -9,7 +9,6 @@ import {
 } from "@workspace/ui/index";
 import { loginService, signupService } from "./services/auth.service";
 import { useRouter } from "next/navigation";
-import { env } from "./config";
 
 export default function Page() {
   const router = useRouter();
@@ -17,7 +16,7 @@ export default function Page() {
     router.push(`/${route}`);
   };
   const handleProviderClick = (provider: "google" | "github") => {
-    window.location.href = `${env.HTTP_BACKEND_URL}/api/auth/${provider}`;
+    window.location.href = `/api/auth/${provider}`;
   };
 
   return (

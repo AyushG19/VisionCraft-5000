@@ -14,18 +14,18 @@ export const authConfig: {
   refreshCookies: {
     httpOnly: true,
     secure: !isDev,
-    sameSite: isDev ? "lax" : "none",
+    sameSite: "lax",
     maxAge: 60 * 60 * 1000,
   },
   accessCookies: {
     httpOnly: true,
     secure: !isDev,
-    sameSite: isDev ? "lax" : "none",
+    sameSite: "lax",
     maxAge: 60 * 15 * 1000, //15 min
   },
 };
 export const corsConfig = {
-  origin: isDev ? "http://localhost:3000" : env.FRONTEND_URL,
+  origin: isDev ? "http://localhost:3000" : "",
   credentials: true,
 };
 export const rfTokenExpiry = env.RF_TOKEN_EXPIRY;
