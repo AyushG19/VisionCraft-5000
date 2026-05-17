@@ -26,7 +26,7 @@ const useDrawInteraction = (
     (worldPos: PointType, toolKitState: ToolKitType) => {
       startDrawing(worldPos);
 
-      // Pencil is special — create temp shape on mousedown so even
+      // for pendil create temp shape on mousedown so even
       // a single click (no drag) creates a dot
       if (toolKitState.currentTool === "pencil") {
         const initialShape = createNewPencil(

@@ -274,6 +274,7 @@ const useCanvasInteraction = (
       }
     };
     const onMouseDown = (e: MouseEvent) => {
+      console.log("down");
       const pos = getMousePos(canvasRef, { x: e.clientX, y: e.clientY });
       const currentState = canvasStateRef.current;
       const currentSelected = selectedShapeRef.current;
@@ -287,6 +288,28 @@ const useCanvasInteraction = (
           currentState,
           activeElementMap,
         );
+        //if currently selected shape,and no new shape,make if shape selected flase remove active element from socket for others too
+        if (currentSelected && !newSelected) {
+          dispatchWithSocket({
+            type: "UPD_SHAPE",
+            payload: { ...currentSelected, isSelected: false },
+          });
+          sendActiveElementUpdate({ type: "DESELECT", payload: {} });
+        } else if (currentSelected && newSelected) {
+          dispatchWithSocket({
+            type: "UPD_SHAPE",
+            payload: { ...currentSelected, isSelected: false },
+          });
+          dispatchWithSocket({
+            type: "UPD_SHAPE",
+            payload: { ...newSelected, isSelected: true },
+          });
+        } else if (!currentSelected && newSelected) {
+          dispatchWithSocket({
+            type: "UPD_SHAPE",
+            payload: { ...newSelected, isSelected: true },
+          });
+        }
         setSelectedShape(newSelected);
       } else if (tool === "text") {
         e.preventDefault();
@@ -478,7 +501,7 @@ const useCanvasInteraction = (
     canvas.addEventListener("dblclick", handleDoubleClick);
     canvas.addEventListener("wheel", handleWheel);
     canvas.addEventListener("pointermove", onMouseMove);
-    canvas.addEventListener("pointerup", onMouseUp);
+    window.addEventListener("pointerup", onMouseUp);
     window.addEventListener("resize", handleResize);
     window.addEventListener("keydown", onKeyDown);
     fileInput.addEventListener("change", handleFileInput);
@@ -496,7 +519,7 @@ const useCanvasInteraction = (
       canvas.removeEventListener("dblclick", handleDoubleClick);
       canvas.removeEventListener("wheel", handleWheel);
       canvas.removeEventListener("pointermove", onMouseMove);
-      canvas.removeEventListener("pointerup", onMouseUp);
+      window.removeEventListener("pointerup", onMouseUp);
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("keydown", onKeyDown);
       fileInput.removeEventListener("change", handleFileInput);

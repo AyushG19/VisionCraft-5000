@@ -1,7 +1,14 @@
 import { HandlerContext } from "../types";
 import { CHAT } from "./chat";
 import { CURSOR } from "./cursor";
-import { ADD_SHAPE, DEL_SHAPE, DRAG, RESIZE, UPD_SHAPE } from "./element";
+import {
+  ADD_SHAPE,
+  DEL_SHAPE,
+  DESELECT,
+  DRAG,
+  RESIZE,
+  UPD_SHAPE,
+} from "./element";
 import { JOIN_ROOM, LEAVE_ROOM } from "./room";
 
 export const handlers: Partial<
@@ -16,4 +23,5 @@ export const handlers: Partial<
   CURSOR,
   RESIZE,
   DRAG,
+  DESELECT,
 };

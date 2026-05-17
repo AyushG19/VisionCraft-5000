@@ -63,11 +63,13 @@ export function useCanvasSocket(
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
+      console.log("RAW: ", data);
       const validatedData = ServerSocketData.safeParse(data);
 
       if (validatedData.success) {
         onMessage(validatedData.data);
       } else {
+        console.log(validatedData.error);
         setError({
           code: "VALIDATION_ERROR",
           message: "Invalid Data type from socket.",

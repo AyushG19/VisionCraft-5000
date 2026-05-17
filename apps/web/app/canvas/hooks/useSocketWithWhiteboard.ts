@@ -238,6 +238,8 @@ export const useSocketWithWhiteboard = (): {
         case "DRAG":
           send("DRAG", event.payload);
           break;
+        case "DESELECT":
+          send("DESELECT", {});
       }
     },
     [send],
@@ -265,10 +267,10 @@ export const useSocketWithWhiteboard = (): {
     activeElementMap.current,
   );
 
-  useEffect(() => {
-    if (!selectedShape)
-      sendActiveElementUpdate({ type: "DESELECT", payload: {} });
-  }, [selectedShape]);
+  // useEffect(() => {
+  //   if (!selectedShape)
+  //     sendActiveElementUpdate({ type: "DESELECT", payload: {} });
+  // }, [selectedShape]);
   // Keep them in sync on every render
   useEffect(() => {
     drawnShapesRef.current = canvasState.drawnShapes;

@@ -37,7 +37,7 @@ export const validateToken = (token: string) => {
 };
 
 export const validateSocketData = (data: any): ClientSocketDataType => {
-  console.log(parseData(data));
+  if (parseData(data).type !== "CURSOR") console.log(parseData(data));
   const validatedData = ClientSocketData.safeParse(parseData(data));
   if (!validatedData.success || !validatedData.data.type) {
     console.error("!ENVIRONMENT VALIDATION FAILED!");
@@ -47,6 +47,6 @@ export const validateSocketData = (data: any): ClientSocketDataType => {
     }
     throw new Error("MALFORMED_PAYLOAD");
   }
-  console.log(validatedData);
+  if (validatedData.data.type !== "CURSOR") console.log(validatedData);
   return validatedData.data;
 };

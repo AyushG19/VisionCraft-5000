@@ -89,11 +89,11 @@ const useSelectInteraction = (
       if (!clickedShape) return undefined;
 
       // Inside handleSelectMouseDown, before allowing selection of a shape:
-      const isLockedByOther = [...activeElementMap.values()].some(
-        (entry) => entry.element.id === clickedShape.id,
-      );
+      // const isLockedByOther = [...activeElementMap.values()].some(
+      //   (entry) => entry.element.id === clickedShape.id,
+      // );
 
-      if (!isLockedByOther && !clickedShape.isDeleted) {
+      if (!clickedShape.isSelected && !clickedShape.isDeleted) {
         // Immediately set up drag so click+drag works in one motion
         startDrag(clickedShape.id, worldPos, {
           x: clickedShape.startX,
